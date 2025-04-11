@@ -254,6 +254,125 @@
             padding: 2rem;
         }
 
+        /* Student Profile Styles */
+        .student-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color);
+            position: relative;
+        }
+
+        .profile-photo-edit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary-color);
+        }
+
+        .profile-photo-edit:hover {
+            transform: scale(1.1);
+            background: var(--primary-color);
+            color: var(--accent-color);
+        }
+
+        .profile-photo-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-id {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .detail-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-item i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-top: 0.3rem;
+        }
+
+        .detail-item h3 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-item p {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .detail-item.address {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .detail-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Welcome Section Styles */
         .welcome-section {
             margin-bottom: 2rem;
@@ -744,48 +863,8 @@
                         <span>Academic Schedules</span>
                     </a>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-calendar-day"></i>
-                        <span>Holidays</span>
-                    </a>
-                    <a href="#" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
-                    </a>
-                </div>
-
-                <div class="nav-section">
-                    <h3>Administrative</h3>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                        <span>Billing</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-calendar-times"></i>
-                        <span>Leave Management</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-bullhorn"></i>
-                        <span>Announcements</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-comment-alt"></i>
-                        <span>Feedback</span>
-                    </a>
-                </div>
-                
-                <div class="nav-section">
-                    <h3>Learning</h3>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-tasks"></i>
-                        <span>Assignments</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Schedule</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Progress</span>
                     </a>
                 </div>
                 
@@ -794,10 +873,6 @@
                     <a href="#" class="nav-item">
                         <i class="fas fa-users"></i>
                         <span>Study Groups</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-comments"></i>
-                        <span>Discussions</span>
                     </a>
                 </div>
             </nav>
@@ -828,49 +903,64 @@
 
             <!-- Dashboard Content -->
             <div class="dashboard-content">
-                <!-- Welcome Section -->
+                <!-- Student Profile Section -->
                 <section class="welcome-section">
                     <div class="welcome-content">
-                        <h1>Welcome back, John!</h1>
-                        <p>Here's what's happening with your learning journey today.</p>
-                        
-                        <div class="welcome-actions">
-                            <button class="welcome-btn welcome-btn-primary">
-                                <i class="fas fa-rocket"></i>
-                                Continue Learning
-                            </button>
-                            <button class="welcome-btn welcome-btn-secondary">
-                                <i class="fas fa-calendar-alt"></i>
-                                View Schedule
-                            </button>
-                        </div>
-
-                        <div class="welcome-stats">
-                            <div class="welcome-stat">
-                                <div class="welcome-stat-icon">
-                                    <i class="fas fa-book-open"></i>
+                        <div class="student-profile">
+                            <div class="profile-header">
+                                <div class="profile-photo-container">
+                                    <img src="assets/avatar.jpg" alt="Student Photo" class="profile-photo">
+                                    <div class="profile-photo-edit" title="Change Profile Photo">
+                                        <i class="fas fa-camera"></i>
+                                    </div>
                                 </div>
-                                <div class="welcome-stat-info">
-                                    <h3>4</h3>
-                                    <p>Active Courses</p>
+                                <div class="profile-info">
+                                    <h1>John Doe</h1>
+                                    <p class="student-id">Roll Number: 2023001</p>
                                 </div>
                             </div>
-                            <div class="welcome-stat">
-                                <div class="welcome-stat-icon">
-                                    <i class="fas fa-tasks"></i>
+                            
+                            <div class="student-details">
+                                <div class="detail-group">
+                                    <div class="detail-item">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <div>
+                                            <h3>Year of Study</h3>
+                                            <p>3rd Year</p>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-book"></i>
+                                        <div>
+                                            <h3>Course</h3>
+                                            <p>Bachelor of Computer Science</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="welcome-stat-info">
-                                    <h3>3</h3>
-                                    <p>Pending Tasks</p>
+                                
+                                <div class="detail-group">
+                                    <div class="detail-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <div>
+                                            <h3>Email ID</h3>
+                                            <p>john.doe@university.edu</p>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-phone"></i>
+                                        <div>
+                                            <h3>Mobile Number</h3>
+                                            <p>+91 98765 43210</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="welcome-stat">
-                                <div class="welcome-stat-icon">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="welcome-stat-info">
-                                    <h3>12</h3>
-                                    <p>Achievements</p>
+                                
+                                <div class="detail-item address">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div>
+                                        <h3>Address</h3>
+                                        <p>123 University Street, Academic City, State - 123456</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -881,118 +971,11 @@
                 <section class="quick-stats">
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-book-open"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Active Courses</h3>
-                            <p>4</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Pending Assignments</h3>
-                            <p>3</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
                             <i class="fas fa-code"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>Coding Streak</h3>
+                            <h3>Current Coding Streak</h3>
                             <p>7 days</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Achievements</h3>
-                            <p>12/20</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Today's Schedule -->
-                <section class="schedule-section">
-                    <div class="section-header">
-                        <h2>Today's Schedule</h2>
-                        <a href="#" class="view-all">View All</a>
-                    </div>
-                    
-                    <div class="schedule-cards">
-                        <div class="schedule-card">
-                            <div class="schedule-time">09:00 AM</div>
-                            <div class="schedule-details">
-                                <h3>Data Structures</h3>
-                                <p>Lecture: Binary Trees</p>
-                                <span class="schedule-status upcoming">Upcoming</span>
-                            </div>
-                        </div>
-                        
-                        <div class="schedule-card">
-                            <div class="schedule-time">11:00 AM</div>
-                            <div class="schedule-details">
-                                <h3>Web Development</h3>
-                                <p>Lab: React Components</p>
-                                <span class="schedule-status in-progress">In Progress</span>
-                            </div>
-                        </div>
-                        
-                        <div class="schedule-card">
-                            <div class="schedule-time">02:00 PM</div>
-                            <div class="schedule-details">
-                                <h3>Algorithm Practice</h3>
-                                <p>Problem Solving Session</p>
-                                <span class="schedule-status later">Later</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Recent Activity -->
-                <section class="activity-section">
-                    <div class="section-header">
-                        <h2>Recent Activity</h2>
-                        <a href="#" class="view-all">View All</a>
-                    </div>
-                    
-                    <div class="activity-feed">
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-code"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p>Solved "Two Sum" problem in Python</p>
-                                <span class="activity-time">2 hours ago</span>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-book"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p>Completed "React Hooks" module</p>
-                                <span class="activity-time">5 hours ago</span>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-tasks"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p>Submitted Data Structures assignment</p>
-                                <span class="activity-time">Yesterday</span>
-                            </div>
                         </div>
                     </div>
                 </section>
