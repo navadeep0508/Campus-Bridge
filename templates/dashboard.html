@@ -817,15 +817,15 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="#" class="nav-item active">
+                    <a href="{{ url_for('home_page') }}" class="nav-item active">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
-                    <a href="mycourse.html" class="nav-item">
+                    <a href="{{ url_for('mycourse') }}" class="nav-item">
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
                         <i class="fas fa-code"></i>
                         <span>Coding Practice</span>
                     </a>
@@ -833,11 +833,11 @@
 
                 <div class="nav-section">
                     <h3>Institution</h3>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('my_institution') }}" class="nav-item">
                         <i class="fas fa-university"></i>
                         <span>My Institution</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('regulations') }}" class="nav-item">
                         <i class="fas fa-gavel"></i>
                         <span>Regulations</span>
                     </a>

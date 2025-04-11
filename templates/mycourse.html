@@ -688,17 +688,21 @@
         }
 
         .course-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             background: var(--card-bg);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         }
 
         .course-header {
@@ -714,14 +718,13 @@
         }
 
         .course-header h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
         .course-stats {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: auto;
         }
 
         .stat {
@@ -729,10 +732,12 @@
             align-items: center;
             gap: 0.5rem;
             color: var(--text-secondary);
+            font-size: 1rem;
         }
 
         .stat i {
             color: var(--accent-color);
+            font-size: 1.2rem;
         }
 
         .download-btn {
@@ -742,7 +747,7 @@
             color: var(--primary-color);
             border: none;
             border-radius: 8px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -754,10 +759,6 @@
         .download-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
-        }
-
-        .download-btn i {
-            font-size: 1.1rem;
         }
 
         @media (max-width: 768px) {
@@ -790,15 +791,15 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="dashboard.html" class="nav-item">
+                    <a href="{{ url_for('home_page') }}" class="nav-item">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
-                    <a href="#" class="nav-item active">
+                    <a href="{{ url_for('mycourse') }}" class="nav-item">
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
                         <i class="fas fa-code"></i>
                         <span>Coding Practice</span>
                     </a>
@@ -806,11 +807,11 @@
 
                 <div class="nav-section">
                     <h3>Institution</h3>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('my_institution') }}" class="nav-item">
                         <i class="fas fa-university"></i>
                         <span>My Institution</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('regulations') }}" class="nav-item">
                         <i class="fas fa-gavel"></i>
                         <span>Regulations</span>
                     </a>
@@ -860,93 +861,24 @@
                 </div>
 
                 <div class="course-grid">
-                    <!-- Data Structures Course -->
+                    {% for course in courses %}
                     <div class="course-card">
                         <div class="course-header">
-                            <i class="fas fa-code-branch"></i>
-                            <h2>Data Structures</h2>
+                            <h2>{{ course.subject }}</h2>
                         </div>
                         <div class="course-stats">
                             <div class="stat">
-                                <i class="fas fa-book"></i>
-                                <span>12 Modules</span>
+                                <span>Modules: {{ course.modules }}</span>
                             </div>
                             <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>45 Hours</span>
+                                <span>Hours: {{ course.hours }}</span>
                             </div>
                         </div>
-                        <button class="download-btn">
-                            <i class="fas fa-download"></i>
-                            Download Materials
-                        </button>
+                        <a href="{{ course.pdf_link }}" class="download-btn" target="_blank">
+                            Download PDF
+                        </a>
                     </div>
-
-                    <!-- Computer Networks Course -->
-                    <div class="course-card">
-                        <div class="course-header">
-                            <i class="fas fa-network-wired"></i>
-                            <h2>Computer Networks</h2>
-                        </div>
-                        <div class="course-stats">
-                            <div class="stat">
-                                <i class="fas fa-book"></i>
-                                <span>10 Modules</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>40 Hours</span>
-                            </div>
-                        </div>
-                        <button class="download-btn">
-                            <i class="fas fa-download"></i>
-                            Download Materials
-                        </button>
-                    </div>
-
-                    <!-- Operating System Course -->
-                    <div class="course-card">
-                        <div class="course-header">
-                            <i class="fas fa-desktop"></i>
-                            <h2>Operating System</h2>
-                        </div>
-                        <div class="course-stats">
-                            <div class="stat">
-                                <i class="fas fa-book"></i>
-                                <span>15 Modules</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>50 Hours</span>
-                            </div>
-                        </div>
-                        <button class="download-btn">
-                            <i class="fas fa-download"></i>
-                            Download Materials
-                        </button>
-                    </div>
-
-                    <!-- Rural Technology Course -->
-                    <div class="course-card">
-                        <div class="course-header">
-                            <i class="fas fa-tractor"></i>
-                            <h2>Rural Technology</h2>
-                        </div>
-                        <div class="course-stats">
-                            <div class="stat">
-                                <i class="fas fa-book"></i>
-                                <span>8 Modules</span>
-                            </div>
-                            <div class="stat">
-                                <i class="fas fa-clock"></i>
-                                <span>30 Hours</span>
-                            </div>
-                        </div>
-                        <button class="download-btn">
-                            <i class="fas fa-download"></i>
-                            Download Materials
-                        </button>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </main>

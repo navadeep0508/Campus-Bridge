@@ -27,6 +27,32 @@ REQUEST_INTERVAL = 1  # Minimum interval between requests in seconds
 @app.route('/')
 def home():
     return render_template('landingpage.html')
+@app.route('/mycourse')
+def mycourse():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    try:
+        # Fetch the user's semester
+        response = supabase.table('users').select('semester').eq('id', user_id).execute()
+        user_data = response.data[0] if response.data else None
+
+        if not user_data:
+            return render_template('mycourse.html', error='User not found')
+
+        semester = user_data['semester']
+        table_name = f'semester{semester}'
+
+        # Fetch courses for the user's semester
+        courses_response = supabase.table(table_name).select('*').execute()
+        courses = courses_response.data if courses_response.data else []
+
+        return render_template('mycourse.html', courses=courses)
+    except Exception as e:
+        print(f"Error fetching courses: {e}")
+        traceback.print_exc()
+        return render_template('mycourse.html', error='An error occurred')
 
 @app.route('/home')
 def home_page():
@@ -172,6 +198,14 @@ def update_password():
 @app.route('/change_password')
 def change_password():
     return render_template('confirm_password.html')
+
+@app.route('/myinstitution')
+def my_institution():
+    return render_template('myinstution.html', section='institution')
+
+@app.route('/regulations')
+def regulations():
+    return render_template('myinstution.html', section='regulations')
 
 if __name__ == '__main__':
     app.run(debug=True)
