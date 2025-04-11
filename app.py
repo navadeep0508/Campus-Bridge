@@ -199,13 +199,7 @@ def update_password():
 def change_password():
     return render_template('confirm_password.html')
 
-@app.route('/myinstitution')
-def my_institution():
-    return render_template('myinstution.html', section='institution')
 
-@app.route('/regulations')
-def regulations():
-    return render_template('myinstution.html', section='regulations')
 
 if __name__ == '__main__':
     app.run(debug=True)
