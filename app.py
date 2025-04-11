@@ -1,8 +1,17 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 import requests
 import time
+from supabase import create_client, Client
+import bcrypt
+import traceback
 
 app = Flask(__name__)
+app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDM1MjYxNSwiZXhwIjoyMDU5OTI4NjE1fQ.qeufhcj6ypy97jOu0BHIRfqTnz9ZJNHoktibYy_p2NY'  # Ensure a proper secret key is set
+
+# Initialize Supabase client
+SUPABASE_URL = 'https://vdvmgzqvqzuaegvqkaxd.supabase.co'
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzNTI2MTUsImV4cCI6MjA1OTkyODYxNX0.uN8oZhbR1ujwwNpUDULigx5wJQ8XVM5DNxYXDOTvlTU'
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 JUDGE0_API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
 JUDGE0_API_HEADERS = {
@@ -17,6 +26,38 @@ REQUEST_INTERVAL = 1  # Minimum interval between requests in seconds
 
 @app.route('/')
 def home():
+    return render_template('landingpage.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        try:
+            # Fetch user by email
+            response = supabase.table('users').select('*').eq('email', email).execute()
+            user = response.data[0] if response.data else None
+
+            if user:
+                # Verify password
+                if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+                    session['user_id'] = user['id']
+                     # Store the user's role in the session
+                    return redirect(url_for('home'))
+                else:
+                    return render_template('login.html', error='Invalid credentials')
+            else:
+                return render_template('login.html', error='Invalid credentials')
+        except Exception as e:
+            print(f"Error signing in: {e}")
+            traceback.print_exc()
+            return render_template('login.html', error='An error occurred')
+
+    return render_template('login.html')
+
+@app.route('/compiler')
+def compiler():
     return render_template('compiler.html')
 
 @app.route('/run', methods=['POST'])
@@ -80,6 +121,17 @@ def run_code():
     except requests.exceptions.RequestException as e:
         print("Error during API request:", e)
         return jsonify({'error': 'Failed to execute code'}), 500
+
+@app.route('/test-supabase')
+def test_supabase():
+    try:
+        # Query a known table in Supabase
+        response = supabase.table('users').select('*').limit(1).execute()
+        print("Supabase test response:", response.data)  # Log the response data
+        return jsonify({"success": "Supabase connection is working!", "data": response.data}), 200
+    except Exception as e:
+        print("Error testing Supabase connection:", e)
+        return jsonify({"error": "Failed to connect to Supabase."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
