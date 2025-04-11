@@ -909,57 +909,44 @@
                         <div class="student-profile">
                             <div class="profile-header">
                                 <div class="profile-photo-container">
-                                    <img src="assets/avatar.jpg" alt="Student Photo" class="profile-photo">
-                                    <div class="profile-photo-edit" title="Change Profile Photo">
-                                        <i class="fas fa-camera"></i>
-                                    </div>
+                                    <img src="assets/default-avatar.jpg" alt="Student Photo" class="profile-photo">
                                 </div>
                                 <div class="profile-info">
-                                    <h1>John Doe</h1>
-                                    <p class="student-id">Roll Number: 2023001</p>
+                                    <h1>{{ user.name }}</h1>
+                                    <p class="student-id">Roll Number: {{ user.roll_number }}</p>
                                 </div>
                             </div>
-                            
                             <div class="student-details">
                                 <div class="detail-group">
                                     <div class="detail-item">
-                                        <i class="fas fa-graduation-cap"></i>
+                                        <i class="fas fa-user-tag"></i>
                                         <div>
-                                            <h3>Year of Study</h3>
-                                            <p>3rd Year</p>
+                                            <h3>Role</h3>
+                                            <p>{{ user.role }}</p>
                                         </div>
                                     </div>
                                     <div class="detail-item">
-                                        <i class="fas fa-book"></i>
+                                        <i class="fas fa-code-branch"></i>
                                         <div>
-                                            <h3>Course</h3>
-                                            <p>Bachelor of Computer Science</p>
+                                            <h3>Branch</h3>
+                                            <p>{{ user.branch }}</p>
                                         </div>
                                     </div>
                                 </div>
-                                
                                 <div class="detail-group">
                                     <div class="detail-item">
-                                        <i class="fas fa-envelope"></i>
+                                        <i class="fas fa-users"></i>
                                         <div>
-                                            <h3>Email ID</h3>
-                                            <p>john.doe@university.edu</p>
+                                            <h3>Section</h3>
+                                            <p>{{ user.section }}</p>
                                         </div>
                                     </div>
                                     <div class="detail-item">
-                                        <i class="fas fa-phone"></i>
+                                        <i class="fas fa-calendar-alt"></i>
                                         <div>
-                                            <h3>Mobile Number</h3>
-                                            <p>+91 98765 43210</p>
+                                            <h3>Semester</h3>
+                                            <p>{{ user.semester }}</p>
                                         </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="detail-item address">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <div>
-                                        <h3>Address</h3>
-                                        <p>123 University Street, Academic City, State - 123456</p>
                                     </div>
                                 </div>
                             </div>

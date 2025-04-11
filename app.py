@@ -56,7 +56,23 @@ def mycourse():
 
 @app.route('/home')
 def home_page():
-    return render_template('dashboard.html')
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    try:
+        # Fetch user details
+        response = supabase.table('users').select('*').eq('id', user_id).execute()
+        user = response.data[0] if response.data else None
+
+        if not user:
+            return render_template('dashboard.html', error='User not found')
+
+        return render_template('dashboard.html', user=user)
+    except Exception as e:
+        print(f"Error fetching user details: {e}")
+        traceback.print_exc()
+        return render_template('dashboard.html', error='An error occurred')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
