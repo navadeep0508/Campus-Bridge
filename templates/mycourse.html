@@ -678,6 +678,98 @@
             background: var(--accent-color);
             border-radius: 2px;
         }
+
+        /* Course Grid Styles */
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .course-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .course-header i {
+            font-size: 2rem;
+            color: var(--accent-color);
+        }
+
+        .course-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .course-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .stat i {
+            color: var(--accent-color);
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .download-btn i {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .course-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -698,11 +790,11 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="#" class="nav-item active">
+                    <a href="dashboard.html" class="nav-item">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
-                    <a href="mycourse.html" class="nav-item">
+                    <a href="#" class="nav-item active">
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
@@ -766,6 +858,7 @@
                     <a href="#" class="nav-item">
                         <i class="fas fa-bullhorn"></i>
                         <span>Announcements</span>
+                        <span class="notification-badge"></span>
                     </a>
                     <a href="#" class="nav-item">
                         <i class="fas fa-comment-alt"></i>
@@ -805,197 +898,101 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Top Navigation -->
-            <header class="top-nav">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search courses, topics, or code problems...">
-                </div>
-                
-                <div class="top-nav-actions">
-                    <button class="notification-btn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
-                    </button>
-                    
-                    <div class="user-profile">
-                        <img src="assets/avatar.jpg" alt="User Avatar">
-                        <span>John Doe</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Dashboard Content -->
+            <!-- Course Content -->
             <div class="dashboard-content">
-                <!-- Welcome Section -->
-                <section class="welcome-section">
-                    <div class="welcome-content">
-                        <h1>Welcome back, John!</h1>
-                        <p>Here's what's happening with your learning journey today.</p>
-                        
-                        <div class="welcome-actions">
-                            <button class="welcome-btn welcome-btn-primary">
-                                <i class="fas fa-rocket"></i>
-                                Continue Learning
-                            </button>
-                            <button class="welcome-btn welcome-btn-secondary">
-                                <i class="fas fa-calendar-alt"></i>
-                                View Schedule
-                            </button>
-                        </div>
+                <div class="section-header">
+                    <h1 class="text-3xl font-bold mb-6">My Courses</h1>
+                </div>
 
-                        <div class="welcome-stats">
-                            <div class="welcome-stat">
-                                <div class="welcome-stat-icon">
-                                    <i class="fas fa-book-open"></i>
-                                </div>
-                                <div class="welcome-stat-info">
-                                    <h3>4</h3>
-                                    <p>Active Courses</p>
-                                </div>
-                            </div>
-                            <div class="welcome-stat">
-                                <div class="welcome-stat-icon">
-                                    <i class="fas fa-tasks"></i>
-                                </div>
-                                <div class="welcome-stat-info">
-                                    <h3>3</h3>
-                                    <p>Pending Tasks</p>
-                                </div>
-                            </div>
-                            <div class="welcome-stat">
-                                <div class="welcome-stat-icon">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="welcome-stat-info">
-                                    <h3>12</h3>
-                                    <p>Achievements</p>
-                                </div>
-                            </div>
+                <div class="course-grid">
+                    <!-- Data Structures Course -->
+                    <div class="course-card">
+                        <div class="course-header">
+                            <i class="fas fa-code-branch"></i>
+                            <h2>Data Structures</h2>
                         </div>
-                    </div>
-                </section>
-
-                <!-- Quick Stats -->
-                <section class="quick-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-book-open"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Active Courses</h3>
-                            <p>4</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Pending Assignments</h3>
-                            <p>3</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-code"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Coding Streak</h3>
-                            <p>7 days</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Achievements</h3>
-                            <p>12/20</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Today's Schedule -->
-                <section class="schedule-section">
-                    <div class="section-header">
-                        <h2>Today's Schedule</h2>
-                        <a href="#" class="view-all">View All</a>
-                    </div>
-                    
-                    <div class="schedule-cards">
-                        <div class="schedule-card">
-                            <div class="schedule-time">09:00 AM</div>
-                            <div class="schedule-details">
-                                <h3>Data Structures</h3>
-                                <p>Lecture: Binary Trees</p>
-                                <span class="schedule-status upcoming">Upcoming</span>
-                            </div>
-                        </div>
-                        
-                        <div class="schedule-card">
-                            <div class="schedule-time">11:00 AM</div>
-                            <div class="schedule-details">
-                                <h3>Web Development</h3>
-                                <p>Lab: React Components</p>
-                                <span class="schedule-status in-progress">In Progress</span>
-                            </div>
-                        </div>
-                        
-                        <div class="schedule-card">
-                            <div class="schedule-time">02:00 PM</div>
-                            <div class="schedule-details">
-                                <h3>Algorithm Practice</h3>
-                                <p>Problem Solving Session</p>
-                                <span class="schedule-status later">Later</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Recent Activity -->
-                <section class="activity-section">
-                    <div class="section-header">
-                        <h2>Recent Activity</h2>
-                        <a href="#" class="view-all">View All</a>
-                    </div>
-                    
-                    <div class="activity-feed">
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-code"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p>Solved "Two Sum" problem in Python</p>
-                                <span class="activity-time">2 hours ago</span>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item">
-                            <div class="activity-icon">
+                        <div class="course-stats">
+                            <div class="stat">
                                 <i class="fas fa-book"></i>
+                                <span>12 Modules</span>
                             </div>
-                            <div class="activity-content">
-                                <p>Completed "React Hooks" module</p>
-                                <span class="activity-time">5 hours ago</span>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-tasks"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p>Submitted Data Structures assignment</p>
-                                <span class="activity-time">Yesterday</span>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>45 Hours</span>
                             </div>
                         </div>
+                        <button class="download-btn">
+                            <i class="fas fa-download"></i>
+                            Download Materials
+                        </button>
                     </div>
-                </section>
+
+                    <!-- Computer Networks Course -->
+                    <div class="course-card">
+                        <div class="course-header">
+                            <i class="fas fa-network-wired"></i>
+                            <h2>Computer Networks</h2>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-book"></i>
+                                <span>10 Modules</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>40 Hours</span>
+                            </div>
+                        </div>
+                        <button class="download-btn">
+                            <i class="fas fa-download"></i>
+                            Download Materials
+                        </button>
+                    </div>
+
+                    <!-- Operating System Course -->
+                    <div class="course-card">
+                        <div class="course-header">
+                            <i class="fas fa-desktop"></i>
+                            <h2>Operating System</h2>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-book"></i>
+                                <span>15 Modules</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>50 Hours</span>
+                            </div>
+                        </div>
+                        <button class="download-btn">
+                            <i class="fas fa-download"></i>
+                            Download Materials
+                        </button>
+                    </div>
+
+                    <!-- Rural Technology Course -->
+                    <div class="course-card">
+                        <div class="course-header">
+                            <i class="fas fa-tractor"></i>
+                            <h2>Rural Technology</h2>
+                        </div>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-book"></i>
+                                <span>8 Modules</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>30 Hours</span>
+                            </div>
+                        </div>
+                        <button class="download-btn">
+                            <i class="fas fa-download"></i>
+                            Download Materials
+                        </button>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
