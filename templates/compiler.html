@@ -7,44 +7,123 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'JetBrains Mono', monospace; background-color: #f9f9f9; color: #333; }
-        .container { background-color: #fff; }
-        .rounded { border-radius: 8px; }
-        .shadow { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .hover\:bg-blue-700:hover { background-color: #0056b3; }
+        :root {
+            --primary-color: #020024;
+            --secondary-color: #090979;
+            --accent-color: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --bg-light: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(2, 0, 36, 0.8);
+        }
+
+        body { 
+            font-family: 'JetBrains Mono', monospace; 
+            background: #020024;
+            background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container { 
+            background-color: transparent;
+            backdrop-filter: blur(10px);
+            max-width: 1200px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .rounded { 
+            border-radius: 8px; 
+        }
+
+        .shadow { 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+        }
+
+        .hover\:bg-blue-700:hover { 
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        select, textarea {
+            background: rgba(2, 0, 36, 0.5) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color) !important;
+        }
+
+        .monaco-editor {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .output-container {
+            background: rgba(2, 0, 36, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(2, 0, 36, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.8);
+        }
+
+        /* Button Styles */
+        .submit-btn {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
     </style>
 </head>
 <body>
     <div class="container mx-auto p-4">
-        <div class="grid grid-cols-2 gap-4">
-            <!-- Left Column: Problem Description -->
-            <div class="bg-white p-4 rounded shadow">
-                <h2 class="text-xl font-bold mb-2">Problem Description</h2>
-                <p>Title: Example Problem</p>
-                <p>Input/Output Format: ...</p>
-                <p>Sample I/O: ...</p>
-                <p>Constraints: ...</p>
+        <!-- Code Editor and Controls -->
+        <div class="card p-4 rounded shadow">
+            <div class="mb-4">
+                <label for="language" class="block text-sm font-medium text-text-secondary">Select Language:</label>
+                <select id="language" class="mt-1 block w-full rounded p-2">
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="java">Java</option>
+                    <option value="c">C</option>
+                    <option value="cpp">C++</option>
+                </select>
             </div>
-            <!-- Right Column: Code Editor and Controls -->
-            <div class="bg-white p-4 rounded shadow">
-                <div class="mb-4">
-                    <label for="language" class="block text-sm font-medium">Select Language:</label>
-                    <select id="language" class="mt-1 block w-full bg-gray-200 border border-gray-300 rounded">
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="java">Java</option>
-                        <option value="c">C</option>
-                        <option value="cpp">C++</option>
-                    </select>
-                </div>
-                <div id="editor" class="h-64 bg-gray-200 rounded mb-4"></div>
-                <div class="mb-4">
-                    <label for="custom-input" class="block text-sm font-medium">Custom Input:</label>
-                    <textarea id="custom-input" class="mt-1 block w-full bg-gray-200 border border-gray-300 rounded"></textarea>
-                </div>
-                <button id="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
-                <div id="output" class="mt-4 bg-gray-100 p-4 rounded h-32 overflow-y-auto"></div>
+            <div id="editor" class="h-96 rounded mb-4"></div>
+            <div class="mb-4">
+                <label for="custom-input" class="block text-sm font-medium text-text-secondary">Custom Input:</label>
+                <textarea id="custom-input" class="mt-1 block w-full rounded p-2" rows="4"></textarea>
             </div>
+            <button id="submit" class="submit-btn font-bold py-2 px-4 rounded w-full">Submit</button>
+            <div id="output" class="mt-4 output-container p-4 rounded h-32 overflow-y-auto"></div>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
