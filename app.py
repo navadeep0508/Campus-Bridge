@@ -28,6 +28,10 @@ REQUEST_INTERVAL = 1  # Minimum interval between requests in seconds
 def home():
     return render_template('landingpage.html')
 
+@app.route('/home')
+def home_page():
+    return render_template('dashboard.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -44,7 +48,7 @@ def login():
                 if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
                     session['user_id'] = user['id']
                      # Store the user's role in the session
-                    return redirect(url_for('home'))
+                    return redirect(url_for('home_page'))
                 else:
                     return render_template('login.html', error='Invalid credentials')
             else:
@@ -132,6 +136,42 @@ def test_supabase():
     except Exception as e:
         print("Error testing Supabase connection:", e)
         return jsonify({"error": "Failed to connect to Supabase."}), 500
+
+@app.route('/update_password', methods=['POST'])
+def update_password():
+    email = request.form.get('email')
+    old_password = request.form.get('old-password')
+    new_password = request.form.get('new-password')
+    confirm_password = request.form.get('confirm-password')
+
+    if new_password != confirm_password:
+        return render_template('confirm_password.html', error='New passwords do not match')
+
+    try:
+        # Fetch user by email
+        response = supabase.table('users').select('*').eq('email', email).execute()
+        user = response.data[0] if response.data else None
+
+        if user:
+            # Verify current password
+            if bcrypt.checkpw(old_password.encode('utf-8'), user['password'].encode('utf-8')):
+                # Hash the new password
+                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+                # Update the password in Supabase
+                supabase.table('users').update({'password': hashed_new_password.decode('utf-8')}).eq('email', email).execute()
+                return redirect(url_for('home_page'))
+            else:
+                return render_template('confirm_password.html', error='Current password is incorrect')
+        else:
+            return render_template('confirm_password.html', error='User not found')
+    except Exception as e:
+        print(f"Error updating password: {e}")
+        traceback.print_exc()
+        return render_template('confirm_password.html', error='An error occurred')
+
+@app.route('/change_password')
+def change_password():
+    return render_template('confirm_password.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
