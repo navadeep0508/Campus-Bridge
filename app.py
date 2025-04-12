@@ -296,116 +296,22 @@ def faculty_home():
 @app.route('/faculty/attendance')
 def faculty_attendance():
     return render_template('faculty_attendance.html')
-@app.route('/attendance')
 
+@app.route('/attendance')
 def attendance():
     return render_template('student attendance.html')
-@app.route('/coding_tracks')
 
+@app.route('/coding_tracks')
 def coding_tracks():
     return render_template('coding tracksss.html')
 
 @app.route('/c_plus_plus')
-
 def c_plus_plus():
     return render_template('c++languagee.html')
-@app.route('/python')
 
+@app.route('/python')
 def python():
     return render_template('python.html')
-
-@app.route('/myverse')
-def myverse():
-    return render_template('myverse.html', problems=CODING_PROBLEMS.values())
-
-@app.route('/problem/<int:problem_id>')
-def get_problem(problem_id):
-    problem = CODING_PROBLEMS.get(problem_id)
-    if not problem:
-        return jsonify({'error': 'Problem not found'}), 404
-    return jsonify(problem)
-
-@app.route('/submit', methods=['POST'])
-def submit_solution():
-    data = request.get_json()
-    problem_id = data.get('problem_id')
-    code = data.get('code')
-    language_id = data.get('language_id')
-
-    if not all([problem_id, code, language_id]):
-        return jsonify({'error': 'Missing required fields'}), 400
-
-    problem = CODING_PROBLEMS.get(problem_id)
-    if not problem:
-        return jsonify({'error': 'Problem not found'}), 404
-
-    results = []
-    for test_case in problem['test_cases']:
-        # Prepare the code with test case input
-        full_code = f"{code}\n\n# Test case\nprint({test_case['input']})"
-        
-        # Run the code using Judge0
-        submission = {
-            'source_code': full_code,
-            'language_id': language_id,
-            'stdin': '',
-            'expected_output': test_case['output']
-        }
-
-        try:
-            response = requests.post(
-                f'{JUDGE0_API_URL}?base64_encoded=false',
-                headers=JUDGE0_API_HEADERS,
-                json=submission
-            )
-            
-            submission_token = response.json().get('token')
-            if not submission_token:
-                return jsonify({'error': 'Failed to create submission'}), 500
-
-            # Get the result
-            time.sleep(2)  # Wait for processing
-            result = requests.get(
-                f'{JUDGE0_API_URL}/{submission_token}?base64_encoded=false',
-                headers=JUDGE0_API_HEADERS
-            ).json()
-
-            results.append({
-                'input': test_case['input'],
-                'expected': test_case['output'],
-                'actual': result.get('stdout', '').strip(),
-                'status': result.get('status', {}).get('description', 'Unknown'),
-                'passed': result.get('stdout', '').strip() == test_case['output']
-            })
-
-        except Exception as e:
-            print(f"Error running test case: {e}")
-            results.append({
-                'input': test_case['input'],
-                'error': str(e),
-                'passed': False
-            })
-
-    # Calculate overall result
-    all_passed = all(result.get('passed', False) for result in results)
-    
-    if all_passed:
-        # Update user's points in the database
-        try:
-            user_id = session.get('user_id')
-            if user_id:
-                response = supabase.table('users').select('points').eq('id', user_id).execute()
-                current_points = response.data[0].get('points', 0) if response.data else 0
-                new_points = current_points + problem['points']
-                supabase.table('users').update({'points': new_points}).eq('id', user_id).execute()
-        except Exception as e:
-            print(f"Error updating points: {e}")
-
-    return jsonify({
-        'results': results,
-        'all_passed': all_passed,
-        'points_earned': problem['points'] if all_passed else 0
-    })
 
 if __name__ == '__main__':
     app.run(debug=True)
