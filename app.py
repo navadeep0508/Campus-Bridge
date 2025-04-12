@@ -250,33 +250,11 @@ def faculty_home():
         traceback.print_exc()
         return render_template('faculty_dashboard.html', error='An error occurred')
 
-@app.route('/attendance', methods=['GET', 'POST'])
+@app.route('/faculty/attendance')
 def attendance():
-    faculty_id = session.get('faculty_id')
-    if not faculty_id:
-        return redirect(url_for('login'))
+    return render_template('faculty_attendance.html')
 
-    if request.method == 'POST':
-        attendance_data = request.json
-        try:
-            # Update attendance data in the database
-            for student_id, status in attendance_data.items():
-                supabase.table('attendance').update({'status': status}).eq('student_id', student_id).execute()
-            return jsonify({'success': True})
-        except Exception as e:
-            print(f"Error updating attendance data: {e}")
-            traceback.print_exc()
-            return jsonify({'success': False, 'error': 'An error occurred'})
 
-    # Fetch attendance data for the faculty's courses
-    try:
-        response = supabase.table('attendance').select('*').eq('faculty_id', faculty_id).execute()
-        attendance_data = response.data if response.data else []
-        return render_template('attendance.html', attendance_data=attendance_data)
-    except Exception as e:
-        print(f"Error fetching attendance data: {e}")
-        traceback.print_exc()
-        return render_template('attendance.html', error='An error occurred')
 
 if __name__ == '__main__':
     app.run(debug=True)
