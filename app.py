@@ -444,9 +444,124 @@ def timetable():
     except Exception as e:
         print(f"Error fetching user semester: {e}")
         return render_template('timetable.html', error='An error occurred')
-@app.route('/faculty/coding_assessment')
+@app.route('/faculty/coding_assessment', methods=['GET', 'POST'])
 def faculty_coding_assessment():
+    faculty_id = session.get('faculty_id')
+    if not faculty_id:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        try:
+            # Get form data
+            title = request.form.get('title')
+            description = request.form.get('description')
+            input_format = request.form.get('input_format')
+            output_format = request.form.get('output_format')
+            difficulty = request.form.get('difficulty', 'medium')
+            points = int(request.form.get('points', 100))
+            time_limit = int(request.form.get('time_limit', 60))
+            memory_limit = int(request.form.get('memory_limit', 512))
+            languages = request.form.getlist('languages[]') or ['python', 'java', 'cpp', 'c']
+
+            print("Creating assessment with data:", {
+                'title': title,
+                'faculty_id': faculty_id,
+                'difficulty': difficulty,
+                'points': points
+            })
+
+            # Insert into coding_assessments table
+            assessment_data = {
+                'faculty_id': faculty_id,
+                'title': title,
+                'description': description,
+                'input_format': input_format,
+                'output_format': output_format,
+                'difficulty': difficulty,
+                'points': points,
+                'time_limit': time_limit,
+                'memory_limit': memory_limit,
+                'allowed_languages': languages,
+                'created_at': 'now()'  # Add creation timestamp
+            }
+            
+            response = supabase.table('coding_assessments').insert(assessment_data).execute()
+            print("Assessment creation response:", response.data)
+            
+            if response.data:
+                assessment_id = response.data[0]['id']
+
+                # Get test cases
+                test_inputs = request.form.getlist('test_inputs[]')
+                test_outputs = request.form.getlist('test_outputs[]')
+
+                # Insert test cases
+                for input_data, expected_output in zip(test_inputs, test_outputs):
+                    if input_data and expected_output:
+                        test_case_data = {
+                            'assessment_id': assessment_id,
+                            'input_data': input_data,
+                            'expected_output': expected_output
+                        }
+                        supabase.table('assessment_test_cases').insert(test_case_data).execute()
+
+                return render_template('faculty_coding_assesment.html', success='Assessment created successfully!')
+
+            return render_template('faculty_coding_assesment.html', error='Failed to create assessment')
+
+        except Exception as e:
+            print(f"Error creating assessment: {e}")
+            traceback.print_exc()
+            return render_template('faculty_coding_assesment.html', error='Please fill all required fields correctly')
+
     return render_template('faculty_coding_assesment.html')
+@app.route('/student_coding_assesment')
+def student_coding_assesment():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    try:
+        print("Fetching assessments...")
+        
+        # Fetch assessments with faculty information
+        assessments_response = supabase.table('coding_assessments')\
+            .select('''
+                *,
+                faculty:users!coding_assessments_faculty_id_fkey (
+                    name
+                )
+            ''')\
+            .order('created_at', desc=True)\
+            .execute()
+            
+        assessments = assessments_response.data if assessments_response.data else []
+        print(f"Found {len(assessments)} assessments:", assessments)
+
+        if not assessments:
+            print("No assessments found in the database")
+        
+        return render_template('student_coding_assesment.html', 
+                            assessments=assessments,
+                            stats={
+                                'total': len(assessments),
+                                'completed': 0,
+                                'attempts': 0,
+                                'time_spent': 0
+                            })
+                            
+    except Exception as e:
+        print(f"Error fetching assessments: {e}")
+        traceback.print_exc()
+        return render_template('student_coding_assesment.html', 
+                            error='Failed to load assessments',
+                            assessments=[],
+                            stats={
+                                'total': 0,
+                                'completed': 0,
+                                'attempts': 0,
+                                'time_spent': 0
+                            })
     
 if __name__ == '__main__':
     app.run(debug=True)

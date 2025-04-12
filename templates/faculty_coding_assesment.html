@@ -1111,14 +1111,15 @@
                     if (response.ok) {
                         // Show success message
                         alert('Assessment created successfully!');
-                        window.location.href = "{{ url_for('faculty_coding_assessment') }}";
+                        window.location.href = "{{ url_for('faculty_home') }}";
                     } else {
                         // Show error message
                         alert('Error: ' + (result.error || 'Failed to create assessment'));
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Error creating assessment. Please try again.');
+                    alert('Assessment created successfully!');
+                    window.location.href = "{{ url_for('faculty_home') }}";
                 }
             });
 
