@@ -27,6 +27,7 @@ REQUEST_INTERVAL = 1  # Minimum interval between requests in seconds
 @app.route('/')
 def home():
     return render_template('landingpage.html')
+
 @app.route('/mycourse')
 def mycourse():
     user_id = session.get('user_id')
@@ -251,8 +252,11 @@ def faculty_home():
         return render_template('faculty_dashboard.html', error='An error occurred')
 
 @app.route('/faculty/attendance')
-def attendance():
+def faculty_attendance():
     return render_template('faculty_attendance.html')
+@app.route('/attendance')
+def attendance():
+    return render_template('student attendance.html')
 
 
 
