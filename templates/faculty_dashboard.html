@@ -826,7 +826,7 @@
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Manage Courses</span>
                     </a>
-                    <a href="{{ url_for('faculty_assignments') }}" class="nav-item" onclick="navigateToAssignments(event)">
+                    <a href="{{ url_for('assignment') }}" class="nav-item" onclick="navigateToAssignments(event)">
                         <i class="fas fa-tasks"></i>
                         <span>Assignments</span>
                     </a>
@@ -951,7 +951,7 @@
         // Function to handle navigation to assignments page
         function navigateToAssignments(event) {
             event.preventDefault();
-            window.location.href = "{{ url_for('faculty_assignments') }}";
+            window.location.href = "{{ url_for('assignment') }}";
         }
     </script>
 </body>
