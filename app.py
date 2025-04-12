@@ -255,10 +255,22 @@ def faculty_home():
 def faculty_attendance():
     return render_template('faculty_attendance.html')
 @app.route('/attendance')
+
 def attendance():
     return render_template('student attendance.html')
+@app.route('/coding_tracks')
 
+def coding_tracks():
+    return render_template('coding tracksss.html')
 
+@app.route('/c_plus_plus')
+
+def c_plus_plus():
+    return render_template('c++languagee.html')
+@app.route('/python')
+
+def python():
+    return render_template('python.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
