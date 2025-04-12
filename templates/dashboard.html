@@ -987,20 +987,28 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
-        sidebarToggle.addEventListener('click', () => {
+        // Function to toggle sidebar
+        function toggleSidebar() {
             sidebar.classList.toggle('collapsed');
             // Adjust main content margin when sidebar is collapsed
             const mainContent = document.querySelector('.main-content');
             if (sidebar.classList.contains('collapsed')) {
                 mainContent.style.marginLeft = '60px';
+                sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
+                sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
             } else {
                 mainContent.style.marginLeft = '250px';
+                sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
+                sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
             }
+        }
+
+        // Event listeners
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
         });
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
 
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', (e) => {
@@ -1015,6 +1023,20 @@
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('active');
+            }
+        });
+
+        // Initialize sidebar state
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.querySelector('.main-content');
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '60px';
+                sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
+                sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
+            } else {
+                mainContent.style.marginLeft = '250px';
+                sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
+                sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
             }
         });
     </script>

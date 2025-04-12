@@ -39,6 +39,8 @@
         .dashboard-container {
             display: flex;
             min-height: 100vh;
+            position: relative;
+            width: 100%;
         }
 
         /* Sidebar Styles */
@@ -50,8 +52,10 @@
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
-            z-index: 1000;
+            z-index: 100;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            left: 0;
+            top: 0;
         }
 
         .sidebar.collapsed {
@@ -147,26 +151,48 @@
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             background: transparent;
+            position: relative;
         }
 
         .nav-item:hover, .nav-item.active {
             background: rgba(0, 212, 255, 0.1);
             color: var(--accent-color);
+            transform: translateX(5px);
         }
 
         .nav-item i {
             margin-right: 1rem;
             width: 20px;
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover i {
+            transform: scale(1.1);
         }
 
         /* Main Content Styles */
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
-            transition: margin-left 0.3s ease;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background: rgba(2, 0, 36, 0.3);
+            backdrop-filter: blur(10px);
+            width: calc(100% - var(--sidebar-width));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            left: 0;
+        }
+
+        .main-content.collapsed {
+            margin-left: 60px;
+            width: calc(100% - 60px);
         }
 
         /* Top Navigation */
@@ -251,7 +277,14 @@
 
         /* Dashboard Content */
         .dashboard-content {
-            padding: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 4rem);
+            position: relative;
         }
 
         /* Student Profile Styles */
@@ -678,6 +711,7 @@
         @media (max-width: 768px) {
             .menu-toggle {
                 display: block;
+                z-index: 101;
             }
 
             .sidebar {
@@ -689,6 +723,13 @@
             }
 
             .main-content {
+                width: 100%;
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .main-content.collapsed {
+                width: 100%;
                 margin-left: 0;
             }
 
@@ -711,6 +752,31 @@
             .welcome-stats {
                 flex-wrap: wrap;
                 gap: 1rem;
+            }
+
+            .dashboard-content {
+                padding: 1rem;
+            }
+
+            .attendance-section {
+                padding: 1.5rem;
+            }
+
+            .attendance-filters {
+                flex-direction: column;
+            }
+
+            .semester-select,
+            .month-select {
+                width: 100%;
+            }
+
+            .attendance-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(5, 1fr);
             }
         }
 
@@ -796,6 +862,316 @@
         .sidebar-nav::-webkit-scrollbar-thumb {
             background: var(--accent-color);
             border-radius: 2px;
+        }
+
+        /* Attendance Section Styles */
+        .attendance-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .attendance-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .attendance-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-info h3 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-info p {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .subject-attendance {
+            margin: 3rem 0;
+        }
+
+        .subject-attendance h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .attendance-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .attendance-bars:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .attendance-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .attendance-bar:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .subject-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .subject-info span:first-child {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .subject-info span:last-child {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .attendance-bar:hover .progress-bar {
+            transform: scaleY(1.2);
+        }
+
+        .monthly-attendance {
+            margin: 2rem 0;
+        }
+
+        .attendance-calendar {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-day.present {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent-color);
+        }
+
+        .calendar-day.absent {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff4444;
+        }
+
+        .previous-semesters {
+            margin: 2rem 0;
+        }
+
+        .semester-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .semester-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .semester-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .semester-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .semester-stats .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .semester-stats .stat:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .semester-stats .stat span:first-child {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .semester-stats .stat:hover span:first-child {
+            color: var(--accent-color);
+        }
+
+        .semester-stats .stat span:last-child {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .semester-stats .stat:hover span:last-child {
+            transform: scale(1.1);
+        }
+
+        .attendance-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .semester-select,
+        .month-select {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            min-width: 200px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .semester-select:hover,
+        .month-select:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-color);
+        }
+
+        .semester-select:focus,
+        .month-select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
         }
     </style>
 </head>
@@ -888,4 +1264,212 @@
                 </div>
             </nav>
         </aside>
-  
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Attendance Overview -->
+            <section class="attendance-section">
+                <div class="section-header">
+                    <h2>Attendance Overview</h2>
+                    <div class="attendance-filters">
+                        <select class="semester-select">
+                            <option value="current">Current Semester</option>
+                            <option value="previous">Previous Semesters</option>
+                        </select>
+                        <select class="month-select">
+                            <option value="current">Current Month</option>
+                            <option value="january">January</option>
+                            <option value="february">February</option>
+                            <!-- Add other months -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Overall Attendance Stats -->
+                <div class="attendance-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Overall Attendance</h3>
+                            <p>85%</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Classes Attended</h3>
+                            <p>68/80</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Classes Missed</h3>
+                            <p>12/80</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject-wise Attendance -->
+                <div class="subject-attendance">
+                    <h3>Subject-wise Attendance</h3>
+                    <div class="attendance-bars">
+                        <div class="attendance-bar">
+                            <div class="subject-info">
+                                <span>Data Structures</span>
+                                <span>90%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="attendance-bar">
+                            <div class="subject-info">
+                                <span>Web Development</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="attendance-bar">
+                            <div class="subject-info">
+                                <span>Database Systems</span>
+                                <span>78%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 78%"></div>
+                            </div>
+                        </div>
+                        <div class="attendance-bar">
+                            <div class="subject-info">
+                                <span>Operating Systems</span>
+                                <span>92%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 92%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Attendance -->
+                <div class="monthly-attendance">
+                    <h3>Monthly Attendance</h3>
+                    <div class="attendance-calendar">
+                        <div class="calendar-header">
+                            <button class="prev-month"><i class="fas fa-chevron-left"></i></button>
+                            <h4>March 2024</h4>
+                            <button class="next-month"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day present">1</div>
+                            <div class="calendar-day present">2</div>
+                            <div class="calendar-day absent">3</div>
+                            <!-- Add more days -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Semesters -->
+                <div class="previous-semesters">
+                    <h3>Previous Semesters</h3>
+                    <div class="semester-cards">
+                        <div class="semester-card">
+                            <h4>Semester 3</h4>
+                            <div class="semester-stats">
+                                <div class="stat">
+                                    <span>Overall</span>
+                                    <span>88%</span>
+                                </div>
+                                <div class="stat">
+                                    <span>Classes</span>
+                                    <span>70/80</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="semester-card">
+                            <h4>Semester 2</h4>
+                            <div class="semester-stats">
+                                <div class="stat">
+                                    <span>Overall</span>
+                                    <span>92%</span>
+                                </div>
+                                <div class="stat">
+                                    <span>Classes</span>
+                                    <span>74/80</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Initialize sidebar toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.querySelector('.main-content');
+        const dashboardContainer = document.querySelector('.dashboard-container');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '60px';
+                mainContent.style.width = 'calc(100% - 60px)';
+            } else {
+                mainContent.style.marginLeft = '250px';
+                mainContent.style.width = 'calc(100% - 250px)';
+            }
+        }
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            if (sidebar.classList.contains('active')) {
+                mainContent.style.marginLeft = '250px';
+            } else {
+                mainContent.style.marginLeft = '0';
+            }
+        });
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                if (sidebar.classList.contains('collapsed')) {
+                    mainContent.style.marginLeft = '60px';
+                    mainContent.style.width = 'calc(100% - 60px)';
+                } else {
+                    mainContent.style.marginLeft = '250px';
+                    mainContent.style.width = 'calc(100% - 250px)';
+                }
+            }
+        });
+
+        // Initialize sidebar state
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '60px';
+                mainContent.style.width = 'calc(100% - 60px)';
+                mainContent.classList.add('collapsed');
+            } else {
+                mainContent.style.marginLeft = '250px';
+                mainContent.style.width = 'calc(100% - 250px)';
+                mainContent.classList.remove('collapsed');
+            }
+        });
+    </script>
+</body>
+</html>
