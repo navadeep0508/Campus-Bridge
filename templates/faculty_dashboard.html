@@ -846,7 +846,7 @@
 
                 <div class="nav-section">
                     <h3>Attendance</h3>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('attendance') }}" class="nav-item">
                         <i class="fas fa-calendar-check"></i>
                         <span>Attendance</span>
                     </a>
@@ -863,7 +863,18 @@
                     <input type="text" placeholder="Search courses, students, or reports...">
                 </div>
                 
-             
+                <div class="top-nav-actions">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    
+                    <div class="user-profile">
+                        <img src="{{ faculty.profile_image_url }}" alt="Profile Photo" class="profile-photo">
+                        <span>{{ faculty.name }}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
             </header>
 
             <!-- Dashboard Content -->

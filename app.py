@@ -76,10 +76,8 @@ def home_page():
             print("Redirecting to faculty dashboard")  # Log redirection to faculty dashboard
             return redirect(url_for('faculty_home'))
         else:
-            session['user_id'] = user['id']
-            session['role'] = user['role']
-            print("Redirecting to home page")  # Log redirection to home page
-            return redirect(url_for('home_page'))
+            # Render the dashboard directly instead of redirecting
+            return render_template('dashboard.html', user=user)
     except Exception as e:
         print(f"Error fetching user details: {e}")
         traceback.print_exc()
@@ -102,6 +100,7 @@ def login():
                     session['user_id'] = user['id']
                     session['role'] = user['role']  # Store the user's role in the session
                     if user['role'] == 'faculty':
+                        session['faculty_id'] = user['id']  # Set faculty_id for faculty users
                         return redirect(url_for('faculty_home'))
                     else:
                         return redirect(url_for('home_page'))
@@ -250,6 +249,34 @@ def faculty_home():
         print(f"Error fetching faculty details: {e}")
         traceback.print_exc()
         return render_template('faculty_dashboard.html', error='An error occurred')
+
+@app.route('/attendance', methods=['GET', 'POST'])
+def attendance():
+    faculty_id = session.get('faculty_id')
+    if not faculty_id:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        attendance_data = request.json
+        try:
+            # Update attendance data in the database
+            for student_id, status in attendance_data.items():
+                supabase.table('attendance').update({'status': status}).eq('student_id', student_id).execute()
+            return jsonify({'success': True})
+        except Exception as e:
+            print(f"Error updating attendance data: {e}")
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': 'An error occurred'})
+
+    # Fetch attendance data for the faculty's courses
+    try:
+        response = supabase.table('attendance').select('*').eq('faculty_id', faculty_id).execute()
+        attendance_data = response.data if response.data else []
+        return render_template('attendance.html', attendance_data=attendance_data)
+    except Exception as e:
+        print(f"Error fetching attendance data: {e}")
+        traceback.print_exc()
+        return render_template('attendance.html', error='An error occurred')
 
 if __name__ == '__main__':
     app.run(debug=True)
