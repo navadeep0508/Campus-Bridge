@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Myinfocam</title>
+    <title>Dashboard - Campus Bridge</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -108,29 +108,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .college-info-section {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 212, 255, 0.05);
-        }
-
-        .college-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--accent-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .department-name {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            opacity: 0.9;
-        }
-
-        .sidebar.collapsed .college-info-section {
-            display: none;
-        }
-
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
@@ -190,6 +167,7 @@
             flex: 1;
             margin-left: var(--sidebar-width);
             transition: margin-left 0.3s ease;
+            padding: 2rem;
         }
 
         /* Top Navigation */
@@ -275,6 +253,125 @@
         /* Dashboard Content */
         .dashboard-content {
             padding: 2rem;
+        }
+
+        /* Student Profile Styles */
+        .student-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color);
+            position: relative;
+        }
+
+        .profile-photo-edit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary-color);
+        }
+
+        .profile-photo-edit:hover {
+            transform: scale(1.1);
+            background: var(--primary-color);
+            color: var(--accent-color);
+        }
+
+        .profile-photo-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-id {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .detail-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-item i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-top: 0.3rem;
+        }
+
+        .detail-item h3 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-item p {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .detail-item.address {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .detail-group {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Welcome Section Styles */
@@ -702,97 +799,73 @@
             border-radius: 2px;
         }
 
-        /* Course Grid Styles */
-        .course-grid {
+        /* Problem Card Styles */
+        .problems-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 1rem;
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
-        .course-card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+        .problem-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
             padding: 1.5rem;
+            transition: transform 0.3s ease;
+            cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .course-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        .problem-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
         }
 
-        .course-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .course-header i {
-            font-size: 2rem;
-            color: var(--accent-color);
-        }
-
-        .course-header h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .course-stats {
-            margin-bottom: auto;
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        .stat i {
-            color: var(--accent-color);
+        .problem-card h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
             font-size: 1.2rem;
         }
 
-        .download-btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--accent-color);
-            color: var(--primary-color);
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .problem-meta {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        .problem-difficulty {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
         }
 
-        @media (max-width: 768px) {
-            .course-grid {
-                grid-template-columns: 1fr;
-            }
+        .difficulty-easy {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
 
-            .course-stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
+        .difficulty-medium {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .difficulty-hard {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+
+        .problem-points {
+            font-size: 0.9rem;
+            color: var(--accent-color);
         }
     </style>
 </head>
@@ -808,24 +881,23 @@
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
-                <h2>Class Verse</h2>
+                <h2>Myinfocam</h2>
             </div>
             
-            <div class="college-info-section">
-                <div class="college-name">College of Engineering</div>
-                <div class="department-name">Department of Computer Science</div>
-            </div>
-
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="{{ url_for('home_page') }}" class="nav-item active">
+                    <a href="{{ url_for('home_page') }}" class="nav-item">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
                     <a href="{{ url_for('mycourse') }}" class="nav-item">
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
+                    </a>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
                     </a>
                 </div>
 
@@ -839,7 +911,7 @@
 
                 <div class="nav-section">
                     <h3>Academic</h3>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('attendance') }}" class="nav-item">
                         <i class="fas fa-user-check"></i>
                         <span>Attendance</span>
                     </a>
@@ -855,11 +927,7 @@
 
                 <div class="nav-section">
                     <h3>Coding</h3>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-code-branch"></i>
-                        <span>Coding Tracks</span>
-                    </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('myverse') }}" class="nav-item active">
                         <i class="fas fa-laptop-code"></i>
                         <span>My Verse</span>
                     </a>
@@ -890,51 +958,39 @@
                 </div>
             </nav>
         </aside>
+    </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="dashboard-content">
-                <div class="section-header">
-                    <h1 class="text-3xl font-bold mb-6"></h1>
-                </div>
+    <script>
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const menuToggle = document.getElementById('menuToggle');
 
-                <script>
-                    // Toggle sidebar on mobile
-                    const menuToggle = document.getElementById('menuToggle');
-                    const sidebar = document.getElementById('sidebar');
-                    const sidebarToggle = document.getElementById('sidebarToggle');
-            
-                    menuToggle.addEventListener('click', () => {
-                        sidebar.classList.toggle('active');
-                    });
-            
-                    sidebarToggle.addEventListener('click', () => {
-                        sidebar.classList.toggle('collapsed');
-                        // Adjust main content margin when sidebar is collapsed
-                        const mainContent = document.querySelector('.main-content');
-                        if (sidebar.classList.contains('collapsed')) {
-                            mainContent.style.marginLeft = '60px';
-                        } else {
-                            mainContent.style.marginLeft = '250px';
-                        }
-                    });
-            
-                    // Close sidebar when clicking outside on mobile
-                    document.addEventListener('click', (e) => {
-                        if (window.innerWidth <= 768) {
-                            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                                sidebar.classList.remove('active');
-                            }
-                        }
-                    });
-            
-                    // Handle window resize
-                    window.addEventListener('resize', () => {
-                        if (window.innerWidth > 768) {
-                            sidebar.classList.remove('active');
-                        }
-                    });
-                </script>
-    
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            document.querySelector('.main-content').style.marginLeft = 
+                sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
+        });
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-visible');
+        });
+
+        // Responsive sidebar
+        function handleResize() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                document.querySelector('.main-content').style.marginLeft = '0';
+                menuToggle.style.display = 'block';
+            } else {
+                sidebar.classList.remove('collapsed');
+                document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)';
+                menuToggle.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+    </script>
 </body>
-</html> 
+</html>
