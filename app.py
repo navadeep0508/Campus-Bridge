@@ -254,23 +254,30 @@ def faculty_home():
 @app.route('/faculty/attendance')
 def faculty_attendance():
     return render_template('faculty_attendance.html')
-@app.route('/attendance')
 
+@app.route('/attendance')
 def attendance():
     return render_template('student attendance.html')
-@app.route('/coding_tracks')
 
+@app.route('/coding_tracks')
 def coding_tracks():
     return render_template('coding tracksss.html')
 
 @app.route('/c_plus_plus')
-
 def c_plus_plus():
     return render_template('c++languagee.html')
-@app.route('/python')
 
+@app.route('/python')
 def python():
     return render_template('python.html')
+
+@app.route('/c')
+def c():
+    return render_template('c language.html')
+
+@app.route('/java')
+def java():
+    return render_template('java programming.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
