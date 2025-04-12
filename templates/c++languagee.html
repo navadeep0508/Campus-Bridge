@@ -108,6 +108,29 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .college-info-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .college-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .department-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            opacity: 0.9;
+        }
+
+        .sidebar.collapsed .college-info-section {
+            display: none;
+        }
+
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
@@ -788,20 +811,21 @@
                 <h2>Myinfocam</h2>
             </div>
             
+            <div class="college-info-section">
+                <div class="college-name">College of Engineering</div>
+                <div class="department-name">Department of Computer Science</div>
+            </div>
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="{{ url_for('home_page') }}" class="nav-item">
+                    <a href="{{ url_for('home_page') }}" class="nav-item active">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
                     <a href="{{ url_for('mycourse') }}" class="nav-item">
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
-                    </a>
-                    <a href="coding tracksss.html" class="nav-item">
-                        <i class="fas fa-code-branch"></i>
-                        <span>Coding Tracks</span>
                     </a>
                 </div>
 
@@ -811,20 +835,11 @@
                         <i class="fas fa-university"></i>
                         <span>My Institution</span>
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-gavel"></i>
-                        <span>Regulations</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>Messages</span>
-                        <span class="notification-badge">5</span>
-                    </a>
                 </div>
 
                 <div class="nav-section">
                     <h3>Academic</h3>
-                    <a href="{{ url_for('attendance') }}" class="nav-item">
+                    <a href="#" class="nav-item">
                         <i class="fas fa-user-check"></i>
                         <span>Attendance</span>
                     </a>
@@ -833,20 +848,44 @@
                         <span>Assignments</span>
                     </a>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Academic Schedules</span>
-                    </a>
-                    <a href="#" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <a href="coding tracksss.html" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Online Compiler</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>Coding Assignment</span>
                     </a>
                 </div>
                 
                 <div class="nav-section">
                     <h3>Community</h3>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        <span>Study Groups</span>
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
                     </a>
                 </div>
             </nav>
@@ -854,72 +893,163 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Course Content -->
             <div class="dashboard-content">
                 <div class="section-header">
-                    <h1 class="text-3xl font-bold mb-6">My Courses</h1>
+                    <h1 class="text-3xl font-bold mb-6">C++ Programming Language</h1>
                 </div>
 
-                <div class="course-grid">
-                    {% for course in courses %}
-                    <div class="course-card">
-                        <div class="course-header">
-                            <h2>{{ course.subject }}</h2>
-                        </div>
-                        <div class="course-stats">
-                            <div class="stat">
-                                <span>Modules: {{ course.modules }}</span>
-                            </div>
-                            <div class="stat">
-                                <span>Hours: {{ course.hours }}</span>
-                            </div>
-                        </div>
-                        <a href="{{ course.pdf_link }}" class="download-btn" target="_blank">
-                            Download PDF
-                        </a>
+                <!-- Video Section -->
+                <div class="video-section" style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">Complete C++ Programming Course</h2>
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                        <iframe 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                            src="https://www.youtube.com/embed/8jLOx1hD3_o"
+                            title="C++ Programming Tutorial"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
                     </div>
-                    {% endfor %}
+                </div>
+
+                <!-- C++ Language Information -->
+                <div class="cpp-language-info" style="background: var(--card-bg); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; margin-bottom: 1.5rem; color: var(--accent-color);">Introduction to C++ Programming</h2>
+                    
+                    <div class="info-section" style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">What is C++?</h3>
+                        <p style="line-height: 1.6; margin-bottom: 1rem;">
+                            C++ is a powerful general-purpose programming language created by Bjarne Stroustrup as an extension of the C programming language. It offers both high-level and low-level language features, supporting object-oriented, procedural, and generic programming paradigms.
+                        </p>
+                    </div>
+
+                    <div class="info-section" style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Key Features of C++</h3>
+                        <ul style="list-style-type: disc; margin-left: 2rem; line-height: 1.6;">
+                            <li>Object-Oriented Programming</li>
+                            <li>Multiple Inheritance</li>
+                            <li>Standard Template Library (STL)</li>
+                            <li>Exception Handling</li>
+                            <li>Operator Overloading</li>
+                            <li>Memory Management</li>
+                            <li>RAII (Resource Acquisition Is Initialization)</li>
+                            <li>Templates for Generic Programming</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-section" style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Basic Structure of a C++ Program</h3>
+                        <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+<code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    cout << "Hello, World!" << endl;
+    return 0;
+}</code></pre>
+                    </div>
+
+                    <div class="info-section" style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Core Concepts in C++</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div class="topic-card" style="background: rgba(0,212,255,0.1); padding: 1rem; border-radius: 8px;">
+                                <h4 style="color: var(--accent-color); margin-bottom: 0.5rem;">Fundamentals</h4>
+                                <ul style="list-style-type: none;">
+                                    <li>Data Types & Variables</li>
+                                    <li>Control Structures</li>
+                                    <li>Functions & Arrays</li>
+                                    <li>Pointers & References</li>
+                                </ul>
+                            </div>
+                            <div class="topic-card" style="background: rgba(0,212,255,0.1); padding: 1rem; border-radius: 8px;">
+                                <h4 style="color: var(--accent-color); margin-bottom: 0.5rem;">Object-Oriented Programming</h4>
+                                <ul style="list-style-type: none;">
+                                    <li>Classes & Objects</li>
+                                    <li>Inheritance & Polymorphism</li>
+                                    <li>Encapsulation</li>
+                                    <li>Abstraction</li>
+                                </ul>
+                            </div>
+                            <div class="topic-card" style="background: rgba(0,212,255,0.1); padding: 1rem; border-radius: 8px;">
+                                <h4 style="color: var(--accent-color); margin-bottom: 0.5rem;">Advanced Features</h4>
+                                <ul style="list-style-type: none;">
+                                    <li>STL Containers & Algorithms</li>
+                                    <li>Smart Pointers</li>
+                                    <li>Lambda Expressions</li>
+                                    <li>Move Semantics</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section" style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Modern C++ Features (C++11 and beyond)</h3>
+                        <ul style="list-style-type: disc; margin-left: 2rem; line-height: 1.6;">
+                            <li>Auto Type Deduction</li>
+                            <li>Range-based for Loops</li>
+                            <li>nullptr Keyword</li>
+                            <li>Lambda Expressions</li>
+                            <li>Smart Pointers</li>
+                            <li>Move Semantics</li>
+                            <li>Uniform Initialization</li>
+                            <li>Constexpr</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-section">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Applications of C++</h3>
+                        <ul style="list-style-type: disc; margin-left: 2rem; line-height: 1.6;">
+                            <li>Game Development</li>
+                            <li>System Software Development</li>
+                            <li>Desktop Applications</li>
+                            <li>Real-time Systems</li>
+                            <li>High-Performance Computing</li>
+                            <li>Graphics and Animation</li>
+                            <li>Embedded Systems</li>
+                            <li>Financial Systems</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </main>
-    </div>
+                </div>
 
-    <script>
-        // Toggle sidebar on mobile
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            // Adjust main content margin when sidebar is collapsed
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '60px';
-            } else {
-                mainContent.style.marginLeft = '250px';
-            }
-        });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-            }
-        });
-    </script>
+                <script>
+                    // Toggle sidebar on mobile
+                    const menuToggle = document.getElementById('menuToggle');
+                    const sidebar = document.getElementById('sidebar');
+                    const sidebarToggle = document.getElementById('sidebarToggle');
+            
+                    menuToggle.addEventListener('click', () => {
+                        sidebar.classList.toggle('active');
+                    });
+            
+                    sidebarToggle.addEventListener('click', () => {
+                        sidebar.classList.toggle('collapsed');
+                        // Adjust main content margin when sidebar is collapsed
+                        const mainContent = document.querySelector('.main-content');
+                        if (sidebar.classList.contains('collapsed')) {
+                            mainContent.style.marginLeft = '60px';
+                        } else {
+                            mainContent.style.marginLeft = '250px';
+                        }
+                    });
+            
+                    // Close sidebar when clicking outside on mobile
+                    document.addEventListener('click', (e) => {
+                        if (window.innerWidth <= 768) {
+                            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                                sidebar.classList.remove('active');
+                            }
+                        }
+                    });
+            
+                    // Handle window resize
+                    window.addEventListener('resize', () => {
+                        if (window.innerWidth > 768) {
+                            sidebar.classList.remove('active');
+                        }
+                    });
+                </script>
 </body>
-</html> 
+</html>

@@ -108,6 +108,29 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .college-info-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .college-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .department-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            opacity: 0.9;
+        }
+
+        .sidebar.collapsed .college-info-section {
+            display: none;
+        }
+
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
@@ -771,6 +794,136 @@
                 gap: 1rem;
             }
         }
+
+        /* Hero Section Styles */
+        .hero-section {
+            background: rgba(2, 0, 36, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="rgba(0,212,255,0.1)"/></svg>') repeat;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .language-card {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .language-card:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 212, 255, 0.15);
+        }
+
+        .language-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .language-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .language-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .language-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .language-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .language-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .language-features li i {
+            color: var(--accent-color);
+        }
+
+        .start-learning {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .start-learning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -799,32 +952,15 @@
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="coding tracksss.html" class="nav-item">
+                    <a href="coding tracksss.html" class="nav-item active">
                         <i class="fas fa-code-branch"></i>
                         <span>Coding Tracks</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <h3>Institution</h3>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-university"></i>
-                        <span>My Institution</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-gavel"></i>
-                        <span>Regulations</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>Messages</span>
-                        <span class="notification-badge">5</span>
-                    </a>
-                </div>
-
-                <div class="nav-section">
                     <h3>Academic</h3>
-                    <a href="{{ url_for('attendance') }}" class="nav-item">
+                    <a href="student attendance.html" class="nav-item">
                         <i class="fas fa-user-check"></i>
                         <span>Attendance</span>
                     </a>
@@ -833,12 +969,24 @@
                         <span>Assignments</span>
                     </a>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Academic Schedules</span>
-                    </a>
-                    <a href="#" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Online Compiler</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>Coding Assignment</span>
                     </a>
                 </div>
                 
@@ -854,72 +1002,135 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Course Content -->
             <div class="dashboard-content">
-                <div class="section-header">
-                    <h1 class="text-3xl font-bold mb-6">My Courses</h1>
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Master Programming Languages</h1>
+                        <p class="hero-subtitle">Choose your path to becoming a skilled developer</p>
+                        
+                        <div class="language-grid">
+                            <div class="language-card">
+                                <div class="language-header">
+                                    <div class="language-icon">
+                                        <i class="fab fa-python"></i>
+                                    </div>
+                                    <h3 class="language-name">Python</h3>
+                                </div>
+                                <p class="language-description">
+                                    A versatile, high-level programming language known for its simplicity and readability.
+                                </p>
+                                <ul class="language-features">
+                                    <li><i class="fas fa-check"></i> Easy to learn syntax</li>
+                                    <li><i class="fas fa-check"></i> Extensive libraries</li>
+                                    <li><i class="fas fa-check"></i> Great for data science</li>
+                                    <li><i class="fas fa-check"></i> Web development</li>
+                                </ul>
+                                <a href="python.html" class="start-learning">Start Learning Python</a>
+                            </div>
+
+                            <div class="language-card">
+                                <div class="language-header">
+                                    <div class="language-icon">
+                                        <i class="fas fa-c"></i>
+                                    </div>
+                                    <h3 class="language-name">C</h3>
+                                </div>
+                                <p class="language-description">
+                                    A powerful, efficient programming language that forms the foundation of modern computing.
+                                </p>
+                                <ul class="language-features">
+                                    <li><i class="fas fa-check"></i> System programming</li>
+                                    <li><i class="fas fa-check"></i> Hardware control</li>
+                                    <li><i class="fas fa-check"></i> Performance critical</li>
+                                    <li><i class="fas fa-check"></i> Memory management</li>
+                                </ul>
+                                <a href="#" class="start-learning">Start Learning C</a>
+                            </div>
+
+                            <div class="language-card">
+                                <div class="language-header">
+                                    <div class="language-icon">
+                                        <i class="fab fa-java"></i>
+                                    </div>
+                                    <h3 class="language-name">Java</h3>
+                                </div>
+                                <p class="language-description">
+                                    A robust, object-oriented language used for enterprise applications and Android development.
+                                </p>
+                                <ul class="language-features">
+                                    <li><i class="fas fa-check"></i> Platform independent</li>
+                                    <li><i class="fas fa-check"></i> Strong typing</li>
+                                    <li><i class="fas fa-check"></i> Enterprise ready</li>
+                                    <li><i class="fas fa-check"></i> Android development</li>
+                                </ul>
+                                <a href="java programming.html" class="start-learning">Start Learning Java</a>
+                            </div>
+
+                            <div class="language-card">
+                                <div class="language-header">
+                                    <div class="language-icon">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <h3 class="language-name">C++</h3>
+                                </div>
+                                <p class="language-description">
+                                    An extension of C with object-oriented features, used for system/software development.
+                                </p>
+                                <ul class="language-features">
+                                    <li><i class="fas fa-check"></i> Object-oriented</li>
+                                    <li><i class="fas fa-check"></i> Game development</li>
+                                    <li><i class="fas fa-check"></i> System programming</li>
+                                    <li><i class="fas fa-check"></i> High performance</li>
+                                </ul>
+                                <a href="c++languagee.html" class="start-learning">Start Learning C++</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="course-grid">
-                    {% for course in courses %}
-                    <div class="course-card">
-                        <div class="course-header">
-                            <h2>{{ course.subject }}</h2>
-                        </div>
-                        <div class="course-stats">
-                            <div class="stat">
-                                <span>Modules: {{ course.modules }}</span>
-                            </div>
-                            <div class="stat">
-                                <span>Hours: {{ course.hours }}</span>
-                            </div>
-                        </div>
-                        <a href="{{ course.pdf_link }}" class="download-btn" target="_blank">
-                            Download PDF
-                        </a>
-                    </div>
-                    {% endfor %}
+                <div class="section-header">
+                    <h1 class="text-3xl font-bold mb-6"></h1>
                 </div>
+
+                <script>
+                    // Toggle sidebar on mobile
+                    const menuToggle = document.getElementById('menuToggle');
+                    const sidebar = document.getElementById('sidebar');
+                    const sidebarToggle = document.getElementById('sidebarToggle');
+            
+                    menuToggle.addEventListener('click', () => {
+                        sidebar.classList.toggle('active');
+                    });
+            
+                    sidebarToggle.addEventListener('click', () => {
+                        sidebar.classList.toggle('collapsed');
+                        // Adjust main content margin when sidebar is collapsed
+                        const mainContent = document.querySelector('.main-content');
+                        if (sidebar.classList.contains('collapsed')) {
+                            mainContent.style.marginLeft = '60px';
+                        } else {
+                            mainContent.style.marginLeft = '250px';
+                        }
+                    });
+            
+                    // Close sidebar when clicking outside on mobile
+                    document.addEventListener('click', (e) => {
+                        if (window.innerWidth <= 768) {
+                            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                                sidebar.classList.remove('active');
+                            }
+                        }
+                    });
+            
+                    // Handle window resize
+                    window.addEventListener('resize', () => {
+                        if (window.innerWidth > 768) {
+                            sidebar.classList.remove('active');
+                        }
+                    });
+                </script>
             </div>
         </main>
     </div>
-
-    <script>
-        // Toggle sidebar on mobile
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            // Adjust main content margin when sidebar is collapsed
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '60px';
-            } else {
-                mainContent.style.marginLeft = '250px';
-            }
-        });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-            }
-        });
-    </script>
 </body>
-</html> 
+</html>
