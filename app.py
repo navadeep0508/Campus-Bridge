@@ -417,7 +417,23 @@ def java():
 
 @app.route('/timetable')
 def timetable():
-    return render_template('timetable.html')
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    try:
+        # Fetch the user's semester
+        response = supabase.table('users').select('semester').eq('id', user_id).execute()
+        user_data = response.data[0] if response.data else None
+
+        if not user_data:
+            return render_template('timetable.html', error='User not found')
+
+        semester = user_data['semester']
+        return render_template('timetable.html', user_semester=semester)
+    except Exception as e:
+        print(f"Error fetching user semester: {e}")
+        return render_template('timetable.html', error='An error occurred')
     
 
 if __name__ == '__main__':
