@@ -833,9 +833,13 @@
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
-                        <i class="fas fa-code-branch"></i>
-                        <span>Coding Tracks</span>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Institution</h3>
+                    <a href="{{ url_for('institution') }}" class="nav-item">
+                        <i class="fas fa-university"></i>
+                        <span>My Institution</span>
                     </a>
                 </div>
 
@@ -857,6 +861,10 @@
 
                 <div class="nav-section">
                     <h3>Coding</h3>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
                     <a href="{{ url_for('myverse') }}" class="nav-item">
                         <i class="fas fa-laptop-code"></i>
                         <span>My Verse</span>
@@ -874,8 +882,16 @@
                 <div class="nav-section">
                     <h3>Community</h3>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        <span>Study Groups</span>
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
                     </a>
                 </div>
             </nav>
@@ -972,6 +988,23 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
 
+        // Function to handle navigation and active states
+        function handleNavigation() {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Get current path
+            const currentPath = window.location.pathname;
+            
+            // Add active class to current nav item
+            const currentNavItem = document.querySelector(`.nav-item[href="${currentPath}"]`);
+            if (currentNavItem) {
+                currentNavItem.classList.add('active');
+            }
+        }
+
         // Function to toggle sidebar
         function toggleSidebar() {
             sidebar.classList.toggle('collapsed');
@@ -1011,7 +1044,7 @@
             }
         });
 
-        // Initialize sidebar state
+        // Initialize sidebar state and navigation
         document.addEventListener('DOMContentLoaded', () => {
             const mainContent = document.querySelector('.main-content');
             if (sidebar.classList.contains('collapsed')) {
@@ -1023,6 +1056,21 @@
                 sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
                 sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
             }
+            
+            // Set initial active state
+            handleNavigation();
+        });
+
+        // Handle navigation clicks
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Remove active class from all nav items
+                document.querySelectorAll('.nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                });
+                // Add active class to clicked item
+                e.currentTarget.classList.add('active');
+            });
         });
     </script>
 </body>

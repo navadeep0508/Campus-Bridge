@@ -341,14 +341,6 @@
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
-                        <i class="fas fa-code-branch"></i>
-                        <span>Coding Tracks</span>
-                    </a>
-                    <a href="{{ url_for('compiler') }}" class="nav-item active">
-                        <i class="fas fa-code"></i>
-                        <span>Coding Practice</span>
-                    </a>
                 </div>
 
                 <div class="nav-section">
@@ -357,7 +349,6 @@
                         <i class="fas fa-university"></i>
                         <span>My Institution</span>
                     </a>
-                    
                 </div>
 
                 <div class="nav-section">
@@ -370,21 +361,41 @@
                         <i class="fas fa-tasks"></i>
                         <span>Assignments</span>
                     </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Academic Schedules</span>
-                    </a>
                     <a href="{{ url_for('timetable') }}" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
+                    <a href="{{ url_for('myverse') }}" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item active">
+                        <i class="fas fa-code"></i>
+                        <span>Coding Practice</span>
                     </a>
                 </div>
                 
                 <div class="nav-section">
                     <h3>Community</h3>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        <span>Study Groups</span>
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
                     </a>
                 </div>
             </nav>
