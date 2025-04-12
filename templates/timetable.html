@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Myinfocam</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --primary-color: #020024;
+            --secondary-color: #090979;
+            --accent-color: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --bg-light: rgba(255, 255, 255, 0.1);
+            --bg-dark: #020024;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--gradient-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(2, 0, 36, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-header h2,
+        .sidebar.collapsed .nav-section h3,
+        .sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item {
+            padding: 0.8rem;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .nav-item i {
+            margin-right: 0;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            right: -12px;
+            top: 20px;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .nav-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-section h3 {
+            color: #A0AEC0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            background: transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            height: var(--header-height);
+            background: rgba(2, 0, 36, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            width: 300px;
+        }
+
+        .search-bar i {
+            color: var(--text-secondary);
+            margin-right: 0.5rem;
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            color: var(--text-primary);
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .top-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 50%;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .user-profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            padding: 2rem;
+        }
+
+        /* Student Profile Styles */
+        .student-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color);
+            position: relative;
+        }
+
+        .profile-photo-edit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary-color);
+        }
+
+        .profile-photo-edit:hover {
+            transform: scale(1.1);
+            background: var(--primary-color);
+            color: var(--accent-color);
+        }
+
+        .profile-photo-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-id {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .detail-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-item i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-top: 0.3rem;
+        }
+
+        .detail-item h3 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-item p {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .detail-item.address {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .detail-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Welcome Section Styles */
+        .welcome-section {
+            margin-bottom: 2rem;
+            background: rgba(2, 0, 36, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 15px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="rgba(0,212,255,0.1)"/></svg>') repeat;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .welcome-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .welcome-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .welcome-btn-primary {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .welcome-btn-secondary {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .welcome-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .welcome-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .welcome-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .welcome-stat-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+        }
+
+        .welcome-stat-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .welcome-stat-info p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .stat-info {
+            text-align: center;
+        }
+
+        .stat-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-info p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Today's Schedule */
+        .schedule-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .view-all {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .view-all:hover {
+            color: var(--text-primary);
+        }
+
+        .schedule-cards {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .schedule-card {
+            flex: 1;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .schedule-time {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-details {
+            text-align: center;
+        }
+
+        .schedule-details h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-details p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .schedule-status {
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .schedule-status.upcoming {
+            background: var(--bg-light);
+            color: var(--text-secondary);
+        }
+
+        .schedule-status.in-progress {
+            background: var(--bg-light);
+            color: var(--primary-color);
+        }
+
+        .schedule-status.later {
+            background: var(--bg-light);
+            color: var(--text-secondary);
+        }
+
+        /* Recent Activity */
+        .activity-section {
+            margin-bottom: 2rem;
+        }
+
+        .activity-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+        }
+
+        .activity-content {
+            text-align: left;
+        }
+
+        .activity-content p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .search-bar {
+                width: 200px;
+            }
+
+            .welcome-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .welcome-actions {
+                flex-direction: column;
+            }
+
+            .welcome-stats {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(2, 0, 36, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(2, 0, 36, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.8);
+        }
+
+        /* Sidebar Notification Badge */
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-item .notification-badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--accent-color);
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Sidebar Section Spacing */
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Sidebar Scroll */
+        .sidebar-nav {
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        /* Additional Styles for Timetable */
+        .semester-selector {
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .semester-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .semester-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--accent-color);
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .semester-btn.active {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .semester-btn:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .timetable-content {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .semester-content {
+            display: none;
+        }
+
+        .semester-content.active {
+            display: block;
+        }
+
+        .semester-header h2 {
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .section-subtitle {
+            color: var(--accent-color);
+            margin: 1.5rem 0;
+            font-size: 1.3rem;
+        }
+
+        .timetable-grid, .exam-grid {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .timetable-grid {
+            grid-template-columns: 1fr 2fr 1fr;
+        }
+
+        .exam-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .timetable-header, .exam-header {
+            display: contents;
+        }
+
+        .timetable-header > div, .exam-header > div {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .timetable-row, .exam-row {
+            display: contents;
+        }
+
+        .timetable-row > div, .exam-row > div {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .lab-day {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lab-day i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .lab-day span:first-of-type {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .timetable-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timetable-header {
+                display: none;
+            }
+
+            .timetable-row {
+                display: flex;
+                flex-direction: column;
+                background: rgba(255, 255, 255, 0.05);
+                padding: 1rem;
+                margin-bottom: 0.5rem;
+                border-radius: 5px;
+            }
+
+            .timetable-row > div {
+                padding: 0.5rem 0;
+                border-bottom: none;
+            }
+
+            .timetable-row > div:first-child {
+                font-weight: 600;
+                color: var(--accent-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="sidebar-header">
+                <h2>Myinfocam</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Main</h3>
+                    <a href="{{ url_for('home_page') }}" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('mycourse') }}" class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>My Courses</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Institution</h3>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-university"></i>
+                        <span>My Institution</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Academic</h3>
+                    <a href="{{ url_for('attendance') }}" class="nav-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a>
+                    <a href="{{ url_for('timetable') }}" class="nav-item active">
+                        <i class="fas fa-clock"></i>
+                        <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
+                    <a href="{{ url_for('myverse') }}" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Online Compiler</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>Coding Assignment</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>Community</h3>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+  
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-content">
+                <!-- Semester Selection -->
+                <div class="semester-selector">
+                    <h2 class="section-title">Select Semester</h2>
+                    <div class="semester-buttons">
+                        <button class="semester-btn active" data-semester="1">1st Semester</button>
+                        <button class="semester-btn" data-semester="2">2nd Semester</button>
+                        <button class="semester-btn" data-semester="3">3rd Semester</button>
+                        <button class="semester-btn" data-semester="4">4th Semester</button>
+                        <button class="semester-btn" data-semester="5">5th Semester</button>
+                        <button class="semester-btn" data-semester="6">6th Semester</button>
+                        <button class="semester-btn" data-semester="7">7th Semester</button>
+                        <button class="semester-btn" data-semester="8">8th Semester</button>
+                    </div>
+                </div>
+
+                <!-- Timetable Content -->
+                <div class="timetable-content">
+                    <!-- 1st Semester -->
+                    <div class="semester-content active" id="semester-1">
+                        <div class="semester-header">
+                            <h2>1st Semester (Aug–Dec 2024)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Daily Timetable (Mon–Fri)</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-header">
+                                    <div>Time</div>
+                                    <div>Subject</div>
+                                    <div>Notes</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>9:00 – 10:00 AM</div>
+                                    <div>Engineering Mathematics–I</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>10:00 – 11:00 AM</div>
+                                    <div>Programming in C</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:00 – 11:15 AM</div>
+                                    <div>Tea Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:15 – 12:15 PM</div>
+                                    <div>Engineering Physics</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>12:15 – 1:15 PM</div>
+                                    <div>English / Communication Skills</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>1:15 – 2:15 PM</div>
+                                    <div>Lunch Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>2:15 – 4:15 PM</div>
+                                    <div>Labs: Physics / C / Workshop</div>
+                                    <div>Rotational labs (alternate days)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lab-schedule">
+                            <h3 class="section-subtitle">Lab Days</h3>
+                            <div class="lab-grid">
+                                <div class="lab-day">
+                                    <i class="fas fa-flask"></i>
+                                    <span>Monday</span>
+                                    <span>Physics Lab</span>
+                                </div>
+                                <div class="lab-day">
+                                    <i class="fas fa-code"></i>
+                                    <span>Tuesday</span>
+                                    <span>Programming in C Lab</span>
+                                </div>
+                                <div class="lab-day">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Thursday</span>
+                                    <span>Workshop Practice</span>
+                                </div>
+                                <div class="lab-day">
+                                    <i class="fas fa-book"></i>
+                                    <span>Friday</span>
+                                    <span>Library / Clubs</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 1st Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term I</div>
+                                    <div>1st week of October 2024</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term II</div>
+                                    <div>1st week of November 2024</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Practical Exams</div>
+                                    <div>19th – 30th November 2024</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Theory Semester Exams</div>
+                                    <div>3rd – 16th December 2024</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Winter Break</div>
+                                    <div>25th – 31st December 2024</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2nd Semester -->
+                    <div class="semester-content" id="semester-2">
+                        <div class="semester-header">
+                            <h2>2nd Semester (Jan–May 2025)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Daily Timetable (Mon–Fri)</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-header">
+                                    <div>Time</div>
+                                    <div>Subject</div>
+                                    <div>Notes</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>9:00 – 10:00 AM</div>
+                                    <div>Engineering Mathematics–II</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>10:00 – 11:00 AM</div>
+                                    <div>Data Structures</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:00 – 11:15 AM</div>
+                                    <div>Tea Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:15 – 12:15 PM</div>
+                                    <div>Java Programming</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>12:15 – 1:15 PM</div>
+                                    <div>Environmental Science</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>1:15 – 2:15 PM</div>
+                                    <div>Lunch Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>2:15 – 4:15 PM</div>
+                                    <div>Labs: Java / DS / EEE</div>
+                                    <div>Rotational labs</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lab-schedule">
+                            <h3 class="section-subtitle">Lab Days</h3>
+                            <div class="lab-grid">
+                                <div class="lab-day">
+                                    <i class="fas fa-code"></i>
+                                    <span>Monday</span>
+                                    <span>Data Structures Lab</span>
+                                </div>
+                                <div class="lab-day">
+                                    <i class="fas fa-java"></i>
+                                    <span>Tuesday</span>
+                                    <span>Java Lab</span>
+                                </div>
+                                <div class="lab-day">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Thursday</span>
+                                    <span>EEE Lab</span>
+                                </div>
+                                <div class="lab-day">
+                                    <i class="fas fa-running"></i>
+                                    <span>Friday</span>
+                                    <span>Club Activities / Sports</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 2nd Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term I</div>
+                                    <div>3rd week of February 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term II</div>
+                                    <div>1st week of April 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Practical Exams</div>
+                                    <div>21st – 30th April 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Theory Semester Exams</div>
+                                    <div>3rd – 17th May 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Summer Vacation</div>
+                                    <div>1st June – 31st July 2025</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3rd Semester -->
+                    <div class="semester-content" id="semester-3">
+                        <div class="semester-header">
+                            <h2>3rd Semester (Aug–Dec 2025)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Daily Timetable (Mon–Fri)</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-header">
+                                    <div>Time</div>
+                                    <div>Subject</div>
+                                    <div>Notes</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>9:00 – 10:00 AM</div>
+                                    <div>Data Structures and Algorithms</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>10:00 – 11:00 AM</div>
+                                    <div>Operating Systems</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:00 – 11:15 AM</div>
+                                    <div>Tea Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:15 – 12:15 PM</div>
+                                    <div>Object-Oriented Programming</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>12:15 – 1:15 PM</div>
+                                    <div>Digital Logic Design</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>1:15 – 2:15 PM</div>
+                                    <div>Lunch Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>2:15 – 4:15 PM</div>
+                                    <div>Lab Sessions / Projects</div>
+                                    <div>Practical</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 3rd Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term I</div>
+                                    <div>1st week of October 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term II</div>
+                                    <div>1st week of November 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Practicals</div>
+                                    <div>18th – 28th November 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Semester Exams</div>
+                                    <div>1st – 16th December 2025</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Winter Break</div>
+                                    <div>25th – 31st December 2025</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4th Semester -->
+                    <div class="semester-content" id="semester-4">
+                        <div class="semester-header">
+                            <h2>4th Semester (Jan–May 2026)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Daily Timetable (Mon–Fri)</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-header">
+                                    <div>Time</div>
+                                    <div>Subject</div>
+                                    <div>Notes</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>9:00 – 10:00 AM</div>
+                                    <div>Algorithms</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>10:00 – 11:00 AM</div>
+                                    <div>DBMS</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:00 – 11:15 AM</div>
+                                    <div>Tea Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:15 – 12:15 PM</div>
+                                    <div>Software Engineering</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>12:15 – 1:15 PM</div>
+                                    <div>Embedded Systems</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>1:15 – 2:15 PM</div>
+                                    <div>Lunch Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>2:15 – 4:15 PM</div>
+                                    <div>Lab / Mini Project</div>
+                                    <div>Practical</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 4th Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term I</div>
+                                    <div>Feb 3rd week 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term II</div>
+                                    <div>Apr 1st week 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Practicals</div>
+                                    <div>Apr 21–30 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Semester Exams</div>
+                                    <div>May 3–17 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Summer Vacation</div>
+                                    <div>June 1 – July 31, 2026</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5th Semester -->
+                    <div class="semester-content" id="semester-5">
+                        <div class="semester-header">
+                            <h2>5th Semester (Aug–Dec 2026)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Daily Timetable (Mon–Fri)</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-header">
+                                    <div>Time</div>
+                                    <div>Subject</div>
+                                    <div>Notes</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>9:00 – 10:00 AM</div>
+                                    <div>AI</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>10:00 – 11:00 AM</div>
+                                    <div>Compiler Design</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:00 – 11:15 AM</div>
+                                    <div>Tea Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:15 – 12:15 PM</div>
+                                    <div>Computer Networks</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>12:15 – 1:15 PM</div>
+                                    <div>Web Technologies</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>1:15 – 2:15 PM</div>
+                                    <div>Lunch Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>2:15 – 4:15 PM</div>
+                                    <div>Labs / Project Work</div>
+                                    <div>Practical</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 5th Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term I</div>
+                                    <div>Oct 1st week 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term II</div>
+                                    <div>Nov 1st week 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Practicals</div>
+                                    <div>Nov 20–30 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Semester Exams</div>
+                                    <div>Dec 2–15 2026</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Winter Break</div>
+                                    <div>Dec 25–31 2026</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6th Semester -->
+                    <div class="semester-content" id="semester-6">
+                        <div class="semester-header">
+                            <h2>6th Semester (Jan–May 2027)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Daily Timetable (Mon–Fri)</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-header">
+                                    <div>Time</div>
+                                    <div>Subject</div>
+                                    <div>Notes</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>9:00 – 10:00 AM</div>
+                                    <div>Machine Learning</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>10:00 – 11:00 AM</div>
+                                    <div>Cloud Computing</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:00 – 11:15 AM</div>
+                                    <div>Tea Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>11:15 – 12:15 PM</div>
+                                    <div>Elective I</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>12:15 – 1:15 PM</div>
+                                    <div>Mobile App Development</div>
+                                    <div>Theory</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>1:15 – 2:15 PM</div>
+                                    <div>Lunch Break</div>
+                                    <div>—</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>2:15 – 4:15 PM</div>
+                                    <div>Labs / Internship Projects</div>
+                                    <div>Practical</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 6th Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term I</div>
+                                    <div>Feb 3rd week 2027</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term II</div>
+                                    <div>Apr 1st week 2027</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Practicals</div>
+                                    <div>Apr 21–30 2027</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Semester Exams</div>
+                                    <div>May 3–17 2027</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7th Semester -->
+                    <div class="semester-content" id="semester-7">
+                        <div class="semester-header">
+                            <h2>7th Semester (Aug–Dec 2027)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Highlights</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-row">
+                                    <div>Most students are off-campus doing internships or industry projects.</div>
+                                </div>
+                                <div class="timetable-row">
+                                    <div>Labs/lectures are hybrid/optional depending on the department.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 7th Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Mid-Term</div>
+                                    <div>Oct 1st week 2027</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Final Assessment</div>
+                                    <div>Nov 2027 (based on internship report)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Semester Exams</div>
+                                    <div>Dec 2027 (if applicable)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8th Semester -->
+                    <div class="semester-content" id="semester-8">
+                        <div class="semester-header">
+                            <h2>8th Semester (Jan–May 2028)</h2>
+                        </div>
+                        
+                        <div class="timetable-section">
+                            <h3 class="section-subtitle">Highlights</h3>
+                            <div class="timetable-grid">
+                                <div class="timetable-row">
+                                    <div>Most of the semester is dedicated to the major project, internships, and research under faculty or in industry.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-schedule">
+                            <h3 class="section-subtitle">Exam Schedule – 8th Semester</h3>
+                            <div class="exam-grid">
+                                <div class="exam-header">
+                                    <div>Event</div>
+                                    <div>Dates (Tentative)</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Project Reviews</div>
+                                    <div>Feb, Mar, Apr 2028</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Final Viva & Report</div>
+                                    <div>May 2028</div>
+                                </div>
+                                <div class="exam-row">
+                                    <div>Convocation</div>
+                                    <div>Post-May 2028</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Semester selection functionality
+        document.querySelectorAll('.semester-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and content
+                document.querySelectorAll('.semester-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.semester-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                const semesterId = button.getAttribute('data-semester');
+                document.getElementById(`semester-${semesterId}`).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
+  

@@ -415,5 +415,10 @@ def c():
 def java():
     return render_template('java programming.html')
 
+@app.route('/timetable')
+def timetable():
+    return render_template('timetable.html')
+    
+
 if __name__ == '__main__':
     app.run(debug=True)
