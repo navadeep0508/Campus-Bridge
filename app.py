@@ -68,7 +68,18 @@ def home_page():
         if not user:
             return render_template('dashboard.html', error='User not found')
 
-        return render_template('dashboard.html', user=user)
+        print(f"User role: {user['role']}")  # Log the user's role
+        if user['role'] == 'faculty':
+            session['user_id'] = user['id']
+            session['role'] = user['role']
+            session['faculty_id'] = user['id']  # Set faculty_id in session
+            print("Redirecting to faculty dashboard")  # Log redirection to faculty dashboard
+            return redirect(url_for('faculty_home'))
+        else:
+            session['user_id'] = user['id']
+            session['role'] = user['role']
+            print("Redirecting to home page")  # Log redirection to home page
+            return redirect(url_for('home_page'))
     except Exception as e:
         print(f"Error fetching user details: {e}")
         traceback.print_exc()
@@ -89,8 +100,11 @@ def login():
                 # Verify password
                 if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
                     session['user_id'] = user['id']
-                     # Store the user's role in the session
-                    return redirect(url_for('home_page'))
+                    session['role'] = user['role']  # Store the user's role in the session
+                    if user['role'] == 'faculty':
+                        return redirect(url_for('faculty_home'))
+                    else:
+                        return redirect(url_for('home_page'))
                 else:
                     return render_template('login.html', error='Invalid credentials')
             else:
@@ -215,7 +229,27 @@ def update_password():
 def change_password():
     return render_template('confirm_password.html')
 
+@app.route('/faculty')
+def faculty_home():
+    faculty_id = session.get('faculty_id')
+    if not faculty_id:
+        return redirect(url_for('login'))
 
+    print(f"Session faculty_id: {faculty_id}")  # Log the session faculty_id
+    try:
+        print("Executing query to fetch faculty details...")  # Log query execution
+        response = supabase.table('users').select('name', 'roll_number', 'branch', 'subject').eq('id', faculty_id).eq('role', 'faculty').execute()
+        faculty = response.data[0] if response.data else None
+        print(f"Query response: {response.data}")  # Log the query response
+        if faculty:
+            return render_template('faculty_dashboard.html', faculty=faculty)
+        else:
+            print("Faculty not found, rendering error")  # Log faculty not found
+            return render_template('faculty_dashboard.html', error='Faculty not found')
+    except Exception as e:
+        print(f"Error fetching faculty details: {e}")
+        traceback.print_exc()
+        return render_template('faculty_dashboard.html', error='An error occurred')
 
 if __name__ == '__main__':
     app.run(debug=True)
