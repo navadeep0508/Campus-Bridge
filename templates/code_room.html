@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Code Room - Campus Bridge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <style>
+        :root {
+            --primary-color: #020024;
+            --secondary-color: #090979;
+            --accent-color: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --bg-light: rgba(255, 255, 255, 0.1);
+            --bg-dark: #020024;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--gradient-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--accent-color);
+        }
+
+        .create-room-btn {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .create-room-btn:hover {
+            opacity: 0.9;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .room-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .room-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .room-language {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .room-participants {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .participant.online::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+        }
+
+        .join-btn {
+            width: 100%;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .join-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-dark);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--accent-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: var(--text-primary);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Code Editor Styles */
+        .code-editor {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 1000;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .editor-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .editor-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .editor-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .CodeMirror {
+            height: calc(100vh - 60px);
+            font-size: 1rem;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff0000;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Live Code Rooms</h1>
+            <button class="create-room-btn" onclick="openCreateRoomModal()">
+                <i class="fas fa-plus"></i>
+                Create Room
+            </button>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="rooms-grid">
+            {% for room in rooms %}
+            <div class="room-card">
+                <div class="room-header">
+                    <h3 class="room-name">{{ room.name }}</h3>
+                    <span class="room-language">{{ room.language }}</span>
+                </div>
+                <div class="room-participants">
+                    {% for participant in room.participants %}
+                    <div class="participant {% if participant.is_online %}online{% endif %}">
+                        {{ participant.user.name }}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="join-btn" onclick="joinRoom('{{ room.id }}')">
+                    Join Room
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div id="createRoomModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Code Room</h2>
+                <button class="close-btn" onclick="closeCreateRoomModal()">&times;</button>
+            </div>
+            <form id="createRoomForm">
+                <div class="form-group">
+                    <label for="roomName">Room Name</label>
+                    <input type="text" id="roomName" required>
+                </div>
+                <div class="form-group">
+                    <label for="language">Programming Language</label>
+                    <select id="language" required>
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                        <option value="c">C</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Create Room</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Code Editor -->
+    <div id="codeEditor" class="code-editor">
+        <div class="editor-header">
+            <div class="editor-title">
+                <h3 id="editorRoomName"></h3>
+                <span id="editorLanguage" class="room-language"></span>
+            </div>
+            <div class="editor-actions">
+                <button class="editor-btn" onclick="leaveRoom()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+        <textarea id="editor"></textarea>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script>
+        let currentRoomId = null;
+        let editor = null;
+
+        // Modal functions
+        function openCreateRoomModal() {
+            document.getElementById('createRoomModal').style.display = 'block';
+        }
+
+        function closeCreateRoomModal() {
+            document.getElementById('createRoomModal').style.display = 'none';
+        }
+
+        // Create room form submission
+        document.getElementById('createRoomForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('roomName').value;
+            const language = document.getElementById('language').value;
+
+            try {
+                const response = await fetch('/create_code_room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, language })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    closeCreateRoomModal();
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to create room');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to create room');
+            }
+        });
+
+        // Join room function
+        async function joinRoom(roomId) {
+            try {
+                const response = await fetch(`/join_code_room/${roomId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to join room');
+                }
+                
+                // Redirect to the code room page
+                window.location.href = `/code_room_page/${roomId}`;
+            } catch (error) {
+                console.error('Error joining room:', error);
+                alert(error.message || 'Failed to join room');
+            }
+        }
+
+        // Leave room function
+        async function leaveRoom() {
+            if (!currentRoomId) return;
+
+            try {
+                const response = await fetch(`/leave_code_room/${currentRoomId}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    currentRoomId = null;
+                    closeCodeEditor();
+                    window.location.reload();
+                } else {
+                    alert('Failed to leave room');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to leave room');
+            }
+        }
+
+        // Code editor functions
+        function openCodeEditor(roomId) {
+            const room = rooms.find(r => r.id === roomId);
+            if (!room) return;
+
+            document.getElementById('editorRoomName').textContent = room.name;
+            document.getElementById('editorLanguage').textContent = room.language;
+            document.getElementById('codeEditor').style.display = 'block';
+
+            // Initialize CodeMirror
+            editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+                mode: getModeForLanguage(room.language),
+                theme: 'monokai',
+                lineNumbers: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                lineWrapping: true
+            });
+
+            // Set initial code
+            editor.setValue(room.code || '');
+
+            // Add change event listener
+            editor.on('change', debounce(updateCode, 1000));
+        }
+
+        function closeCodeEditor() {
+            document.getElementById('codeEditor').style.display = 'none';
+            if (editor) {
+                editor.toTextArea();
+                editor = null;
+            }
+        }
+
+        // Update code function
+        async function updateCode() {
+            if (!currentRoomId || !editor) return;
+
+            try {
+                const response = await fetch(`/update_code/${currentRoomId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: editor.getValue() })
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to update code');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Utility functions
+        function getModeForLanguage(language) {
+            switch (language.toLowerCase()) {
+                case 'python':
+                    return 'python';
+                case 'javascript':
+                    return 'javascript';
+                case 'java':
+                case 'cpp':
+                case 'c':
+                    return 'text/x-c++src';
+                default:
+                    return 'text/plain';
+            }
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('createRoomModal');
+            if (event.target === modal) {
+                closeCreateRoomModal();
+            }
+        }
+    </script>
+</body>
+</html> 
