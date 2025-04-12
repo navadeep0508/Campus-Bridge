@@ -316,6 +316,9 @@ def faculty_home():
 
 @app.route('/faculty/attendance')
 def faculty_attendance():
+    faculty_id = session.get('faculty_id')
+    if not faculty_id:
+        return redirect(url_for('login'))
     return render_template('faculty_attendance.html')
 
 @app.route('/attendance')
@@ -685,6 +688,194 @@ def submit_assessment():
     except Exception as e:
         print("Unexpected error:", e)
         return jsonify({'error': 'An unexpected error occurred'}), 500
+
+@app.route('/get_sections')
+def get_sections():
+    try:
+        faculty_id = session.get('faculty_id')
+        if not faculty_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        # Fetch sections that the faculty is assigned to
+        response = supabase.table('faculty_sections')\
+            .select('section')\
+            .eq('faculty_id', faculty_id)\
+            .execute()
+        
+        # Get unique sections
+        sections = list(set(record['section'] for record in response.data))
+        return jsonify(sections)
+    except Exception as e:
+        print(f"Error fetching sections: {e}")
+        return jsonify({'error': 'Failed to fetch sections'}), 500
+
+@app.route('/get_students')
+def get_students():
+    try:
+        faculty_id = session.get('faculty_id')
+        if not faculty_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        section = request.args.get('section')
+        if not section:
+            return jsonify({'error': 'Section is required'}), 400
+
+        print(f"Fetching students for section: {section}")  # Debug log
+
+        # First, let's check if there are any students in the users table
+        check_users = supabase.table('users')\
+            .select('count')\
+            .eq('role', 'student')\
+            .execute()
+        print(f"Total students in users table: {check_users.data}")  # Debug log
+
+        # Fetch students in the selected section
+        response = supabase.table('users')\
+            .select('id, name, roll_number, section')\
+            .eq('role', 'student')\
+            .eq('section', section)\
+            .execute()
+
+        print(f"Raw response from database: {response.data}")  # Debug log
+
+        if not response.data:
+            print(f"No students found for section {section}")  # Debug log
+            return jsonify([])
+
+        students = []
+        for student in response.data:
+            print(f"Processing student: {student}")  # Debug log
+            
+            # Get attendance for each student
+            attendance_response = supabase.table('attendance')\
+                .select('total_classes, attended_classes')\
+                .eq('student_id', student['id'])\
+                .eq('section', section)\
+                .execute()
+            
+            attendance = attendance_response.data[0] if attendance_response.data else None
+            attendance_str = f"{attendance['attended_classes']}/{attendance['total_classes']}" if attendance else '0/0'
+
+            students.append({
+                'id': student['id'],
+                'name': student['name'],
+                'roll_number': student['roll_number'],
+                'attendance': attendance_str
+            })
+
+        print(f"Final students list: {students}")  # Debug log
+        return jsonify(students)
+    except Exception as e:
+        print(f"Error fetching students: {e}")
+        traceback.print_exc()
+        return jsonify({'error': 'Failed to fetch students'}), 500
+
+@app.route('/mark_attendance', methods=['POST'])
+def mark_attendance():
+    try:
+        data = request.json
+        print("Received data:", data)
+        
+        section = data.get('section')
+        date = data.get('date')
+        attendance_data = data.get('attendance', [])
+
+        if not all([section, date, attendance_data]):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        results = []
+        for student_attendance in attendance_data:
+            student_id = student_attendance.get('student_id')
+            status = student_attendance.get('status')
+
+            if not all([student_id, status]):
+                continue
+
+            try:
+                # Check if attendance record exists
+                response = supabase.table('attendance')\
+                    .select('*')\
+                    .eq('student_id', student_id)\
+                    .eq('section', section)\
+                    .execute()
+                
+                attendance_record = response.data[0] if response.data else None
+
+                if attendance_record:
+                    # Update existing record
+                    total_classes = attendance_record['total_classes'] + 1
+                    attended_classes = attendance_record['attended_classes'] + (1 if status == 'present' else 0)
+                    
+                    update_data = {
+                        'total_classes': total_classes,
+                        'attended_classes': attended_classes,
+                        'status': status,
+                        'date': date
+                    }
+                    
+                    # Update the record
+                    supabase.table('attendance')\
+                        .update(update_data)\
+                        .eq('student_id', student_id)\
+                        .eq('section', section)\
+                        .execute()
+                    
+                    results.append({
+                        'student_id': student_id,
+                        'attendance': f"{attended_classes}/{total_classes}"
+                    })
+                else:
+                    # Create new record if none exists
+                    new_attendance = {
+                        'student_id': student_id,
+                        'section': section,
+                        'date': date,
+                        'status': status,
+                        'total_classes': 1,
+                        'attended_classes': 1 if status == 'present' else 0
+                    }
+                    
+                    supabase.table('attendance').insert(new_attendance).execute()
+                    
+                    results.append({
+                        'student_id': student_id,
+                        'attendance': f"{1 if status == 'present' else 0}/1"
+                    })
+
+            except Exception as e:
+                print(f"Error processing attendance for student {student_id}: {e}")
+                continue
+
+        if not results:
+            return jsonify({'error': 'No attendance records were processed'}), 400
+
+        return jsonify({
+            'message': 'Attendance marked successfully',
+            'results': results
+        })
+
+    except Exception as e:
+        print(f"Error in mark_attendance route: {e}")
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to mark attendance: {str(e)}'}), 500
+
+@app.route('/get_courses')
+def get_courses():
+    try:
+        faculty_id = session.get('faculty_id')
+        if not faculty_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        # Fetch courses for the current faculty
+        response = supabase.table('courses')\
+            .select('*')\
+            .eq('faculty_id', faculty_id)\
+            .execute()
+        
+        return jsonify(response.data)
+    except Exception as e:
+        print(f"Error fetching courses: {e}")
+        return jsonify({'error': 'Failed to fetch courses'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
