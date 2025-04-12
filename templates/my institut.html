@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Campus Bridge</title>
+    <title>Dashboard - Myinfocam</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -795,141 +795,147 @@
             }
         }
 
-        /* Attendance Progress Styles */
-        .attendance-section {
+        /* Institution Information Styles */
+        .institution-content {
             background: rgba(2, 0, 36, 0.5);
             backdrop-filter: blur(10px);
-            padding: 2.5rem;
             border-radius: 15px;
+            padding: 2rem;
             margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            text-align: left;
         }
 
-        .attendance-header {
-            margin-bottom: 2rem;
+        .institution-section {
+            margin-bottom: 2.5rem;
+            text-align: left;
         }
 
-        .attendance-header h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: var(--accent-color);
-            margin-bottom: 1rem;
+        .institution-section:last-child {
+            margin-bottom: 0;
         }
 
-        .attendance-header p {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            opacity: 0.9;
-        }
-
-        .subject-attendance {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .subject-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
+        .section-header {
             display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 1rem;
+            margin-bottom: 1.5rem;
+            justify-content: flex-start;
         }
 
-        .subject-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .subject-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 0.5rem;
-        }
-
-        .subject-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .attendance-percentage {
-            font-size: 1.2rem;
-            font-weight: 600;
+        .section-header i {
+            font-size: 1.5rem;
             color: var(--accent-color);
         }
 
-        .progress-bar {
-            width: 40px;
-            height: 160px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00d4ff, #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: left;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
             position: relative;
-            overflow: hidden;
+            padding-bottom: 0.5rem;
         }
 
-        .progress-fill {
+        .section-header h2::after {
+            content: '';
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 100%;
-            background: var(--accent-color);
-            border-radius: 20px;
-            transition: height 0.3s ease;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, transparent);
+            border-radius: 2px;
         }
 
-        .attendance-details {
+        .institution-info {
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .institution-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+
+        .institution-list li {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .overall-attendance {
-            background: rgba(0, 212, 255, 0.1);
-            padding: 2rem;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 2rem;
-        }
-
-        .overall-title {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
+            gap: 0.8rem;
             margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-align: left;
         }
 
-        .overall-percentage {
-            font-size: 3rem;
+        .institution-list li:hover {
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .institution-list i {
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .institution-list li span {
+            text-align: left;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .institution-info p {
+            color: var(--text-primary);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .stat-card {
+            background: rgba(0, 212, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .stat-card h3 {
+            font-size: 1.2rem;
             font-weight: 700;
-            color: var(--accent-color);
             margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00d4ff, #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
         }
 
-        .overall-status {
-            font-size: 1rem;
-            color: var(--text-secondary);
+        .stat-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            color: var(--text-primary);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
         }
 
         @media (max-width: 768px) {
-            .attendance-section {
-                padding: 2rem 1.5rem;
-            }
-
-            .attendance-header h1 {
-                font-size: 2rem;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -949,10 +955,15 @@
                 <h2>Myinfocam</h2>
             </div>
             
+            <div class="college-info-section">
+                <div class="college-name">College of Engineering</div>
+                <div class="department-name">Department of Computer Science</div>
+            </div>
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="{{ url_for('home_page') }}" class="nav-item">
+                    <a href="{{ url_for('home_page') }}" class="nav-item active">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
@@ -960,15 +971,19 @@
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
-                        <i class="fas fa-code-branch"></i>
-                        <span>Coding Tracks</span>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Institution</h3>
+                    <a href="{{ url_for('institution') }}" class="nav-item">
+                        <i class="fas fa-university"></i>
+                        <span>My Institution</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
                     <h3>Academic</h3>
-                    <a href="student attendance.html" class="nav-item active">
+                    <a href="{{ url_for('attendance') }}" class="nav-item">
                         <i class="fas fa-user-check"></i>
                         <span>Attendance</span>
                     </a>
@@ -984,6 +999,10 @@
 
                 <div class="nav-section">
                     <h3>Coding</h3>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
                     <a href="{{ url_for('myverse') }}" class="nav-item">
                         <i class="fas fa-laptop-code"></i>
                         <span>My Verse</span>
@@ -1001,8 +1020,16 @@
                 <div class="nav-section">
                     <h3>Community</h3>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-users"></i>
-                        <span>Study Groups</span>
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
                     </a>
                 </div>
             </nav>
@@ -1011,76 +1038,223 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="dashboard-content">
-                <section class="attendance-section">
-                    <div class="attendance-header">
-                        <h1>Student Attendance</h1>
-                        <p>Current Semester Attendance Overview</p>
-                    </div>
-
-                    <div class="subject-attendance">
-                        <div class="subject-card">
-                            <div class="subject-header">
-                                <span class="subject-name">Data Structures and Algorithms</span>
-                                <span class="attendance-percentage">85%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="height: 85%"></div>
-                            </div>
-                            <div class="attendance-details">
-                                <span>Present: 34/40</span>
-                                <span>Required: 75%</span>
-                            </div>
+                <div class="institution-content">
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-university"></i>
+                            <h2>About Mohan Babu University</h2>
                         </div>
-
-                        <div class="subject-card">
-                            <div class="subject-header">
-                                <span class="subject-name">Database Management Systems</span>
-                                <span class="attendance-percentage">92%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="height: 92%"></div>
-                            </div>
-                            <div class="attendance-details">
-                                <span>Present: 37/40</span>
-                                <span>Required: 75%</span>
-                            </div>
-                        </div>
-
-                        <div class="subject-card">
-                            <div class="subject-header">
-                                <span class="subject-name">Operating Systems</span>
-                                <span class="attendance-percentage">78%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="height: 78%"></div>
-                            </div>
-                            <div class="attendance-details">
-                                <span>Present: 31/40</span>
-                                <span>Required: 75%</span>
-                            </div>
-                        </div>
-
-                        <div class="subject-card">
-                            <div class="subject-header">
-                                <span class="subject-name">Computer Networks</span>
-                                <span class="attendance-percentage">88%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="height: 88%"></div>
-                            </div>
-                            <div class="attendance-details">
-                                <span>Present: 35/40</span>
-                                <span>Required: 75%</span>
-                            </div>
+                        <div class="institution-info">
+                            <p>Mohan Babu University (MBU), formerly known as Sree Vidyanikethan Educational Institutions, is a private university located in Tirupati, Andhra Pradesh. Established in 1992, it was restructured into a university in January 2022.</p>
                         </div>
                     </div>
 
-                    <div class="overall-attendance">
-                        <div class="overall-title">Current Semester Overall Attendance</div>
-                        <div class="overall-percentage">85.75%</div>
-                        <div class="overall-status">Good Standing</div>
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-history"></i>
+                            <h2>History and Establishment</h2>
+                        </div>
+                        <div class="institution-info">
+                            <p>Mohan Babu University originated from the Sree Vidyanikethan Educational Trust (SVET), founded by Dr. M. Mohan Babu in 1992. The institution evolved from Sree Vidyanikethan Engineering College, which was established in 1996, and expanded to include various schools offering diverse programs. In January 2022, the Andhra Pradesh State Legislative Assembly recognized the institution as a private university, renaming it Mohan Babu University.</p>
+                        </div>
                     </div>
-                </section>
+
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-award"></i>
+                            <h2>Accreditations and Rankings</h2>
+                        </div>
+                        <ul class="institution-list">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>NAAC A+ Accreditation: Recognized for academic excellence</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>NBA Accreditation: Ensures quality in engineering programs</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>AICTE-CII Platinum Category: Highlights industry collaboration and infrastructure</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>NIRF Rankings: Placed in the 201-300 band for engineering and the 51-100 band for innovation</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>QS-IGauge Diamond Band: Reflects high educational standards</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>SII Green Rankings 2023: Ranked among the top 20 universities in India</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h2>Academic Programs</h2>
+                        </div>
+                        <ul class="institution-list">
+                            <li>
+                                <i class="fas fa-laptop-code"></i>
+                                <span>School of Engineering and Technology: B.Tech, M.Tech, and research programs</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-desktop"></i>
+                                <span>School of Computing: Computer science and applications</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-chart-line"></i>
+                                <span>School of Commerce and Management: Business and management studies</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-flask"></i>
+                                <span>School of Pharmaceutical Sciences: Pharmacy and related fields</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-heartbeat"></i>
+                                <span>School of Paramedical and Health Sciences: Allied health sciences</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-leaf"></i>
+                                <span>School of Agriculture: Agricultural sciences</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-film"></i>
+                                <span>School of Media Studies: Media and communication</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-paint-brush"></i>
+                                <span>School of Art and Design: Design and visual arts</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-video"></i>
+                                <span>School of Film Academy: Film studies and production</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-building"></i>
+                            <h2>Campus and Facilities</h2>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <i class="fas fa-book"></i>
+                                <h3>Central Library</h3>
+                                <p>142,000+ volumes, 21,500 titles, and 8,100 journals</p>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-home"></i>
+                                <h3>Hostels</h3>
+                                <p>5-star rated accommodations with CCTV surveillance</p>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-flask"></i>
+                                <h3>Laboratories</h3>
+                                <p>State-of-the-art labs for various disciplines</p>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-users"></i>
+                                <h3>Student Clubs</h3>
+                                <p>65+ student clubs and organizations</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <h2>Research and Innovation</h2>
+                        </div>
+                        <ul class="institution-list">
+                            <li>
+                                <i class="fas fa-microscope"></i>
+                                <span>30+ specialized research labs and centers</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-cogs"></i>
+                                <span>V-Hub Innovation Centre and AICTE-IDEA Lab</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-file-alt"></i>
+                                <span>1,200+ papers indexed in Scopus/WoS</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-certificate"></i>
+                                <span>175+ patents held by faculty</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-globe-americas"></i>
+                            <h2>Global Collaborations</h2>
+                        </div>
+                        <ul class="institution-list">
+                            <li>
+                                <i class="fas fa-university"></i>
+                                <span>University of Wisconsin (USA)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-university"></i>
+                                <span>RWTH Aachen (Germany)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-university"></i>
+                                <span>Penn State University (USA)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-university"></i>
+                                <span>Wayne State University (USA)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-university"></i>
+                                <span>Virginia Commonwealth University (USA)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-university"></i>
+                                <span>University of Pitesti (Romania)</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-university"></i>
+                                <span>Asia University (Taiwan)</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="institution-section">
+                        <div class="section-header">
+                            <i class="fas fa-briefcase"></i>
+                            <h2>Placements and Career Development</h2>
+                        </div>
+                        <div class="institution-info">
+                            <p>MBU boasts a strong placement record, with the Career Development Centre engaging over 110 companies. In the 2022-23 academic year, students received offers from top recruiters:</p>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <i class="fab fa-google"></i>
+                                <h3>Google</h3>
+                                <p>Offers up to INR 60 LPA</p>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fab fa-amazon"></i>
+                                <h3>Amazon</h3>
+                                <p>Offers up to INR 44 LPA</p>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-database"></i>
+                                <h3>Yugabyte</h3>
+                                <p>Offers up to INR 29 LPA</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
