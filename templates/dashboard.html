@@ -274,6 +274,8 @@
             object-fit: cover;
             border: 3px solid var(--accent-color);
             position: relative;
+            overflow: hidden;
+            background-color: var(--bg-light);
         }
 
         .profile-photo-edit {
@@ -301,7 +303,13 @@
 
         .profile-photo-container {
             position: relative;
-            display: inline-block;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .profile-info h1 {
@@ -811,7 +819,7 @@
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
-                <h2>Myinfocam</h2>
+                <h2>Campus Bridge</h2>
             </div>
 
             <nav class="sidebar-nav">
@@ -885,14 +893,7 @@
                 <div class="top-nav-actions">
                     <button class="notification-btn">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
                     </button>
-                    
-                    <div class="user-profile">
-                        <img src="assets/avatar.jpg" alt="User Avatar">
-                        <span>John Doe</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
                 </div>
             </header>
 
@@ -904,7 +905,7 @@
                         <div class="student-profile">
                             <div class="profile-header">
                                 <div class="profile-photo-container">
-                                    <img src="assets/default-avatar.jpg" alt="Student Photo" class="profile-photo">
+                                    <img src="{{ url_for('static', filename='images/student profile campus bridge.jpg') }}" alt="Student Photo" class="profile-photo">
                                 </div>
                                 <div class="profile-info">
                                     <h1>{{ user.name }}</h1>
