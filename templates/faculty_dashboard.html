@@ -826,6 +826,10 @@
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Manage Courses</span>
                     </a>
+                    <a href="{{ url_for('faculty_assignments') }}" class="nav-item" onclick="navigateToAssignments(event)">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a>
                 </div>
 
                 <div class="nav-section">
@@ -943,6 +947,12 @@
                 sidebar.classList.remove('active');
             }
         });
+
+        // Function to handle navigation to assignments page
+        function navigateToAssignments(event) {
+            event.preventDefault();
+            window.location.href = "{{ url_for('faculty_assignments') }}";
+        }
     </script>
 </body>
 </html> 
