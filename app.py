@@ -415,11 +415,21 @@ def c():
 def java():
     return render_template('java programming.html')
 
+@app.route('/assignment')
+def assignment():
+    return render_template('assignment.html')
+
+@app.route('/institution')
+def institution():
+    return render_template('my institut.html')
+
 @app.route('/timetable')
 def timetable():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
+
+     
 
     try:
         # Fetch the user's semester
@@ -434,7 +444,9 @@ def timetable():
     except Exception as e:
         print(f"Error fetching user semester: {e}")
         return render_template('timetable.html', error='An error occurred')
+@app.route('/faculty/coding_assessment')
+def faculty_coding_assessment():
+    return render_template('faculty_coding_assesment.html')
     
-
 if __name__ == '__main__':
     app.run(debug=True)
