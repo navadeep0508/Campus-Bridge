@@ -400,34 +400,173 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="container mx-auto p-4">
+                {% if problem %}
+                <!-- Problem Description -->
+                <div class="card p-4 rounded shadow mb-4">
+                    <h2 class="text-2xl font-bold mb-2">{{ problem.title }}</h2>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="problem-difficulty difficulty-{{ problem.difficulty }}">{{ problem.difficulty|title }}</span>
+                        <span class="text-accent-color">{{ problem.points }} points</span>
+                    </div>
+                    <p class="text-text-secondary mb-4">{{ problem.description }}</p>
+                    <div class="bg-bg-light p-4 rounded">
+                        <h3 class="font-bold mb-2">Sample Test Cases:</h3>
+                        <div class="space-y-2">
+                            {% for test_case in problem.test_cases[:2] %}
+                            <div class="bg-card-bg p-3 rounded">
+                                <div class="mb-1"><span class="text-accent-color">Input:</span> {{ test_case.input }}</div>
+                                <div><span class="text-accent-color">Expected Output:</span> {{ test_case.output }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Code Editor and Controls -->
                 <div class="card p-4 rounded shadow">
-                <div class="mb-4">
+                    <div class="mb-4">
                         <label for="language" class="block text-sm font-medium text-text-secondary">Select Language:</label>
-                        <select id="language" class="mt-1 block w-full rounded p-2">
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="java">Java</option>
-                        <option value="c">C</option>
-                        <option value="cpp">C++</option>
-                    </select>
-                </div>
-                    <div id="editor" class="h-96 rounded mb-4"></div>
-                <div class="mb-4">
-                        <label for="custom-input" class="block text-sm font-medium text-text-secondary">Custom Input:</label>
-                        <textarea id="custom-input" class="mt-1 block w-full rounded p-2" rows="4"></textarea>
+                        <select id="language" class="mt-1 block w-full rounded p-2 bg-card-bg text-text-primary border border-bg-light">
+                            <option value="71">Python</option>
+                            <option value="63">JavaScript</option>
+                            <option value="62">Java</option>
+                            <option value="50">C</option>
+                            <option value="54">C++</option>
+                        </select>
                     </div>
-                    <button id="submit" class="submit-btn font-bold py-2 px-4 rounded w-full">Submit</button>
-                    <div id="output" class="mt-4 output-container p-4 rounded h-32 overflow-y-auto"></div>
+                    <div id="editor" class="h-96 rounded mb-4"></div>
+                    {% if not problem %}
+                    <div class="mb-4">
+                        <label for="custom-input" class="block text-sm font-medium text-text-secondary">Custom Input:</label>
+                        <textarea id="custom-input" class="mt-1 block w-full rounded p-2 bg-card-bg text-text-primary border border-bg-light" rows="4"></textarea>
+                    </div>
+                    {% endif %}
+                    <button id="submit" class="submit-btn font-bold py-2 px-4 rounded w-full">
+                        {{ 'Submit Solution' if problem else 'Run Code' }}
+                    </button>
+                    <div id="output" class="mt-4 output-container p-4 rounded h-32 overflow-y-auto bg-card-bg border border-bg-light"></div>
                 </div>
+
+                {% if problem %}
+                <!-- Test Results Section (Initially Hidden) -->
+                <div id="test-results" class="card p-4 rounded shadow mt-4" style="display: none;">
+                    <h3 class="text-xl font-bold mb-4">Test Results</h3>
+                    <div id="test-cases-results" class="space-y-4"></div>
+                    <div id="final-result" class="mt-4 p-4 rounded text-center"></div>
+                </div>
+                {% endif %}
             </div>
         </main>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
-    <script src="/static/js/editor.js"></script>
     <script>
-        // Toggle sidebar on mobile
+        // Monaco Editor Setup
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            window.editor = monaco.editor.create(document.getElementById('editor'), {
+                value: '# Write your code here\n',
+                language: 'python',
+                theme: 'vs-dark',
+                minimap: { enabled: false }
+            });
+
+            // Handle language change
+            document.getElementById('language').addEventListener('change', function(e) {
+                const languageMap = {
+                    '71': 'python',
+                    '63': 'javascript',
+                    '62': 'java',
+                    '50': 'c',
+                    '54': 'cpp'
+                };
+                monaco.editor.setModelLanguage(editor.getModel(), languageMap[e.target.value]);
+            });
+        });
+
+        // Submit button click handler
+        document.getElementById('submit').addEventListener('click', async function() {
+            const code = window.editor.getValue();
+            const languageId = document.getElementById('language').value;
+            const outputDiv = document.getElementById('output');
+            const testResultsDiv = document.getElementById('test-results');
+            const testCasesResultsDiv = document.getElementById('test-cases-results');
+            const finalResultDiv = document.getElementById('final-result');
+
+            outputDiv.innerHTML = 'Processing...';
+            
+            {% if problem %}
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        language_id: parseInt(languageId),
+                        problem_id: {{ problem.id }}
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    outputDiv.innerHTML = `Error: ${data.error}`;
+                    return;
+                }
+
+                // Display test results
+                testResultsDiv.style.display = 'block';
+                testCasesResultsDiv.innerHTML = data.results.map((result, index) => `
+                    <div class="bg-card-bg p-4 rounded">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold">Test Case ${index + 1}</h4>
+                            <span class="${result.passed ? 'text-green-500' : 'text-red-500'}">
+                                ${result.passed ? '✓ Passed' : '✗ Failed'}
+                            </span>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div><span class="text-accent-color">Input:</span> ${result.input}</div>
+                            <div><span class="text-accent-color">Expected:</span> ${result.expected}</div>
+                            <div><span class="text-accent-color">Output:</span> ${result.actual || 'No output'}</div>
+                            ${result.error ? `<div class="text-red-500">Error: ${result.error}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                finalResultDiv.innerHTML = data.all_passed
+                    ? `<div class="text-green-500 font-bold">All tests passed! You earned ${data.points_earned} points.</div>`
+                    : '<div class="text-red-500 font-bold">Some tests failed. Try again!</div>';
+
+                outputDiv.innerHTML = 'Submission processed. Check the test results below.';
+            } catch (error) {
+                outputDiv.innerHTML = `Error: ${error.message}`;
+            }
+            {% else %}
+            try {
+                const response = await fetch('/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        language_id: parseInt(languageId),
+                        input: document.getElementById('custom-input').value
+                    })
+                });
+
+                const data = await response.json();
+                outputDiv.innerHTML = data.output || data.error || 'No output';
+            } catch (error) {
+                outputDiv.innerHTML = `Error: ${error.message}`;
+            }
+            {% endif %}
+        });
+
+        // Sidebar toggle functionality
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -464,4 +603,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
