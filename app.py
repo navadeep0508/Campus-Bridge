@@ -584,5 +584,107 @@ def student_coding_assesment():
                                 'time_spent': 0
                             })
     
+@app.route('/submit_assessment', methods=['POST'])
+def submit_assessment():
+    data = request.json
+    assessment_id = data.get('assessment_id')
+    code = data.get('code')
+    language = data.get('language')
+
+    if not all([assessment_id, code, language]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    try:
+        # Fetch assessment and its test cases
+        assessment_response = supabase.table('coding_assessments').select('*').eq('id', assessment_id).execute()
+        assessment = assessment_response.data[0] if assessment_response.data else None
+
+        if not assessment:
+            return jsonify({'error': 'Assessment not found'}), 404
+
+        test_cases_response = supabase.table('assessment_test_cases').select('*').eq('assessment_id', assessment_id).execute()
+        test_cases = test_cases_response.data if test_cases_response.data else []
+
+        if not test_cases:
+            return jsonify({'error': 'No test cases found for this assessment'}), 404
+
+        results = []
+        all_passed = True
+
+        for test_case in test_cases:
+            # Prepare the payload for Judge0 API
+            payload = {
+                'source_code': code,
+                'language_id': language_map.get(language.lower()),
+                'stdin': test_case['input_data'],
+                'expected_output': test_case['expected_output'],
+                'base64_encoded': False
+            }
+
+            # Send the request to Judge0 API
+            response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload)
+            response.raise_for_status()
+            token = response.json().get('token')
+
+            if not token:
+                return jsonify({'error': 'Failed to get submission token'}), 500
+
+            # Poll for the result
+            result_url = f"{JUDGE0_API_URL}/{token}"
+            max_attempts = 10
+            attempts = 0
+
+            while attempts < max_attempts:
+                result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS)
+                result_response.raise_for_status()
+                result = result_response.json()
+
+                status_id = result.get('status', {}).get('id')
+                if status_id in [1, 2]:  # In Queue or Processing
+                    time.sleep(1)
+                    attempts += 1
+                else:
+                    break
+
+            if attempts >= max_attempts:
+                return jsonify({'error': 'Execution timed out'}), 504
+
+            # Check if the test case passed
+            passed = result.get('stdout', '').strip() == test_case['expected_output'].strip()
+            all_passed = all_passed and passed
+
+            results.append({
+                'input': test_case['input_data'],
+                'expected': test_case['expected_output'],
+                'actual': result.get('stdout', '').strip(),
+                'status': result.get('status', {}).get('description', 'Unknown'),
+                'passed': passed
+            })
+
+        # If all test cases passed, update the user's points
+        if all_passed:
+            try:
+                user_id = session.get('user_id')
+                if user_id:
+                    response = supabase.table('users').select('points').eq('id', user_id).execute()
+                    current_points = response.data[0].get('points', 0) if response.data else 0
+                    new_points = current_points + assessment['points']
+                    supabase.table('users').update({'points': new_points}).eq('id', user_id).execute()
+            except Exception as e:
+                print(f"Error updating points: {e}")
+
+        return jsonify({
+            'results': results,
+            'all_passed': all_passed,
+            'points_earned': assessment['points'] if all_passed else 0
+        })
+
+    except requests.exceptions.RequestException as e:
+        print("Error during API request:", e)
+        return jsonify({'error': 'Failed to execute code. Please try again.'}), 500
+    except Exception as e:
+        print("Unexpected error:", e)
+        return jsonify({'error': 'An unexpected error occurred'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
