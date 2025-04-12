@@ -314,12 +314,16 @@ def faculty_home():
         traceback.print_exc()
         return render_template('faculty_dashboard.html', error='An error occurred')
 
+<<<<<<< HEAD
 @app.route('/faculty/attendance')
 def faculty_attendance():
     faculty_id = session.get('faculty_id')
     if not faculty_id:
         return redirect(url_for('login'))
     return render_template('faculty_attendance.html')
+=======
+
+>>>>>>> 8ac01bfe86abdcc79d9d05492183eb66db3ac05a
 
 @app.route('/attendance')
 def attendance():
