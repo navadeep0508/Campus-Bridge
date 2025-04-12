@@ -16,8 +16,9 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 JUDGE0_API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
 JUDGE0_API_HEADERS = {
     'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
-    'x-rapidapi-key': '4be4a0b098msha12e9d5e92eda12p12960ejsn03f80d153530',  # Replace with your actual RapidAPI key
-    'content-type': 'application/json'
+    'x-rapidapi-key': '2d4a7d825cmsh702550f2a4c30e2p138e11jsn467d292624aa',
+    'content-type': 'application/json',
+    'accept': 'application/json'
 }
 
 # Simple rate limiting
@@ -176,6 +177,9 @@ def run_code():
     language = data.get('language')
     input_data = data.get('input')
 
+    if not code or not language:
+        return jsonify({'error': 'Missing required fields: code and language'}), 400
+
     # Map language to Judge0 language_id
     language_map = {
         'python': 71,
@@ -184,7 +188,7 @@ def run_code():
         'c': 50,
         'cpp': 54
     }
-    language_id = language_map.get(language)
+    language_id = language_map.get(language.lower())
 
     if not language_id:
         return jsonify({'error': 'Unsupported language'}), 400
@@ -193,36 +197,53 @@ def run_code():
     payload = {
         'source_code': code,
         'language_id': language_id,
-        'stdin': input_data
+        'stdin': input_data or '',
+        'base64_encoded': False
     }
 
     try:
         # Send the request to Judge0 API
         response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload)
-        response.raise_for_status()  # Raise an error for bad responses
+        response.raise_for_status()
         token = response.json().get('token')
-        print("Judge0 API Token:", token)  # Log the token
+        
+        if not token:
+            return jsonify({'error': 'Failed to get submission token'}), 500
 
         # Poll for the result
         result_url = f"{JUDGE0_API_URL}/{token}"
-        while True:
+        max_attempts = 10
+        attempts = 0
+        
+        while attempts < max_attempts:
             result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS)
             result_response.raise_for_status()
             result = result_response.json()
-            if result.get('status', {}).get('id') in [1, 2]:  # In Queue or Processing
-                time.sleep(1)  # Wait before polling again
+            
+            status_id = result.get('status', {}).get('id')
+            if status_id in [1, 2]:  # In Queue or Processing
+                time.sleep(1)
+                attempts += 1
             else:
                 break
 
+        if attempts >= max_attempts:
+            return jsonify({'error': 'Execution timed out'}), 504
+
         # Return the result
         return jsonify({
-            'stdout': result.get('stdout'),
-            'stderr': result.get('stderr'),
-            'status': result.get('status', {}).get('description')
+            'stdout': result.get('stdout', ''),
+            'stderr': result.get('stderr', ''),
+            'status': result.get('status', {}).get('description', 'Unknown'),
+            'time': result.get('time', ''),
+            'memory': result.get('memory', '')
         })
     except requests.exceptions.RequestException as e:
         print("Error during API request:", e)
-        return jsonify({'error': 'Failed to execute code'}), 500
+        return jsonify({'error': 'Failed to execute code. Please try again.'}), 500
+    except Exception as e:
+        print("Unexpected error:", e)
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @app.route('/test-supabase')
 def test_supabase():
