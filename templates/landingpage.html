@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classverse - Your Academic & Coding Companion</title>
+    <title>Campus Bridge - Your Academic Excellence Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -457,7 +457,7 @@
     <nav class="navbar">
         <a href="#" class="navbar-brand">
             <i class="fas fa-graduation-cap"></i>
-            Classverse
+            Campus Bridge
         </a>
         <button class="mobile-menu-btn">
             <i class="fas fa-bars"></i>
@@ -474,35 +474,35 @@
     <!-- Hero Section -->
     <section id="hero" class="hero">
         <div class="hero-content">
-            <h1>Welcome to Classverse</h1>
-            <p>Your all-in-one academic and coding companion.</p>
+            <h1>Welcome to Campus Bridge</h1>
+            <p>Bridging the gap between academic excellence and coding innovation.</p>
             <div class="cta-buttons">
-                <a href="#" class="btn btn-primary">Get Started Free</a>
-                <a href="#" class="btn btn-secondary">Watch Demo</a>
+                <a href="{{ url_for('login') }}" class="btn btn-primary">Get Started</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
             </div>
         </div>
     </section>
 
-    <!-- What is Classverse Section -->
+    <!-- What is Campus Bridge Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">What is Classverse?</h2>
+            <h2 class="section-title">What is Campus Bridge?</h2>
             <p class="text-center" style="max-width: 800px; margin: 0 auto 3rem;">
-                Classverse brings together LMS tools and coding skill development in one powerful platform. 
-                Built for modern university learners and educators.
+                Campus Bridge is a comprehensive educational platform that seamlessly integrates academic management with coding skill development. 
+                Designed specifically for university students and educators to enhance the learning experience.
             </p>
             <div class="features-grid">
                 <div class="feature-card">
-                    <h3>🎓 Academic Courses & Attendance</h3>
-                    <p>Manage your courses and track attendance in one place.</p>
+                    <h3>📚 Academic Management</h3>
+                    <p>Track attendance, access course materials, and manage assignments efficiently.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>💻 Code Editor & Skill Tracks</h3>
-                    <p>Practice coding with our built-in editor and skill tracks.</p>
+                    <h3>💻 Coding Excellence</h3>
+                    <p>Practice coding with our integrated compiler and specialized learning tracks.</p>
                 </div>
                 <div class="feature-card">
-                    <h3>🤖 AI-Powered Assistant</h3>
-                    <p>Get instant help with your coding questions.</p>
+                    <h3>📊 Progress Tracking</h3>
+                    <p>Monitor your academic performance and coding skill development in real-time.</p>
                 </div>
             </div>
         </div>
@@ -514,34 +514,34 @@
             <h2 class="section-title">Key Features</h2>
             <div class="key-features-grid">
                 <div class="key-feature-item">
+                    <i class="fas fa-user-check"></i>
+                    <h3>Smart Attendance</h3>
+                    <p>Automated attendance tracking and reporting</p>
+                </div>
+                <div class="key-feature-item">
                     <i class="fas fa-code"></i>
-                    <h3>Built-in Compiler</h3>
-                    <p>Run and test your code instantly</p>
+                    <h3>Online Compiler</h3>
+                    <p>Code and compile in multiple languages</p>
                 </div>
                 <div class="key-feature-item">
-                    <i class="fas fa-robot"></i>
-                    <h3>AI Code Assistant</h3>
-                    <p>Smart suggestions and debugging help</p>
-                </div>
-                <div class="key-feature-item">
-                    <i class="fas fa-briefcase"></i>
-                    <h3>Job Match Recommender</h3>
-                    <p>Find relevant job opportunities</p>
-                </div>
-                <div class="key-feature-item">
-                    <i class="fas fa-check-circle"></i>
-                    <h3>Smart Code Reviews</h3>
-                    <p>Get detailed feedback on your code</p>
-                </div>
-                <div class="key-feature-item">
-                    <i class="fas fa-users"></i>
-                    <h3>Live Group Coding</h3>
-                    <p>Collaborate in real-time</p>
+                    <i class="fas fa-book"></i>
+                    <h3>Course Management</h3>
+                    <p>Easy access to all course materials</p>
                 </div>
                 <div class="key-feature-item">
                     <i class="fas fa-tasks"></i>
-                    <h3>Course Manager</h3>
-                    <p>Organize your academic work</p>
+                    <h3>Assignment Tracker</h3>
+                    <p>Never miss a deadline again</p>
+                </div>
+                <div class="key-feature-item">
+                    <i class="fas fa-clock"></i>
+                    <h3>Smart Timetable</h3>
+                    <p>Dynamic class schedule management</p>
+                </div>
+                <div class="key-feature-item">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>My Verse</h3>
+                    <p>Your personalized coding workspace</p>
                 </div>
             </div>
         </div>
@@ -550,27 +550,27 @@
     <!-- Preview Section -->
     <section id="preview" class="preview">
         <div class="container">
-            <h2 class="section-title">Live Preview</h2>
+            <h2 class="section-title">Platform Preview</h2>
             <div class="preview-grid">
                 <div class="preview-card">
-                    <img src="https://via.placeholder.com/600x400" alt="Student Dashboard">
+                    <img src="{{ url_for('static', filename='images/dashboard-preview.jpg') }}" alt="Student Dashboard">
                     <div class="p-4">
                         <h3>Student Dashboard</h3>
-                        <p>Track your progress and manage courses</p>
+                        <p>Comprehensive overview of your academic journey</p>
                     </div>
                 </div>
                 <div class="preview-card">
-                    <img src="https://via.placeholder.com/600x400" alt="AI Chatbot">
+                    <img src="{{ url_for('static', filename='images/compiler-preview.jpg') }}" alt="Online Compiler">
                     <div class="p-4">
-                        <h3>AI Chatbot</h3>
-                        <p>Get instant coding help</p>
+                        <h3>Online Compiler</h3>
+                        <p>Code, compile, and learn in real-time</p>
                     </div>
                 </div>
                 <div class="preview-card">
-                    <img src="https://via.placeholder.com/600x400" alt="Leaderboard">
+                    <img src="{{ url_for('static', filename='images/attendance-preview.jpg') }}" alt="Attendance Tracking">
                     <div class="p-4">
-                        <h3>Coding Leaderboard</h3>
-                        <p>Compete with peers</p>
+                        <h3>Attendance Tracking</h3>
+                        <p>Monitor your attendance across all courses</p>
                     </div>
                 </div>
             </div>
@@ -588,16 +588,16 @@
             </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <h3>Learn & Practice</h3>
-                    <p>Access courses and coding exercises</p>
+                    <h3>For Students</h3>
+                    <p>Access courses, track attendance, practice coding, and manage assignments</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Track Progress</h3>
-                    <p>Monitor your learning journey</p>
+                    <h3>For Faculty</h3>
+                    <p>Manage courses, track student progress, and create assignments</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Collaborate</h3>
-                    <p>Work with peers and mentors</p>
+                    <h3>For Admin</h3>
+                    <p>Oversee institution-wide activities and manage user access</p>
                 </div>
             </div>
         </div>
@@ -606,29 +606,29 @@
     <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials">
         <div class="container">
-            <h2 class="section-title">Success Stories</h2>
+            <h2 class="section-title">User Experiences</h2>
             <div class="testimonial-grid">
                 <div class="testimonial-card">
-                    <p>"Classverse transformed how I learn coding. The AI assistant is incredibly helpful!"</p>
-                    <p class="mt-4"><strong>- Sarah, Computer Science Student</strong></p>
+                    <p>"Campus Bridge has revolutionized how I manage my academic life. The attendance tracking and coding features are exceptional!"</p>
+                    <p class="mt-4"><strong>- Computer Science Student</strong></p>
                 </div>
                 <div class="testimonial-card">
-                    <p>"As a professor, I love how easy it is to manage assignments and track student progress."</p>
-                    <p class="mt-4"><strong>- Dr. Johnson, Professor</strong></p>
+                    <p>"As a faculty member, I appreciate how easy it is to manage courses and track student attendance."</p>
+                    <p class="mt-4"><strong>- Engineering Professor</strong></p>
                 </div>
             </div>
             <div class="stats">
                 <div class="stat-item">
-                    <div class="stat-number">500+</div>
-                    <p>Coding Problems Solved</p>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">92%</div>
-                    <p>Placement-Ready Students</p>
+                    <div class="stat-number">100%</div>
+                    <p>Attendance Tracking</p>
                 </div>
                 <div class="stat-item">
                     <div class="stat-number">24/7</div>
-                    <p>AI Support Available</p>
+                    <p>Platform Access</p>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10+</div>
+                    <p>Programming Languages</p>
                 </div>
             </div>
         </div>
@@ -639,8 +639,8 @@
         <div class="container">
             <div class="footer-content">
                 <div>
-                    <h3>Classverse</h3>
-                    <p>Designed for next-gen learners.</p>
+                    <h3>Campus Bridge</h3>
+                    <p>Empowering academic excellence through technology.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-linkedin"></i></a>
@@ -648,11 +648,11 @@
                     </div>
                 </div>
                 <div class="footer-links">
-                    <h4>Links</h4>
-                    <a href="#">About</a>
-                    <a href="#">Contact</a>
-                    <a href="#">Documentation</a>
-                    <a href="#">Privacy Policy</a>
+                    <h4>Quick Links</h4>
+                    <a href="#features">Features</a>
+                    <a href="#preview">Preview</a>
+                    <a href="#roles">Roles</a>
+                    <a href="{{ url_for('login') }}">Login</a>
                 </div>
             </div>
         </div>
