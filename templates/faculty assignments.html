@@ -1098,42 +1098,67 @@
             const description = document.getElementById('description').value;
             const deadline = document.getElementById('deadline').value;
 
-            // Create assignment card
-            const card = document.createElement('div');
-            card.className = 'assignment-card';
-            card.innerHTML = `
-                <h3 class="assignment-subject">${subject}</h3>
-                <p class="assignment-description">${description}</p>
-                <div class="assignment-meta">
-                    <div class="deadline">
-                        <i class="fas fa-clock"></i>
-                        <span>Due: ${formatDeadline(deadline)}</span>
-                    </div>
-                    <div class="assignment-info">
-                        <span class="badge">${year}${getYearSuffix(year)} Year</span>
-                        <span class="badge">${branch}</span>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="action-btn" onclick="editAssignment(this)">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn" onclick="deleteAssignment(this)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
+            // Create form data
+            const formData = new FormData();
+            formData.append('subject', subject);
+            formData.append('year', year);
+            formData.append('branch', branch);
+            formData.append('description', description);
+            formData.append('deadline', deadline);
 
-            // Add click handler to the card
-            card.addEventListener('click', function(e) {
-                if (!e.target.closest('.action-buttons')) {
-                    showSubmissions(this);
+            // Send data to server
+            fetch('/faculty/assignments', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
                 }
-            });
 
-            document.getElementById('assignmentsGrid').prepend(card);
-            closeModal();
-            updateStats();
+                // Create assignment card
+                const card = document.createElement('div');
+                card.className = 'assignment-card';
+                card.innerHTML = `
+                    <h3 class="assignment-subject">${subject}</h3>
+                    <p class="assignment-description">${description}</p>
+                    <div class="assignment-meta">
+                        <div class="deadline">
+                            <i class="fas fa-clock"></i>
+                            <span>Due: ${formatDeadline(deadline)}</span>
+                        </div>
+                        <div class="assignment-info">
+                            <span class="badge">${year}${getYearSuffix(year)} Year</span>
+                            <span class="badge">${branch}</span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="editAssignment(this)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn" onclick="deleteAssignment(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Add click handler to the card
+                card.addEventListener('click', function(e) {
+                    if (!e.target.closest('.action-buttons')) {
+                        showSubmissions(this);
+                    }
+                });
+
+                document.getElementById('assignmentsGrid').prepend(card);
+                closeModal();
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create assignment. Please try again.');
+            });
         }
 
         // Format deadline
@@ -1192,14 +1217,56 @@
             const title = assignmentCard.querySelector('.assignment-subject').textContent;
             const description = assignmentCard.querySelector('.assignment-description').textContent;
             const deadline = assignmentCard.querySelector('.deadline span').textContent.replace('Due: ', '');
+            const assignmentId = assignmentCard.dataset.assignmentId;
 
             // Update modal content
             document.getElementById('submissionAssignmentTitle').textContent = title;
             document.getElementById('submissionAssignmentDate').textContent = `Due Date: ${deadline}`;
             document.getElementById('submissionAssignmentDesc').textContent = description;
 
-            // Example: Generate random submissions for demonstration
-            generateExampleSubmissions();
+            // Fetch submissions from the server
+            fetch(`/get_assignment_submissions/${assignmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching submissions:', data.error);
+                        return;
+                    }
+
+                    const tbody = document.getElementById('submissionsModalTableBody');
+                    tbody.innerHTML = ''; // Clear existing submissions
+
+                    data.submissions.forEach(submission => {
+                        const row = document.createElement('tr');
+                        const status = new Date(deadline) < new Date(submission.created_at) ? 'late' : 'submitted';
+                        
+                        row.innerHTML = `
+                            <td>${submission.name}</td>
+                            <td>${new Date(submission.created_at).toLocaleString()}</td>
+                            <td><span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></td>
+                            <td>
+                                <a href="${submission.link}" target="_blank" class="action-btn review">
+                                    <i class="fas fa-eye"></i> View Submission
+                                </a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    // Update submission stats
+                    const total = data.submissions.length;
+                    const submitted = data.submissions.filter(s => new Date(deadline) >= new Date(s.created_at)).length;
+                    const late = data.submissions.filter(s => new Date(deadline) < new Date(s.created_at)).length;
+                    const pending = 30 - total; // Assuming 30 total students
+
+                    document.getElementById('totalStudents').textContent = 30;
+                    document.getElementById('submittedCount').textContent = submitted;
+                    document.getElementById('pendingCount').textContent = pending;
+                    document.getElementById('lateCount').textContent = late;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
 
             // Show modal
             document.getElementById('submissionsModal').classList.add('active');
@@ -1225,45 +1292,6 @@
             });
         }
 
-        // Generate example submissions for demonstration
-        function generateExampleSubmissions() {
-            const tbody = document.getElementById('submissionsModalTableBody');
-            tbody.innerHTML = ''; // Clear existing submissions
-
-            const students = [
-                { name: 'John Doe', status: 'submitted', date: 'Mar 15, 2024' },
-                { name: 'Jane Smith', status: 'pending', date: '-' },
-                { name: 'Mike Johnson', status: 'late', date: 'Mar 14, 2024' },
-                { name: 'Sarah Wilson', status: 'submitted', date: 'Mar 13, 2024' },
-                { name: 'Tom Brown', status: 'pending', date: '-' }
-            ];
-
-            students.forEach((student, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${student.name}</td>
-                    <td>${student.date}</td>
-                    <td><span class="status-badge status-${student.status}">${student.status.charAt(0).toUpperCase() + student.status.slice(1)}</span></td>
-                    <td>
-                        <button class="action-btn review" ${student.status === 'pending' ? 'disabled' : `onclick="reviewSubmission(${index + 1})"`}>
-                            <i class="fas fa-eye"></i> Review
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            // Update submission stats
-            const submitted = students.filter(s => s.status === 'submitted').length;
-            const pending = students.filter(s => s.status === 'pending').length;
-            const late = students.filter(s => s.status === 'late').length;
-
-            document.getElementById('totalStudents').textContent = students.length;
-            document.getElementById('submittedCount').textContent = submitted;
-            document.getElementById('pendingCount').textContent = pending;
-            document.getElementById('lateCount').textContent = late;
-        }
-
         // Close modal when clicking outside
         document.getElementById('submissionsModal').addEventListener('click', function(e) {
             if (e.target === this) {
@@ -1279,6 +1307,78 @@
             event.preventDefault();
             window.location.href = "{{ url_for('faculty_home') }}";
         }
+
+        // Function to load assignments
+        function loadAssignments() {
+            fetch('/get_faculty_assignments')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching assignments:', data.error);
+                        return;
+                    }
+
+                    const grid = document.getElementById('assignmentsGrid');
+                    grid.innerHTML = ''; // Clear existing assignments
+
+                    data.assignments.forEach(assignment => {
+                        const card = document.createElement('div');
+                        card.className = 'assignment-card';
+                        card.dataset.assignmentId = assignment.id;
+                        
+                        const deadline = new Date(assignment.deadline).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        card.innerHTML = `
+                            <h3 class="assignment-subject">${assignment.subject}</h3>
+                            <p class="assignment-description">${assignment.description}</p>
+                            <div class="assignment-meta">
+                                <div class="deadline">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Due: ${deadline}</span>
+                                </div>
+                                <div class="assignment-info">
+                                    <span class="badge">${assignment.year}${getYearSuffix(assignment.year)} Year</span>
+                                    <span class="badge">${assignment.branch}</span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn" onclick="editAssignment(this)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="deleteAssignment(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                        // Add click handler to the card
+                        card.addEventListener('click', function(e) {
+                            if (!e.target.closest('.action-buttons')) {
+                                showSubmissions(this);
+                            }
+                        });
+
+                        grid.appendChild(card);
+                    });
+
+                    updateStats();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Initial load of assignments
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAssignments();
+            updateStats();
+        });
     </script>
 </body>
 </html>

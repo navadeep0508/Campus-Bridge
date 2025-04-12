@@ -338,10 +338,65 @@ def c_plus_plus():
 def python():
     return render_template('python.html')
 
-@app.route('/faculty/assignments')
+@app.route('/faculty/assignments', methods=['GET', 'POST'])
 def faculty_assignments():
-    return render_template('faculty assignments.html')
+    if request.method == 'POST':
+        try:
+            # Get form data
+            subject = request.form.get('subject')
+            year = request.form.get('year')
+            branch = request.form.get('branch')
+            description = request.form.get('description')
+            deadline = request.form.get('deadline')
+            faculty_id = session.get('faculty_id')
 
+            print(f"Received form data: subject={subject}, year={year}, branch={branch}, deadline={deadline}, faculty_id={faculty_id}")
+
+            if not all([subject, year, branch, description, deadline, faculty_id]):
+                missing_fields = []
+                if not subject: missing_fields.append('subject')
+                if not year: missing_fields.append('year')
+                if not branch: missing_fields.append('branch')
+                if not description: missing_fields.append('description')
+                if not deadline: missing_fields.append('deadline')
+                if not faculty_id: missing_fields.append('faculty_id')
+                print(f"Missing required fields: {', '.join(missing_fields)}")
+                return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+
+            # Insert into assessments table
+            assessment_data = {
+                'faculty_id': faculty_id,
+                'subject': subject,
+                'year': year,
+                'branch': branch,
+                'description': description,
+                'deadline': deadline,
+                'created_at': 'now()'
+            }
+            
+            print(f"Attempting to insert assessment data: {assessment_data}")
+            
+            response = supabase.table('assessments').insert(assessment_data).execute()
+            
+            print(f"Supabase response: {response}")
+            
+            if response.data:
+                print(f"Successfully created assessment with ID: {response.data[0]['id']}")
+                return jsonify({
+                    'message': 'Assignment created successfully',
+                    'assessment_id': response.data[0]['id']
+                })
+            
+            print("Failed to create assessment - no data returned from Supabase")
+            return jsonify({'error': 'Failed to create assignment - no data returned from database'}), 500
+
+        except Exception as e:
+            print(f"Error creating assignment: {str(e)}")
+            print(f"Error type: {type(e)}")
+            traceback.print_exc()
+            return jsonify({'error': f'Failed to create assignment: {str(e)}'}), 500
+
+    return render_template('faculty assignments.html')
 
 @app.route('/myverse')
 def myverse():
@@ -1250,6 +1305,336 @@ def code_room_page(room_id):
     except Exception as e:
         print(f"Error loading code room page: {e}")
         return redirect(url_for('code_room'))
+
+@app.route('/create_assessments_table')
+def create_assessments_table():
+    try:
+        # Create table if it doesn't exist
+        create_table_query = """
+        -- Drop existing tables if they exist
+        DROP TABLE IF EXISTS public.assignment_submissions CASCADE;
+        DROP TABLE IF EXISTS public.assessment_links CASCADE;
+        DROP TABLE IF EXISTS public.assessments CASCADE;
+
+        -- Create assessments table
+        CREATE TABLE public.assessments (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            faculty_id UUID REFERENCES auth.users(id),
+            subject TEXT NOT NULL,
+            year TEXT NOT NULL,
+            branch TEXT NOT NULL,
+            description TEXT NOT NULL,
+            deadline TIMESTAMP WITH TIME ZONE NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+        -- Create assessment_links table
+        CREATE TABLE public.assessment_links (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            assessment_id UUID REFERENCES public.assessments(id),
+            link_type TEXT NOT NULL,
+            link_url TEXT NOT NULL,
+            description TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+        -- Create assignment_submissions table
+        CREATE TABLE public.assignment_submissions (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            assignment_id UUID REFERENCES public.assessments(id),
+            student_id UUID REFERENCES auth.users(id),
+            drive_link TEXT NOT NULL,
+            comments TEXT,
+            submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+        -- Add RLS policies for assessments
+        ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
+
+        CREATE POLICY "Faculty can view their own assignments"
+            ON public.assessments
+            FOR SELECT
+            USING (faculty_id = auth.uid());
+
+        CREATE POLICY "Faculty can insert their own assignments"
+            ON public.assessments
+            FOR INSERT
+            WITH CHECK (faculty_id = auth.uid());
+
+        CREATE POLICY "Faculty can update their own assignments"
+            ON public.assessments
+            FOR UPDATE
+            USING (faculty_id = auth.uid());
+
+        CREATE POLICY "Faculty can delete their own assignments"
+            ON public.assessments
+            FOR DELETE
+            USING (faculty_id = auth.uid());
+
+        -- Add RLS policies for assessment_links
+        ALTER TABLE public.assessment_links ENABLE ROW LEVEL SECURITY;
+
+        CREATE POLICY "Faculty can view links for their assignments"
+            ON public.assessment_links
+            FOR SELECT
+            USING (
+                EXISTS (
+                    SELECT 1 FROM public.assessments
+                    WHERE assessments.id = assessment_links.assessment_id
+                    AND assessments.faculty_id = auth.uid()
+                )
+            );
+
+        CREATE POLICY "Faculty can insert links for their assignments"
+            ON public.assessment_links
+            FOR INSERT
+            WITH CHECK (
+                EXISTS (
+                    SELECT 1 FROM public.assessments
+                    WHERE assessments.id = assessment_links.assessment_id
+                    AND assessments.faculty_id = auth.uid()
+                )
+            );
+
+        -- Add RLS policies for assignment_submissions
+        ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
+
+        CREATE POLICY "Students can view their own submissions"
+            ON public.assignment_submissions
+            FOR SELECT
+            USING (student_id = auth.uid());
+
+        CREATE POLICY "Students can insert their own submissions"
+            ON public.assignment_submissions
+            FOR INSERT
+            WITH CHECK (student_id = auth.uid());
+
+        CREATE POLICY "Faculty can view submissions for their assignments"
+            ON public.assignment_submissions
+            FOR SELECT
+            USING (
+                EXISTS (
+                    SELECT 1 FROM public.assessments
+                    WHERE assessments.id = assignment_submissions.assignment_id
+                    AND assessments.faculty_id = auth.uid()
+                )
+            );
+        """
+        
+        # Execute the query
+        response = supabase.rpc('exec_sql', {'query': create_table_query}).execute()
+        print("Tables created successfully")
+        return jsonify({"message": "Tables created successfully"})
+    except Exception as e:
+        print(f"Error creating tables: {str(e)}")
+        return jsonify({"error": f"Failed to create tables: {str(e)}"}), 500
+
+@app.route('/student/assignments')
+def student_assignments():
+    try:
+        # Fetch all assignments from the assessments table
+        response = supabase.table('assessments').select('*').execute()
+        assignments = response.data if response.data else []
+        
+        return render_template('student assignment.html', assignments=assignments)
+    except Exception as e:
+        print(f"Error fetching assignments: {str(e)}")
+        return render_template('student assignment.html', error='Failed to load assignments')
+
+@app.route('/submit_assignment', methods=['POST'])
+def submit_assignment():
+    try:
+        data = request.json
+        print("Received data:", data)  # Debug log
+        
+        assignment_id = data.get('assignment_id')
+        link = data.get('drive_link')  # Changed from 'link' to 'drive_link'
+        user_id = session.get('user_id')
+
+        print(f"Validating fields - assignment_id: {assignment_id}, drive_link: {link}, user_id: {user_id}")  # Debug log
+
+        # Check if any required field is missing
+        missing_fields = []
+        if not assignment_id:
+            missing_fields.append('assignment_id')
+        if not link:
+            missing_fields.append('drive_link')
+        if not user_id:
+            missing_fields.append('user_id')
+
+        if missing_fields:
+            return jsonify({
+                'error': 'Missing required fields',
+                'missing_fields': missing_fields
+            }), 400
+
+        # Get user details from users table
+        user_response = supabase.table('users').select('name, roll_number').eq('id', user_id).execute()
+        if not user_response.data:
+            return jsonify({'error': 'User not found'}), 404
+
+        user_data = user_response.data[0]
+
+        # Insert submission into database
+        submission_data = {
+            'assessment_id': assignment_id,
+            'name': user_data['name'],
+            'roll_number': user_data['roll_number'],
+            'link': link
+        }
+
+        print("Submitting data:", submission_data)  # Debug log
+
+        response = supabase.table('assignment_submissions').insert(submission_data).execute()
+        
+        if response.data:
+            return jsonify({
+                'message': 'Assignment submitted successfully',
+                'submission_id': response.data[0]['id']
+            })
+        
+        return jsonify({'error': 'Failed to submit assignment - no data returned from database'}), 500
+
+    except Exception as e:
+        print(f"Error submitting assignment: {str(e)}")
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to submit assignment: {str(e)}'}), 500
+
+@app.route('/add_assessment_link', methods=['POST'])
+def add_assessment_link():
+    try:
+        data = request.json
+        assessment_id = data.get('assessment_id')
+        link_type = data.get('link_type')
+        link_url = data.get('link_url')
+        description = data.get('description')
+
+        if not all([assessment_id, link_type, link_url]):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        # Insert link into database
+        link_data = {
+            'assessment_id': assessment_id,
+            'link_type': link_type,
+            'link_url': link_url,
+            'description': description
+        }
+
+        response = supabase.table('assessment_links').insert(link_data).execute()
+        
+        if response.data:
+            return jsonify({'message': 'Link added successfully'})
+        
+        return jsonify({'error': 'Failed to add link'}), 500
+
+    except Exception as e:
+        print(f"Error adding assessment link: {str(e)}")
+        return jsonify({'error': 'An error occurred while adding the link'}), 500
+
+@app.route('/get_assessment_links/<assessment_id>')
+def get_assessment_links(assessment_id):
+    try:
+        response = supabase.table('assessment_links')\
+            .select('*')\
+            .eq('assessment_id', assessment_id)\
+            .execute()
+        
+        links = response.data if response.data else []
+        return jsonify(links)
+    except Exception as e:
+        print(f"Error fetching assessment links: {str(e)}")
+        return jsonify({'error': 'Failed to fetch links'}), 500
+
+@app.route('/create_assignment_submissions_table')
+def create_assignment_submissions_table():
+    try:
+        # Create table if it doesn't exist
+        create_table_query = """
+        -- Drop existing table if it exists
+        DROP TABLE IF EXISTS public.assignment_submissions CASCADE;
+
+        -- Create assignment_submissions table
+        CREATE TABLE public.assignment_submissions (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            assessment_id UUID REFERENCES public.assessments(id),
+            name TEXT NOT NULL,
+            roll_number TEXT NOT NULL,
+            link TEXT NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+        -- Add RLS policies
+        ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
+
+        CREATE POLICY "Students can view their own submissions"
+            ON public.assignment_submissions
+            FOR SELECT
+            USING (roll_number = auth.jwt()->>'roll_number');
+
+        CREATE POLICY "Students can insert their own submissions"
+            ON public.assignment_submissions
+            FOR INSERT
+            WITH CHECK (roll_number = auth.jwt()->>'roll_number');
+
+        CREATE POLICY "Faculty can view all submissions"
+            ON public.assignment_submissions
+            FOR SELECT
+            USING (auth.role() = 'faculty');
+        """
+        
+        # Execute the query
+        response = supabase.rpc('exec_sql', {'query': create_table_query}).execute()
+        print("Assignment submissions table created successfully")
+        return jsonify({"message": "Assignment submissions table created successfully"})
+    except Exception as e:
+        print(f"Error creating table: {str(e)}")
+        return jsonify({"error": f"Failed to create table: {str(e)}"}), 500
+
+@app.route('/get_assignment_submissions/<assignment_id>')
+def get_assignment_submissions(assignment_id):
+    try:
+        # Fetch submissions for the given assignment
+        response = supabase.table('assignment_submissions')\
+            .select('*')\
+            .eq('assessment_id', assignment_id)\
+            .execute()
+        
+        submissions = response.data if response.data else []
+        
+        return jsonify({
+            'submissions': submissions
+        })
+    except Exception as e:
+        print(f"Error fetching submissions: {str(e)}")
+        return jsonify({'error': 'Failed to fetch submissions'}), 500
+
+@app.route('/get_faculty_assignments')
+def get_faculty_assignments():
+    try:
+        faculty_id = session.get('faculty_id')
+        if not faculty_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+        # Fetch assignments for the current faculty
+        response = supabase.table('assessments')\
+            .select('*')\
+            .eq('faculty_id', faculty_id)\
+            .order('created_at', desc=True)\
+            .execute()
+        
+        assignments = response.data if response.data else []
+        
+        return jsonify({
+            'assignments': assignments
+        })
+    except Exception as e:
+        print(f"Error fetching assignments: {str(e)}")
+        return jsonify({'error': 'Failed to fetch assignments'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
