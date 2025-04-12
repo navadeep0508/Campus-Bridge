@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faculty Dashboard - Myinfocam</title>
+    <title>Faculty Dashboard - Campus Bridge</title>
    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -811,7 +811,7 @@
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
-                <h2>Myinfocam</h2>
+                <h2>Campus Bridge</h2>
             </div>
             
             <nav class="sidebar-nav">
@@ -832,11 +832,31 @@
                 </div>
 
                 <div class="nav-section">
-                    <h3>Reports</h3>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Generate Reports</span>
+                    <h3>Academic</h3>
+                    <a href="{{ url_for('faculty_attendance') }}" class="nav-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Attendance</span>
                     </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Timetable</span>
+                    </a>
+                    <div class="nav-subsection">
+                        <a href="{{ url_for('faculty_assignments') }}" class="nav-item">
+                            <i class="fas fa-book"></i>
+                            <span>Academic Assignments</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <div class="nav-subsection">
+                        <a href="{{ url_for('faculty_coding_assessment') }}" class="nav-item">
+                            <i class="fas fa-tasks"></i>
+                            <span>Coding Assignments</span>
+                        </a>
+                    </div>
                 </div>
             </nav>
         </aside>
@@ -866,13 +886,13 @@
 
             <!-- Dashboard Content -->
             <div class="dashboard-content">
-                <!-- Faculty Profile Section -->
+                <!-- Welcome Section -->
                 <section class="welcome-section">
                     <div class="welcome-content">
                         <h1>Welcome, {{ faculty.name }}</h1>
-                        <p>Roll Number: {{ faculty.roll_number }}</p>
-                        <p>Branch: {{ faculty.branch }}</p>
-                        <p>Subject: {{ faculty.subject }}</p>
+                        <p>Faculty ID: {{ faculty.faculty_id }}</p>
+                        <p>Department: {{ faculty.department }}</p>
+                        <p>Designation: {{ faculty.designation }}</p>
                     </div>
                 </section>
 
@@ -883,13 +903,73 @@
                             <i class="fas fa-chalkboard"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>Courses Managed</h3>
-                            <p>5</p>
+                            <h3>Active Courses</h3>
+                            <p>{{ faculty.active_courses }}</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Students</h3>
+                            <p>{{ faculty.total_students }}</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Pending Tasks</h3>
+                            <p>{{ faculty.pending_tasks }}</p>
                         </div>
                     </div>
                 </section>
 
-                
+                <!-- Today's Schedule -->
+                <section class="schedule-section">
+                    <div class="section-header">
+                        <h2>Today's Schedule</h2>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="schedule-cards">
+                        {% for schedule in faculty.today_schedule %}
+                        <div class="schedule-card">
+                            <div class="schedule-time">
+                                <i class="fas fa-clock"></i>
+                                {{ schedule.time }}
+                            </div>
+                            <div class="schedule-details">
+                                <h3>{{ schedule.course }}</h3>
+                                <p>{{ schedule.batch }}</p>
+                                <span class="schedule-status {{ schedule.status }}">{{ schedule.status }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- Recent Activity -->
+                <section class="activity-section">
+                    <div class="section-header">
+                        <h2>Recent Activity</h2>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="activity-feed">
+                        {% for activity in faculty.recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="{{ activity.icon }}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>{{ activity.description }}</p>
+                                <span class="activity-time">{{ activity.time }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
             </div>
         </main>
     </div>
