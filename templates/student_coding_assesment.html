@@ -52,6 +52,8 @@
             transition: all 0.3s ease;
             z-index: 1000;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar.collapsed {
@@ -106,6 +108,7 @@
         .sidebar-header {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .sidebar-header h2 {
@@ -127,9 +130,38 @@
             cursor: pointer;
         }
 
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.8);
+        }
+
         .nav-section {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-section:last-child {
+            border-bottom: none;
         }
 
         .nav-section h3 {
@@ -338,10 +370,6 @@
                         <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
-                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
-                        <i class="fas fa-code-branch"></i>
-                        <span>Coding Tracks</span>
-                    </a>
                 </div>
 
                 <div class="nav-section">
@@ -370,6 +398,10 @@
 
                 <div class="nav-section">
                     <h3>Coding</h3>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
                     <a href="{{ url_for('myverse') }}" class="nav-item">
                         <i class="fas fa-laptop-code"></i>
                         <span>My Verse</span>
@@ -378,9 +410,25 @@
                         <i class="fas fa-terminal"></i>
                         <span>Online Compiler</span>
                     </a>
-                    <a href="#" class="nav-item active">
+                    <a href="{{ url_for('student_coding_assesment') }}" class="nav-item active">
                         <i class="fas fa-file-code"></i>
                         <span>Coding Assignment</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Community</h3>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
                     </a>
                 </div>
             </nav>

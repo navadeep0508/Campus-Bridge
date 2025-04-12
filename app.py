@@ -314,9 +314,7 @@ def faculty_home():
         traceback.print_exc()
         return render_template('faculty_dashboard.html', error='An error occurred')
 
-@app.route('/faculty/attendance')
-def faculty_attendance():
-    return render_template('faculty_attendance.html')
+
 
 @app.route('/attendance')
 def attendance():
