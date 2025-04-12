@@ -452,6 +452,18 @@ def assignment():
 def institution():
     return render_template('my institut.html')
 
+@app.route('/faculty/admin')
+def faculty_admin():
+    return render_template('admin_faculty.html')
+
+@app.route('/students/admin')
+def students_admin():
+    return render_template('admin_students.html')
+
+@app.route('/dashboard/admin')
+def dashboard_admin():
+    return render_template('my admin.html')
+    
 @app.route('/timetable')
 def timetable():
     user_id = session.get('user_id')
