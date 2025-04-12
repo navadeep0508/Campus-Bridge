@@ -4,6 +4,7 @@ import time
 from supabase import create_client, Client
 import bcrypt
 import traceback
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDM1MjYxNSwiZXhwIjoyMDU5OTI4NjE1fQ.qeufhcj6ypy97jOu0BHIRfqTnz9ZJNHoktibYy_p2NY'  # Ensure a proper secret key is set
@@ -320,11 +321,75 @@ def faculty_attendance():
     if not faculty_id:
         return redirect(url_for('login'))
     return render_template('faculty_attendance.html')
+<<<<<<< HEAD
 
+=======
+>>>>>>> b79b957974697617b7b7b872060054814d0f8d31
 
 @app.route('/attendance')
 def attendance():
-    return render_template('student attendance.html')
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    try:
+        # Get user's section
+        user_response = supabase.table('users').select('section').eq('id', user_id).execute()
+        user_data = user_response.data[0] if user_response.data else None
+        
+        if not user_data:
+            return render_template('student attendance.html', error='User not found')
+
+        section = user_data['section']
+
+        # Get current week's Monday to Friday dates
+        today = datetime.now()
+        current_weekday = today.weekday()  # Monday is 0, Sunday is 6
+        monday = today - timedelta(days=current_weekday)
+        friday = monday + timedelta(days=4)
+        
+        # Format dates for display
+        week_dates = {
+            'Monday': monday.strftime('%Y-%m-%d'),
+            'Tuesday': (monday + timedelta(days=1)).strftime('%Y-%m-%d'),
+            'Wednesday': (monday + timedelta(days=2)).strftime('%Y-%m-%d'),
+            'Thursday': (monday + timedelta(days=3)).strftime('%Y-%m-%d'),
+            'Friday': friday.strftime('%Y-%m-%d')
+        }
+
+        # Get attendance data for the current week
+        response = supabase.table('attendance')\
+            .select('*')\
+            .eq('student_id', user_id)\
+            .eq('section', section)\
+            .gte('date', monday.strftime('%Y-%m-%d'))\
+            .lte('date', friday.strftime('%Y-%m-%d'))\
+            .execute()
+        
+        week_attendance = response.data if response.data else []
+
+        # Calculate overall attendance
+        total_response = supabase.table('attendance')\
+            .select('total_classes, attended_classes')\
+            .eq('student_id', user_id)\
+            .eq('section', section)\
+            .execute()
+        
+        total_data = total_response.data[0] if total_response.data else None
+        overall_attendance = {
+            'total_classes': total_data['total_classes'] if total_data else 0,
+            'attended_classes': total_data['attended_classes'] if total_data else 0,
+            'percentage': round((total_data['attended_classes'] / total_data['total_classes'] * 100) if total_data and total_data['total_classes'] > 0 else 0, 2)
+        }
+
+        return render_template('student attendance.html', 
+                            week_dates=week_dates,
+                            week_attendance=week_attendance,
+                            overall_attendance=overall_attendance)
+    except Exception as e:
+        print(f"Error fetching attendance: {e}")
+        traceback.print_exc()
+        return render_template('student attendance.html', error='An error occurred')
 
 @app.route('/coding_tracks')
 def coding_tracks():
@@ -338,11 +403,14 @@ def c_plus_plus():
 def python():
     return render_template('python.html')
 
+<<<<<<< HEAD
 @app.route('/faculty/assignments')
 def faculty_assignments():
     return render_template('faculty assignments.html')
 
 
+=======
+>>>>>>> b79b957974697617b7b7b872060054814d0f8d31
 @app.route('/myverse')
 def myverse():
     return render_template('myverse.html', problems=CODING_PROBLEMS.values())
@@ -458,8 +526,6 @@ def timetable():
     if not user_id:
         return redirect(url_for('login'))
 
-     
-
     try:
         # Fetch the user's semester
         response = supabase.table('users').select('semester').eq('id', user_id).execute()
@@ -473,6 +539,7 @@ def timetable():
     except Exception as e:
         print(f"Error fetching user semester: {e}")
         return render_template('timetable.html', error='An error occurred')
+
 @app.route('/faculty/coding_assessment', methods=['GET', 'POST'])
 def faculty_coding_assessment():
     faculty_id = session.get('faculty_id')
@@ -544,6 +611,7 @@ def faculty_coding_assessment():
             return render_template('faculty_coding_assesment.html', error='Please fill all required fields correctly')
 
     return render_template('faculty_coding_assesment.html')
+
 @app.route('/student_coding_assesment')
 def student_coding_assesment():
     user_id = session.get('user_id')
