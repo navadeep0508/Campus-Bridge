@@ -791,7 +791,7 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="{{ url_for('home_page') }}" class="nav-item">
+                    <a href="{{ url_for('home_page') }}" class="nav-item active">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
@@ -806,23 +806,6 @@
                 </div>
 
                 <div class="nav-section">
-                    <h3>Institution</h3>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-university"></i>
-                        <span>My Institution</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-gavel"></i>
-                        <span>Regulations</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>Messages</span>
-                        <span class="notification-badge">5</span>
-                    </a>
-                </div>
-
-                <div class="nav-section">
                     <h3>Academic</h3>
                     <a href="{{ url_for('attendance') }}" class="nav-item">
                         <i class="fas fa-user-check"></i>
@@ -833,12 +816,24 @@
                         <span>Assignments</span>
                     </a>
                     <a href="#" class="nav-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Academic Schedules</span>
-                    </a>
-                    <a href="#" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <a href="{{ url_for('myverse') }}" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Online Compiler</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>Coding Assignment</span>
                     </a>
                 </div>
                 
