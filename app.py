@@ -321,6 +321,10 @@ def faculty_attendance():
     if not faculty_id:
         return redirect(url_for('login'))
     return render_template('faculty_attendance.html')
+<<<<<<< HEAD
+
+=======
+>>>>>>> b79b957974697617b7b7b872060054814d0f8d31
 
 @app.route('/attendance')
 def attendance():
@@ -399,6 +403,14 @@ def c_plus_plus():
 def python():
     return render_template('python.html')
 
+<<<<<<< HEAD
+@app.route('/faculty/assignments')
+def faculty_assignments():
+    return render_template('faculty assignments.html')
+
+
+=======
+>>>>>>> b79b957974697617b7b7b872060054814d0f8d31
 @app.route('/myverse')
 def myverse():
     return render_template('myverse.html', problems=CODING_PROBLEMS.values())

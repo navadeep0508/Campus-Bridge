@@ -302,7 +302,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Myinfocam</h2>
+                <h2>Campus Bridge</h2>
             </div>
             
             <nav class="sidebar-nav">
@@ -311,10 +311,6 @@
                     <a href="{{ url_for('faculty_home') }}" class="nav-item">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        <span>Manage Courses</span>
                     </a>
                 </div>
 
@@ -327,19 +323,31 @@
                 </div>
 
                 <div class="nav-section">
-                    <h3>Reports</h3>
-                    <a href="#" class="nav-item">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Generate Reports</span>
-                    </a>
-                </div>
-
-                <div class="nav-section">
-                    <h3>Attendance</h3>
+                    <h3>Academic</h3>
                     <a href="{{ url_for('faculty_attendance') }}" class="nav-item active">
                         <i class="fas fa-calendar-check"></i>
                         <span>Attendance</span>
                     </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Timetable</span>
+                    </a>
+                    <div class="nav-subsection">
+                        <a href="{{ url_for('faculty_assignments') }}" class="nav-item">
+                            <i class="fas fa-book"></i>
+                            <span>Academic Assignments</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <div class="nav-subsection">
+                        <a href="{{ url_for('faculty_coding_assessment') }}" class="nav-item">
+                            <i class="fas fa-tasks"></i>
+                            <span>Coding Assignments</span>
+                        </a>
+                    </div>
                 </div>
             </nav>
         </aside>
