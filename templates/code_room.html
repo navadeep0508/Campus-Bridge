@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
     <style>
         :root {
+            --sidebar-width: 250px;
+            --header-height: 60px;
             --primary-color: #020024;
             --secondary-color: #090979;
             --accent-color: #00d4ff;
@@ -34,6 +36,170 @@
             min-height: 100vh;
         }
 
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(2, 0, 36, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-header h2,
+        .sidebar.collapsed .nav-section h3,
+        .sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item {
+            padding: 0.8rem;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .nav-item i {
+            margin-right: 0;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            right: -12px;
+            top: 20px;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .nav-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-section h3 {
+            color: #A0AEC0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            background: transparent;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Sidebar Scroll */
+        .sidebar-nav {
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -44,12 +210,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
         }
 
-        .header h1 {
-            font-size: 2rem;
-            color: var(--accent-color);
+        .create-room-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2rem;
         }
 
         .create-room-btn {
@@ -275,40 +442,132 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Live Code Rooms</h1>
-            <button class="create-room-btn" onclick="openCreateRoomModal()">
-                <i class="fas fa-plus"></i>
-                Create Room
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
             </button>
-        </div>
-
-        {% if error %}
-        <div class="error-message">
-            {{ error }}
-        </div>
-        {% endif %}
-
-        <div class="rooms-grid">
-            {% for room in rooms %}
-            <div class="room-card">
-                <div class="room-header">
-                    <h3 class="room-name">{{ room.name }}</h3>
-                    <span class="room-language">{{ room.language }}</span>
+            <div class="sidebar-header">
+                <h2>Campus Bridge</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Main</h3>
+                    <a href="{{ url_for('home_page') }}" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('mycourse') }}" class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>My Courses</span>
+                    </a>
                 </div>
-                <div class="room-participants">
-                    {% for participant in room.participants %}
-                    <div class="participant {% if participant.is_online %}online{% endif %}">
-                        {{ participant.user.name }}
-                    </div>
-                    {% endfor %}
+
+                <div class="nav-section">
+                    <h3>Institution</h3>
+                    <a href="{{ url_for('institution') }}" class="nav-item">
+                        <i class="fas fa-university"></i>
+                        <span>My Institution</span>
+                    </a>
                 </div>
-                <button class="join-btn" onclick="joinRoom('{{ room.id }}')">
-                    Join Room
+
+                <div class="nav-section">
+                    <h3>Academic</h3>
+                    <a href="{{ url_for('attendance') }}" class="nav-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                    <a href="{{ url_for('assignment') }}" class="nav-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a>
+                    <a href="{{ url_for('timetable') }}" class="nav-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
+                    <a href="{{ url_for('myverse') }}" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Online Compiler</span>
+                    </a>
+                    <a href="{{ url_for('student_coding_assesment') }}" class="nav-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>Coding Assignment</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <h3>Community</h3>
+                    <a href="{{ url_for('code_room') }}" class="nav-item active">
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="container">
+            <div class="header">
+                <h1>Live Code Rooms</h1>
+            </div>
+            <div class="create-room-container">
+                <button class="create-room-btn" onclick="openCreateRoomModal()">
+                    <i class="fas fa-plus"></i>
+                    Create Room
                 </button>
             </div>
-            {% endfor %}
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="rooms-grid">
+                {% for room in rooms %}
+                <div class="room-card">
+                    <div class="room-header">
+                        <h3 class="room-name">{{ room.name }}</h3>
+                        <span class="room-language">{{ room.language }}</span>
+                    </div>
+                    <div class="room-participants">
+                        {% for participant in room.participants %}
+                        <div class="participant {% if participant.is_online %}online{% endif %}">
+                            {{ participant.user.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="join-btn" onclick="joinRoom('{{ room.id }}')">
+                        Join Room
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
