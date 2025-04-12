@@ -434,7 +434,9 @@ def timetable():
     except Exception as e:
         print(f"Error fetching user semester: {e}")
         return render_template('timetable.html', error='An error occurred')
+@app.route('/faculty/coding_assessment')
+def faculty_coding_assessment():
+    return render_template('faculty_coding_assesment.html')
     
-
 if __name__ == '__main__':
     app.run(debug=True)
