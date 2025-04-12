@@ -16,8 +16,9 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 JUDGE0_API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
 JUDGE0_API_HEADERS = {
     'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
-    'x-rapidapi-key': '4be4a0b098msha12e9d5e92eda12p12960ejsn03f80d153530',  # Replace with your actual RapidAPI key
-    'content-type': 'application/json'
+    'x-rapidapi-key': '2d4a7d825cmsh702550f2a4c30e2p138e11jsn467d292624aa',
+    'content-type': 'application/json',
+    'accept': 'application/json'
 }
 
 # Simple rate limiting
@@ -176,6 +177,9 @@ def run_code():
     language = data.get('language')
     input_data = data.get('input')
 
+    if not code or not language:
+        return jsonify({'error': 'Missing required fields: code and language'}), 400
+
     # Map language to Judge0 language_id
     language_map = {
         'python': 71,
@@ -184,7 +188,7 @@ def run_code():
         'c': 50,
         'cpp': 54
     }
-    language_id = language_map.get(language)
+    language_id = language_map.get(language.lower())
 
     if not language_id:
         return jsonify({'error': 'Unsupported language'}), 400
@@ -193,36 +197,53 @@ def run_code():
     payload = {
         'source_code': code,
         'language_id': language_id,
-        'stdin': input_data
+        'stdin': input_data or '',
+        'base64_encoded': False
     }
 
     try:
         # Send the request to Judge0 API
         response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload)
-        response.raise_for_status()  # Raise an error for bad responses
+        response.raise_for_status()
         token = response.json().get('token')
-        print("Judge0 API Token:", token)  # Log the token
+        
+        if not token:
+            return jsonify({'error': 'Failed to get submission token'}), 500
 
         # Poll for the result
         result_url = f"{JUDGE0_API_URL}/{token}"
-        while True:
+        max_attempts = 10
+        attempts = 0
+        
+        while attempts < max_attempts:
             result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS)
             result_response.raise_for_status()
             result = result_response.json()
-            if result.get('status', {}).get('id') in [1, 2]:  # In Queue or Processing
-                time.sleep(1)  # Wait before polling again
+            
+            status_id = result.get('status', {}).get('id')
+            if status_id in [1, 2]:  # In Queue or Processing
+                time.sleep(1)
+                attempts += 1
             else:
                 break
 
+        if attempts >= max_attempts:
+            return jsonify({'error': 'Execution timed out'}), 504
+
         # Return the result
         return jsonify({
-            'stdout': result.get('stdout'),
-            'stderr': result.get('stderr'),
-            'status': result.get('status', {}).get('description')
+            'stdout': result.get('stdout', ''),
+            'stderr': result.get('stderr', ''),
+            'status': result.get('status', {}).get('description', 'Unknown'),
+            'time': result.get('time', ''),
+            'memory': result.get('memory', '')
         })
     except requests.exceptions.RequestException as e:
         print("Error during API request:", e)
-        return jsonify({'error': 'Failed to execute code'}), 500
+        return jsonify({'error': 'Failed to execute code. Please try again.'}), 500
+    except Exception as e:
+        print("Unexpected error:", e)
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @app.route('/test-supabase')
 def test_supabase():
@@ -444,7 +465,226 @@ def timetable():
     except Exception as e:
         print(f"Error fetching user semester: {e}")
         return render_template('timetable.html', error='An error occurred')
+@app.route('/faculty/coding_assessment', methods=['GET', 'POST'])
+def faculty_coding_assessment():
+    faculty_id = session.get('faculty_id')
+    if not faculty_id:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        try:
+            # Get form data
+            title = request.form.get('title')
+            description = request.form.get('description')
+            input_format = request.form.get('input_format')
+            output_format = request.form.get('output_format')
+            difficulty = request.form.get('difficulty', 'medium')
+            points = int(request.form.get('points', 100))
+            time_limit = int(request.form.get('time_limit', 60))
+            memory_limit = int(request.form.get('memory_limit', 512))
+            languages = request.form.getlist('languages[]') or ['python', 'java', 'cpp', 'c']
+
+            print("Creating assessment with data:", {
+                'title': title,
+                'faculty_id': faculty_id,
+                'difficulty': difficulty,
+                'points': points
+            })
+
+            # Insert into coding_assessments table
+            assessment_data = {
+                'faculty_id': faculty_id,
+                'title': title,
+                'description': description,
+                'input_format': input_format,
+                'output_format': output_format,
+                'difficulty': difficulty,
+                'points': points,
+                'time_limit': time_limit,
+                'memory_limit': memory_limit,
+                'allowed_languages': languages,
+                'created_at': 'now()'  # Add creation timestamp
+            }
+            
+            response = supabase.table('coding_assessments').insert(assessment_data).execute()
+            print("Assessment creation response:", response.data)
+            
+            if response.data:
+                assessment_id = response.data[0]['id']
+
+                # Get test cases
+                test_inputs = request.form.getlist('test_inputs[]')
+                test_outputs = request.form.getlist('test_outputs[]')
+
+                # Insert test cases
+                for input_data, expected_output in zip(test_inputs, test_outputs):
+                    if input_data and expected_output:
+                        test_case_data = {
+                            'assessment_id': assessment_id,
+                            'input_data': input_data,
+                            'expected_output': expected_output
+                        }
+                        supabase.table('assessment_test_cases').insert(test_case_data).execute()
+
+                return render_template('faculty_coding_assesment.html', success='Assessment created successfully!')
+
+            return render_template('faculty_coding_assesment.html', error='Failed to create assessment')
+
+        except Exception as e:
+            print(f"Error creating assessment: {e}")
+            traceback.print_exc()
+            return render_template('faculty_coding_assesment.html', error='Please fill all required fields correctly')
+
+    return render_template('faculty_coding_assesment.html')
+@app.route('/student_coding_assesment')
+def student_coding_assesment():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    try:
+        print("Fetching assessments...")
+        
+        # Fetch assessments with faculty information
+        assessments_response = supabase.table('coding_assessments')\
+            .select('''
+                *,
+                faculty:users!coding_assessments_faculty_id_fkey (
+                    name
+                )
+            ''')\
+            .order('created_at', desc=True)\
+            .execute()
+            
+        assessments = assessments_response.data if assessments_response.data else []
+        print(f"Found {len(assessments)} assessments:", assessments)
+
+        if not assessments:
+            print("No assessments found in the database")
+        
+        return render_template('student_coding_assesment.html', 
+                            assessments=assessments,
+                            stats={
+                                'total': len(assessments),
+                                'completed': 0,
+                                'attempts': 0,
+                                'time_spent': 0
+                            })
+                            
+    except Exception as e:
+        print(f"Error fetching assessments: {e}")
+        traceback.print_exc()
+        return render_template('student_coding_assesment.html', 
+                            error='Failed to load assessments',
+                            assessments=[],
+                            stats={
+                                'total': 0,
+                                'completed': 0,
+                                'attempts': 0,
+                                'time_spent': 0
+                            })
     
+@app.route('/submit_assessment', methods=['POST'])
+def submit_assessment():
+    data = request.json
+    assessment_id = data.get('assessment_id')
+    code = data.get('code')
+    language = data.get('language')
+
+    if not all([assessment_id, code, language]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    try:
+        # Fetch assessment and its test cases
+        assessment_response = supabase.table('coding_assessments').select('*').eq('id', assessment_id).execute()
+        assessment = assessment_response.data[0] if assessment_response.data else None
+
+        if not assessment:
+            return jsonify({'error': 'Assessment not found'}), 404
+
+        test_cases_response = supabase.table('assessment_test_cases').select('*').eq('assessment_id', assessment_id).execute()
+        test_cases = test_cases_response.data if test_cases_response.data else []
+
+        if not test_cases:
+            return jsonify({'error': 'No test cases found for this assessment'}), 404
+
+        results = []
+        all_passed = True
+
+        for test_case in test_cases:
+            # Prepare the payload for Judge0 API
+            payload = {
+                'source_code': code,
+                'language_id': language_map.get(language.lower()),
+                'stdin': test_case['input_data'],
+                'expected_output': test_case['expected_output'],
+                'base64_encoded': False
+            }
+
+            # Send the request to Judge0 API
+            response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload)
+            response.raise_for_status()
+            token = response.json().get('token')
+
+            if not token:
+                return jsonify({'error': 'Failed to get submission token'}), 500
+
+            # Poll for the result
+            result_url = f"{JUDGE0_API_URL}/{token}"
+            max_attempts = 10
+            attempts = 0
+
+            while attempts < max_attempts:
+                result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS)
+                result_response.raise_for_status()
+                result = result_response.json()
+
+                status_id = result.get('status', {}).get('id')
+                if status_id in [1, 2]:  # In Queue or Processing
+                    time.sleep(1)
+                    attempts += 1
+                else:
+                    break
+
+            if attempts >= max_attempts:
+                return jsonify({'error': 'Execution timed out'}), 504
+
+            # Check if the test case passed
+            passed = result.get('stdout', '').strip() == test_case['expected_output'].strip()
+            all_passed = all_passed and passed
+
+            results.append({
+                'input': test_case['input_data'],
+                'expected': test_case['expected_output'],
+                'actual': result.get('stdout', '').strip(),
+                'status': result.get('status', {}).get('description', 'Unknown'),
+                'passed': passed
+            })
+
+        # If all test cases passed, update the user's points
+        if all_passed:
+            try:
+                user_id = session.get('user_id')
+                if user_id:
+                    response = supabase.table('users').select('points').eq('id', user_id).execute()
+                    current_points = response.data[0].get('points', 0) if response.data else 0
+                    new_points = current_points + assessment['points']
+                    supabase.table('users').update({'points': new_points}).eq('id', user_id).execute()
+            except Exception as e:
+                print(f"Error updating points: {e}")
+
+        return jsonify({
+            'results': results,
+            'all_passed': all_passed,
+            'points_earned': assessment['points'] if all_passed else 0
+        })
+
+    except requests.exceptions.RequestException as e:
+        print("Error during API request:", e)
+        return jsonify({'error': 'Failed to execute code. Please try again.'}), 500
+    except Exception as e:
+        print("Unexpected error:", e)
+        return jsonify({'error': 'An unexpected error occurred'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

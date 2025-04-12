@@ -557,13 +557,22 @@
                     },
                     body: JSON.stringify({
                         code: code,
-                        language_id: parseInt(languageId),
+                        language: document.getElementById('language').options[document.getElementById('language').selectedIndex].text.toLowerCase(),
                         input: document.getElementById('custom-input').value
                     })
                 });
 
                 const data = await response.json();
-                outputDiv.innerHTML = data.output || data.error || 'No output';
+                if (data.error) {
+                    outputDiv.innerHTML = `Error: ${data.error}`;
+                } else {
+                    outputDiv.innerHTML = `
+                        <div class="mb-2"><strong>Output:</strong> ${data.stdout || 'No output'}</div>
+                        ${data.stderr ? `<div class="text-red-500"><strong>Error:</strong> ${data.stderr}</div>` : ''}
+                        ${data.time ? `<div class="text-sm text-gray-400">Time: ${data.time}s</div>` : ''}
+                        ${data.memory ? `<div class="text-sm text-gray-400">Memory: ${data.memory}KB</div>` : ''}
+                    `;
+                }
             } catch (error) {
                 outputDiv.innerHTML = `Error: ${error.message}`;
             }

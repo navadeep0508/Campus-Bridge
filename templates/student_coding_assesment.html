@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Coding Assessments</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --primary-color: #020024;
+            --secondary-color: #090979;
+            --accent-color: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --bg-light: rgba(255, 255, 255, 0.1);
+            --bg-dark: #020024;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--gradient-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(2, 0, 36, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-header h2,
+        .sidebar.collapsed .nav-section h3,
+        .sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item {
+            padding: 0.8rem;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .nav-item i {
+            margin-right: 0;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            right: -12px;
+            top: 20px;
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .nav-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-section h3 {
+            color: #A0AEC0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            background: transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            padding: 2rem;
+        }
+
+        /* Problem Card Styles */
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .problem-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .problem-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        .problem-card h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .problem-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .problem-difficulty {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .difficulty-easy {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .difficulty-medium {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .difficulty-hard {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+
+        .problem-points {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+
+        /* Code Editor Modal */
+        .editor-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .editor-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 90%;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            padding: 1rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--bg-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .problem-section {
+            width: 40%;
+            padding: 1rem;
+            overflow-y: auto;
+            background: var(--card-bg);
+        }
+
+        .code-section {
+            width: 60%;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+
+        .code-editor {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .code-controls {
+            padding: 1rem;
+            background: var(--card-bg);
+            border-top: 1px solid var(--bg-light);
+        }
+
+        .output-container {
+            background: rgba(2, 0, 36, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="sidebar-header">
+                <h2>Myinfocam</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Main</h3>
+                    <a href="{{ url_for('home_page') }}" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('mycourse') }}" class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>My Courses</span>
+                    </a>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Coding Tracks</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Institution</h3>
+                    <a href="{{ url_for('institution') }}" class="nav-item">
+                        <i class="fas fa-university"></i>
+                        <span>My Institution</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Academic</h3>
+                    <a href="{{ url_for('attendance') }}" class="nav-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                    <a href="{{ url_for('assignment') }}" class="nav-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a>
+                    <a href="{{ url_for('timetable') }}" class="nav-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Coding</h3>
+                    <a href="{{ url_for('myverse') }}" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Online Compiler</span>
+                    </a>
+                    <a href="#" class="nav-item active">
+                        <i class="fas fa-file-code"></i>
+                        <span>Coding Assignment</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+  
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1>Coding Assessments</h1>
+                <p>Select an assessment to solve and test your skills</p>
+            </div>
+
+            <div class="problems-grid">
+                {% for assessment in assessments %}
+                <div class="problem-card" onclick="openEditor({{ assessment.id }})">
+                    <h3>{{ assessment.title }}</h3>
+                    <p>{{ assessment.description }}</p>
+                    <div class="problem-meta">
+                        <span class="problem-difficulty difficulty-{{ assessment.difficulty }}">{{ assessment.difficulty|title }}</span>
+                        <span class="problem-points">{{ assessment.points }} points</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Code Editor Modal -->
+    <div id="editorModal" class="editor-modal">
+        <div class="editor-content">
+            <div class="editor-header">
+                <h2 id="problemTitle"></h2>
+                <button onclick="closeEditor()" class="text-text-secondary hover:text-accent-color">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="editor-body">
+                <div class="problem-section">
+                    <div id="problemDescription"></div>
+                    <div class="mt-4">
+                        <h3 class="font-bold mb-2">Input Format:</h3>
+                        <p id="inputFormat" class="text-sm text-text-secondary"></p>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="font-bold mb-2">Output Format:</h3>
+                        <p id="outputFormat" class="text-sm text-text-secondary"></p>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="font-bold mb-2">Constraints:</h3>
+                        <p id="constraints" class="text-sm text-text-secondary"></p>
+                    </div>
+                </div>
+                
+                <div class="code-section">
+                    <div class="code-controls">
+                        <select id="language" class="rounded p-2 bg-card-bg text-text-primary border border-bg-light">
+                            <option value="71">Python</option>
+                            <option value="63">JavaScript</option>
+                            <option value="62">Java</option>
+                            <option value="50">C</option>
+                            <option value="54">C++</option>
+                        </select>
+                    </div>
+                    
+                    <div id="editor" class="code-editor"></div>
+                    
+                    <div class="code-controls">
+                        <div class="flex justify-between items-center mb-4">
+                            <button id="runButton" class="bg-accent-color text-primary-color py-2 px-4 rounded hover:bg-opacity-90 transition">
+                                Run Code
+                            </button>
+                            <button id="submitButton" class="bg-green-500 text-primary-color py-2 px-4 rounded hover:bg-opacity-90 transition">
+                                Submit Solution
+                            </button>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-text-secondary mb-2">Custom Input:</label>
+                            <textarea id="customInput" class="w-full rounded p-2 bg-card-bg text-text-primary border border-bg-light" rows="4"></textarea>
+                        </div>
+                        
+                        <div id="output" class="output-container p-4 rounded h-32 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
+    <script>
+        let currentAssessment = null;
+        let editor = null;
+        const assessments = {{ assessments|tojson|safe }};
+
+        // Monaco Editor Setup
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor'), {
+                value: '# Write your code here\n',
+                language: 'python',
+                theme: 'vs-dark',
+                minimap: { enabled: false },
+                fontSize: 14,
+                lineNumbers: 'on',
+                roundedSelection: false,
+                scrollBeyondLastLine: false,
+                readOnly: false,
+                automaticLayout: true
+            });
+        });
+
+        function openEditor(assessmentId) {
+            currentAssessment = assessmentId;
+            const assessment = assessments.find(a => a.id === assessmentId);
+            
+            // Update problem details
+            document.getElementById('problemTitle').textContent = assessment.title;
+            document.getElementById('problemDescription').innerHTML = `<p class="text-text-secondary">${assessment.description}</p>`;
+            document.getElementById('inputFormat').textContent = assessment.input_format;
+            document.getElementById('outputFormat').textContent = assessment.output_format;
+            
+            // Show editor
+            document.getElementById('editorModal').style.display = 'block';
+        }
+
+        function closeEditor() {
+            document.getElementById('editorModal').style.display = 'none';
+            currentAssessment = null;
+        }
+
+        // Handle language change
+        document.getElementById('language').addEventListener('change', function(e) {
+            const languageMap = {
+                '71': 'python',
+                '63': 'javascript',
+                '62': 'java',
+                '50': 'c',
+                '54': 'cpp'
+            };
+            monaco.editor.setModelLanguage(editor.getModel(), languageMap[e.target.value]);
+        });
+
+        // Run button click handler
+        document.getElementById('runButton').addEventListener('click', async function() {
+            const code = editor.getValue();
+            const language = document.getElementById('language').options[document.getElementById('language').selectedIndex].text.toLowerCase();
+            const input = document.getElementById('customInput').value;
+            const outputDiv = document.getElementById('output');
+
+            outputDiv.innerHTML = 'Processing...';
+
+            try {
+                const response = await fetch('/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        language: language,
+                        input: input
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    outputDiv.innerHTML = `Error: ${data.error}`;
+                } else {
+                    outputDiv.innerHTML = `
+                        <div class="mb-2"><strong>Output:</strong> ${data.stdout || 'No output'}</div>
+                        ${data.stderr ? `<div class="text-red-500"><strong>Error:</strong> ${data.stderr}</div>` : ''}
+                        ${data.time ? `<div class="text-sm text-gray-400">Time: ${data.time}s</div>` : ''}
+                        ${data.memory ? `<div class="text-sm text-gray-400">Memory: ${data.memory}KB</div>` : ''}
+                    `;
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        // Submit button click handler
+        document.getElementById('submitButton').addEventListener('click', async function() {
+            const code = editor.getValue();
+            const language = document.getElementById('language').options[document.getElementById('language').selectedIndex].text.toLowerCase();
+            const outputDiv = document.getElementById('output');
+
+            outputDiv.innerHTML = 'Submitting...';
+
+            try {
+                const response = await fetch('/submit_assessment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        assessment_id: currentAssessment,
+                        code: code,
+                        language: language
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    outputDiv.innerHTML = `Error: ${data.error}`;
+                } else {
+                    let resultsHtml = '<div class="space-y-4">';
+                    data.results.forEach((result, index) => {
+                        resultsHtml += `
+                            <div class="p-4 rounded ${result.passed ? 'bg-green-900' : 'bg-red-900'}">
+                                <h4 class="font-bold mb-2">Test Case ${index + 1}</h4>
+                                <p><strong>Input:</strong> ${result.input}</p>
+                                <p><strong>Expected:</strong> ${result.expected}</p>
+                                <p><strong>Actual:</strong> ${result.actual}</p>
+                                <p class="${result.passed ? 'text-green-400' : 'text-red-400'}">
+                                    ${result.passed ? '✓ Passed' : '✗ Failed'}
+                                </p>
+                            </div>
+                        `;
+                    });
+                    resultsHtml += '</div>';
+                    
+                    if (data.all_passed) {
+                        resultsHtml += `<div class="mt-4 p-4 bg-green-900 rounded">
+                            <p class="text-green-400">All test cases passed! You earned ${data.points_earned} points!</p>
+                        </div>`;
+                    }
+                    
+                    outputDiv.innerHTML = resultsHtml;
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const menuToggle = document.getElementById('menuToggle');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            document.querySelector('.main-content').style.marginLeft = 
+                sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
+        });
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-visible');
+        });
+
+        // Responsive sidebar
+        function handleResize() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                document.querySelector('.main-content').style.marginLeft = '0';
+                menuToggle.style.display = 'block';
+            } else {
+                sidebar.classList.remove('collapsed');
+                document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)';
+                menuToggle.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+    </script>
+</body>
+</html>
