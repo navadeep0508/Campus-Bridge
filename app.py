@@ -882,5 +882,374 @@ def get_courses():
         print(f"Error fetching courses: {e}")
         return jsonify({'error': 'Failed to fetch courses'}), 500
 
+@app.route('/code_room')
+def code_room():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    try:
+        # Get all active code rooms
+        rooms_response = supabase.table('code_rooms')\
+            .select('*, participants:code_room_participants(*, user:users(name))')\
+            .eq('is_active', True)\
+            .execute()
+        
+        rooms = rooms_response.data if rooms_response.data else []
+        
+        return render_template('code_room.html', rooms=rooms)
+    except Exception as e:
+        print(f"Error fetching code rooms: {e}")
+        return render_template('code_room.html', error='Failed to load code rooms')
+
+@app.route('/create_code_room', methods=['POST'])
+def create_code_room():
+    try:
+        data = request.json
+        name = data.get('name')
+        language = data.get('language')
+        user_id = session.get('user_id')
+        
+        if not all([name, language, user_id]):
+            return jsonify({'error': 'Missing required fields'}), 400
+            
+        # Create new code room
+        room_data = {
+            'name': name,
+            'created_by': user_id,
+            'language': language,
+            'code': '',
+            'is_active': True
+        }
+        
+        room_response = supabase.table('code_rooms').insert(room_data).execute()
+        room = room_response.data[0] if room_response.data else None
+        
+        if room:
+            # Add creator as participant
+            participant_data = {
+                'room_id': room['id'],
+                'user_id': user_id,
+                'is_online': True
+            }
+            supabase.table('code_room_participants').insert(participant_data).execute()
+            
+            return jsonify({
+                'message': 'Code room created successfully',
+                'room': room
+            })
+            
+        return jsonify({'error': 'Failed to create code room'}), 500
+    except Exception as e:
+        print(f"Error creating code room: {e}")
+        return jsonify({'error': 'Failed to create code room'}), 500
+
+@app.route('/join_code_room/<room_id>', methods=['POST'])
+def join_code_room(room_id):
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        # Convert room_id to integer
+        try:
+            room_id = int(room_id)
+        except ValueError:
+            return jsonify({'error': 'Invalid room ID'}), 400
+            
+        # Check if room exists and is active
+        room_response = supabase.table('code_rooms')\
+            .select('*')\
+            .eq('id', room_id)\
+            .eq('is_active', True)\
+            .execute()
+            
+        if not room_response.data:
+            return jsonify({'error': 'Room not found or inactive'}), 404
+            
+        # Check if user is already a participant
+        existing_participant = supabase.table('code_room_participants')\
+            .select('*')\
+            .eq('room_id', room_id)\
+            .eq('user_id', user_id)\
+            .execute()
+            
+        if not existing_participant.data:
+            # Add user as participant if not already in the room
+            participant_data = {
+                'room_id': room_id,
+                'user_id': user_id,
+                'is_online': True
+            }
+            participant_response = supabase.table('code_room_participants').insert(participant_data).execute()
+            if not participant_response.data:
+                return jsonify({'error': 'Failed to add participant'}), 500
+        
+        # Get room details and participants
+        room = room_response.data[0]
+        participants_response = supabase.table('code_room_participants')\
+            .select('*, user:users(name)')\
+            .eq('room_id', room_id)\
+            .execute()
+            
+        participants = participants_response.data if participants_response.data else []
+        
+        # Get messages for the room
+        messages_response = supabase.table('code_room_messages')\
+            .select('*, user:users(name)')\
+            .eq('room_id', room_id)\
+            .order('created_at', desc=True)\
+            .limit(50)\
+            .execute()
+            
+        messages = messages_response.data if messages_response.data else []
+        
+        return render_template('code_room_page.html', 
+                             room=room, 
+                             participants=participants,
+                             messages=messages)
+    except Exception as e:
+        print(f"Error joining code room: {e}")
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to join code room: {str(e)}'}), 500
+
+@app.route('/update_code/<room_id>', methods=['POST'])
+def update_code(room_id):
+    try:
+        data = request.json
+        code = data.get('code')
+        user_id = session.get('user_id')
+        
+        if not all([code, user_id]):
+            return jsonify({'error': 'Missing required fields'}), 400
+            
+        # Convert room_id to integer
+        try:
+            room_id = int(room_id)
+        except ValueError:
+            return jsonify({'error': 'Invalid room ID'}), 400
+            
+        # Check if user is a participant
+        participant_response = supabase.table('code_room_participants')\
+            .select('*')\
+            .eq('room_id', room_id)\
+            .eq('user_id', user_id)\
+            .execute()
+            
+        if not participant_response.data:
+            return jsonify({'error': 'Not a participant in this room'}), 403
+            
+        # Update code
+        supabase.table('code_rooms')\
+            .update({'code': code})\
+            .eq('id', room_id)\
+            .execute()
+            
+        return jsonify({'message': 'Code updated successfully'})
+    except Exception as e:
+        print(f"Error updating code: {e}")
+        return jsonify({'error': 'Failed to update code'}), 500
+
+@app.route('/leave_code_room/<room_id>', methods=['POST'])
+def leave_code_room(room_id):
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        # Remove user from participants
+        supabase.table('code_room_participants')\
+            .delete()\
+            .eq('room_id', room_id)\
+            .eq('user_id', user_id)\
+            .execute()
+            
+        # Check if room is empty and deactivate if needed
+        participants_response = supabase.table('code_room_participants')\
+            .select('*')\
+            .eq('room_id', room_id)\
+            .execute()
+            
+        if not participants_response.data:
+            supabase.table('code_rooms')\
+                .update({'is_active': False})\
+                .eq('id', room_id)\
+                .execute()
+                
+        return jsonify({'message': 'Left code room successfully'})
+    except Exception as e:
+        print(f"Error leaving code room: {e}")
+        return jsonify({'error': 'Failed to leave code room'}), 500
+
+@app.route('/get_room_messages/<int:room_id>')
+def get_room_messages(room_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        # Check if user is a participant
+        participant_response = supabase.table('code_room_participants').select('*').eq('room_id', room_id).eq('user_id', session['user_id']).execute()
+        if not participant_response.data:
+            return jsonify({'error': 'You are not a participant in this room'}), 403
+
+        # Get messages with user details
+        messages_response = supabase.table('code_room_messages').select('*, user:users(name)').eq('room_id', room_id).order('created_at', desc=True).limit(50).execute()
+
+        return jsonify({
+            'messages': messages_response.data
+        })
+
+    except Exception as e:
+        print(f"Error fetching messages: {str(e)}")
+        return jsonify({'error': 'Failed to fetch messages'}), 500
+
+@app.route('/send_message/<room_id>', methods=['POST'])
+def send_message(room_id):
+    try:
+        data = request.json
+        message = data.get('message')
+        user_id = session.get('user_id')
+        
+        if not all([message, user_id]):
+            return jsonify({'error': 'Missing required fields'}), 400
+            
+        # Convert room_id to integer
+        try:
+            room_id = int(room_id)
+        except ValueError:
+            return jsonify({'error': 'Invalid room ID'}), 400
+            
+        # Check if user is a participant
+        participant_response = supabase.table('code_room_participants')\
+            .select('*')\
+            .eq('room_id', room_id)\
+            .eq('user_id', user_id)\
+            .execute()
+            
+        if not participant_response.data:
+            return jsonify({'error': 'Not a participant in this room'}), 403
+            
+        # Send message
+        message_data = {
+            'room_id': room_id,
+            'user_id': user_id,
+            'message': message,
+            'created_at': 'now()'
+        }
+        
+        supabase.table('code_room_messages').insert(message_data).execute()
+        
+        return jsonify({'message': 'Message sent successfully'})
+    except Exception as e:
+        print(f"Error sending message: {e}")
+        return jsonify({'error': 'Failed to send message'}), 500
+
+@app.route('/send_code_room_message/<int:room_id>', methods=['POST'])
+def send_code_room_message(room_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        if not data or 'message' not in data:
+            return jsonify({'error': 'Message is required'}), 400
+
+        user_id = int(session['user_id'])
+
+        # Check if room exists and is active
+        room_response = supabase.table('code_rooms').select('*').eq('id', room_id).eq('is_active', True).execute()
+        if not room_response.data:
+            return jsonify({'error': 'Room not found or inactive'}), 404
+
+        # Check if user is a participant
+        participant_response = supabase.table('code_room_participants').select('*').eq('room_id', room_id).eq('user_id', user_id).execute()
+        if not participant_response.data:
+            return jsonify({'error': 'You are not a participant in this room'}), 403
+
+        # Get user name
+        user_response = supabase.table('users').select('name').eq('id', user_id).execute()
+        user_name = user_response.data[0]['name'] if user_response.data else 'Unknown'
+
+        # Insert message
+        message_data = {
+            'room_id': room_id,
+            'user_id': user_id,
+            'message': data['message']
+        }
+        
+        message_response = supabase.table('code_room_messages').insert(message_data).execute()
+        
+        if not message_response.data:
+            return jsonify({'error': 'Failed to send message'}), 500
+
+        created_message = message_response.data[0]
+
+        return jsonify({
+            'data': {
+                'id': created_message['id'],
+                'room_id': room_id,
+                'user_id': user_id,
+                'user_name': user_name,
+                'message': data['message'],
+                'created_at': created_message['created_at']
+            }
+        })
+
+    except Exception as e:
+        print(f"Error sending message: {str(e)}")
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to send message: {str(e)}'}), 500
+
+@app.route('/code_room_page/<room_id>')
+def code_room_page(room_id):
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return redirect(url_for('login'))
+            
+        # Convert room_id to integer
+        try:
+            room_id = int(room_id)
+        except ValueError:
+            return redirect(url_for('code_room'))
+            
+        # Get room details
+        room_response = supabase.table('code_rooms')\
+            .select('*')\
+            .eq('id', room_id)\
+            .eq('is_active', True)\
+            .execute()
+            
+        if not room_response.data:
+            return redirect(url_for('code_room'))
+            
+        room = room_response.data[0]
+        
+        # Get participants
+        participants_response = supabase.table('code_room_participants')\
+            .select('*, user:users(name)')\
+            .eq('room_id', room_id)\
+            .execute()
+            
+        participants = participants_response.data if participants_response.data else []
+        
+        # Get messages
+        messages_response = supabase.table('code_room_messages')\
+            .select('*, user:users(name)')\
+            .eq('room_id', room_id)\
+            .order('created_at', desc=True)\
+            .limit(50)\
+            .execute()
+            
+        messages = messages_response.data if messages_response.data else []
+        
+        return render_template('code_room_page.html', 
+                             room=room, 
+                             participants=participants,
+                             messages=messages)
+    except Exception as e:
+        print(f"Error loading code room page: {e}")
+        return redirect(url_for('code_room'))
+
 if __name__ == '__main__':
     app.run(debug=True)
