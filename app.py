@@ -4,6 +4,7 @@ import time
 from supabase import create_client, Client
 import bcrypt
 import traceback
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDM1MjYxNSwiZXhwIjoyMDU5OTI4NjE1fQ.qeufhcj6ypy97jOu0BHIRfqTnz9ZJNHoktibYy_p2NY'  # Ensure a proper secret key is set
@@ -64,6 +65,14 @@ CODING_PROBLEMS = {
         ]
     }
 }
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get('role') != 'admin':
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 def home():
@@ -141,7 +150,11 @@ def login():
                 if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
                     session['user_id'] = user['id']
                     session['role'] = user['role']  # Store the user's role in the session
-                    if user['role'] == 'faculty':
+                    
+                    # Check if user is admin
+                    if user['role'] == 'admin':
+                        return redirect(url_for('dashboard_admin'))
+                    elif user['role'] == 'faculty':
                         session['faculty_id'] = user['id']  # Set faculty_id for faculty users
                         return redirect(url_for('faculty_home'))
                     else:
@@ -508,16 +521,140 @@ def institution():
     return render_template('my institut.html')
 
 @app.route('/faculty/admin')
+@admin_required
 def faculty_admin():
-    return render_template('admin_faculty.html')
+    try:
+        # Fetch all faculty members
+        faculty_response = supabase.table('users')\
+            .select('id, name, email, subject, branch, created_at')\
+            .eq('role', 'faculty')\
+            .execute()
+        
+        faculty = faculty_response.data if faculty_response.data else []
+        
+        # Fetch faculty sections
+        sections_response = supabase.table('faculty_sections')\
+            .select('faculty_id, section')\
+            .execute()
+        
+        # Create a map of faculty to their sections
+        faculty_sections = {}
+        for record in sections_response.data:
+            if record['faculty_id'] not in faculty_sections:
+                faculty_sections[record['faculty_id']] = []
+            faculty_sections[record['faculty_id']].append(record['section'])
+        
+        # Add sections to faculty data
+        for member in faculty:
+            member['sections'] = faculty_sections.get(member['id'], [])
+        
+        return render_template('admin_faculty.html', faculty=faculty)
+    except Exception as e:
+        print(f"Error fetching faculty data: {e}")
+        traceback.print_exc()
+        return render_template('admin_faculty.html', error='Failed to load faculty data')
 
 @app.route('/students/admin')
+@admin_required
 def students_admin():
-    return render_template('admin_students.html')
+    try:
+        # Fetch all students
+        students_response = supabase.table('users')\
+            .select('id, name, email, roll_number, branch, section, semester, created_at')\
+            .eq('role', 'student')\
+            .execute()
+        
+        students = students_response.data if students_response.data else []
+        
+        # Fetch attendance for each student
+        attendance_response = supabase.table('attendance')\
+            .select('student_id, attended_classes, total_classes')\
+            .execute()
+        
+        # Create a map of student to their attendance
+        student_attendance = {}
+        for record in attendance_response.data:
+            student_attendance[record['student_id']] = {
+                'attended': record['attended_classes'],
+                'total': record['total_classes'],
+                'percentage': round((record['attended_classes'] / record['total_classes'] * 100) if record['total_classes'] > 0 else 0, 2)
+            }
+        
+        # Add attendance to student data
+        for student in students:
+            student['attendance'] = student_attendance.get(student['id'], {
+                'attended': 0,
+                'total': 0,
+                'percentage': 0
+            })
+        
+        return render_template('admin_students.html', students=students)
+    except Exception as e:
+        print(f"Error fetching student data: {e}")
+        traceback.print_exc()
+        return render_template('admin_students.html', error='Failed to load student data')
 
 @app.route('/dashboard/admin')
+@admin_required
 def dashboard_admin():
-    return render_template('my admin.html')
+    try:
+        # Fetch statistics
+        students_response = supabase.table('users').select('count').eq('role', 'student').execute()
+        faculty_response = supabase.table('users').select('count').eq('role', 'faculty').execute()
+        courses_response = supabase.table('courses').select('count').execute()
+        
+        # Fetch attendance data
+        attendance_response = supabase.table('attendance').select('attended_classes, total_classes').execute()
+        total_attended = sum(record['attended_classes'] for record in attendance_response.data)
+        total_classes = sum(record['total_classes'] for record in attendance_response.data)
+        avg_attendance = round((total_attended / total_classes * 100) if total_classes > 0 else 0, 2)
+        
+        # Fetch recent activities
+        assignments_response = supabase.table('assessments').select('*').order('created_at', desc=True).limit(5).execute()
+        coding_assessments_response = supabase.table('coding_assessments').select('*').order('created_at', desc=True).limit(5).execute()
+        
+        recent_activities = []
+        for assignment in assignments_response.data:
+            recent_activities.append({
+                'type': 'assignment',
+                'title': assignment['subject'],
+                'description': assignment['description'],
+                'date': assignment['created_at']
+            })
+        
+        for assessment in coding_assessments_response.data:
+            recent_activities.append({
+                'type': 'coding_assessment',
+                'title': assessment['title'],
+                'description': assessment['description'],
+                'date': assessment['created_at']
+            })
+        
+        # Sort activities by date
+        recent_activities.sort(key=lambda x: x['date'], reverse=True)
+        
+        return render_template('admin.html', 
+            stats={
+                'total_students': students_response.data[0]['count'],
+                'total_faculty': faculty_response.data[0]['count'],
+                'total_courses': courses_response.data[0]['count'],
+                'avg_attendance': avg_attendance
+            },
+            recent_activities=recent_activities
+        )
+    except Exception as e:
+        print(f"Error fetching dashboard data: {e}")
+        traceback.print_exc()
+        return render_template('admin.html', 
+            error='Failed to load dashboard data',
+            stats={
+                'total_students': 0,
+                'total_faculty': 0,
+                'total_courses': 0,
+                'avg_attendance': 0
+            },
+            recent_activities=[]
+        )
     
 @app.route('/timetable')
 def timetable():
@@ -1647,6 +1784,99 @@ def get_faculty_assignments():
     except Exception as e:
         print(f"Error fetching assignments: {str(e)}")
         return jsonify({'error': 'Failed to fetch assignments'}), 500
+
+@app.route('/add_faculty', methods=['POST'])
+@admin_required
+def add_faculty():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
+        roll_number = data.get('roll_number')
+        branch = data.get('branch')
+        sections = data.get('sections')
+
+        # Hash the password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # Insert faculty into users table
+        faculty_data = {
+            'name': name,
+            'email': email,
+            'password': hashed_password,
+            'roll_number': roll_number,
+            'branch': branch,
+            'role': 'faculty'
+        }
+        response = supabase.table('users').insert(faculty_data).execute()
+        faculty_id = response.data[0]['id']
+
+        # Insert faculty sections
+        for section in sections.split(','):
+            section_data = {
+                'faculty_id': faculty_id,
+                'section': section.strip()
+            }
+            supabase.table('faculty_sections').insert(section_data).execute()
+
+        return jsonify({'success': True, 'message': 'Faculty added successfully'})
+    except Exception as e:
+        print(f"Error adding faculty: {e}")
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': 'Failed to add faculty'}), 500
+
+@app.route('/add_student', methods=['POST'])
+@admin_required
+def add_student():
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['name', 'email', 'password', 'roll_number', 'branch', 'section', 'semester']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+
+        # Check if email already exists
+        existing_user = supabase.table('users').select('id').eq('email', data['email']).execute()
+        if existing_user.data:
+            return jsonify({'success': False, 'message': 'Email already exists'}), 400
+
+        # Hash the password
+        hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # Prepare student data
+        student_data = {
+            'name': data['name'],
+            'email': data['email'],
+            'password': hashed_password,
+            'roll_number': data['roll_number'],
+            'branch': data['branch'],
+            'section': data['section'],
+            'semester': data['semester'],
+            'role': 'student'
+        }
+
+        # Insert student into users table
+        response = supabase.table('users').insert(student_data).execute()
+        
+        if not response.data:
+            return jsonify({'success': False, 'message': 'Failed to add student'}), 500
+
+        # Initialize attendance record
+        attendance_data = {
+            'student_id': response.data[0]['id'],
+            'attended_classes': 0,
+            'total_classes': 0
+        }
+        supabase.table('attendance').insert(attendance_data).execute()
+
+        return jsonify({'success': True, 'message': 'Student added successfully'})
+    except Exception as e:
+        print(f"Error adding student: {e}")
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': 'Failed to add student'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

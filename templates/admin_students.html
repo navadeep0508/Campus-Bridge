@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Campus Bridge</title>
+    <title>Student Management - Campus Bridge</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -118,34 +118,6 @@
             font-weight: 600;
         }
 
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-
-        .admin-profile img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid var(--accent-color);
-        }
-
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1001;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
         .nav-section {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -209,146 +181,6 @@
         .page-title {
             font-size: 1.5rem;
             font-weight: 600;
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            width: 300px;
-        }
-
-        .search-bar i {
-            color: var(--text-secondary);
-            margin-right: 0.5rem;
-        }
-
-        .search-bar input {
-            border: none;
-            background: none;
-            outline: none;
-            width: 100%;
-            color: var(--text-primary);
-        }
-
-        .search-bar input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .top-nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .notification-btn {
-            position: relative;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--danger-color);
-            color: white;
-            font-size: 0.7rem;
-            padding: 0.2rem 0.4rem;
-            border-radius: 50%;
-        }
-
-        .logout-btn {
-            background: rgba(255, 71, 87, 0.2);
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .logout-btn:hover {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        /* Dashboard Content */
-        .dashboard-content {
-            padding: 1rem 0;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .stat-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 212, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-color);
-        }
-
-        .stat-title {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-change {
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .stat-change.positive {
-            color: var(--success-color);
-        }
-
-        .stat-change.negative {
-            color: var(--danger-color);
         }
 
         /* Tables */
@@ -465,10 +297,6 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .menu-toggle {
-                display: block;
-            }
-
             .sidebar {
                 transform: translateX(-100%);
             }
@@ -479,14 +307,6 @@
 
             .main-content {
                 margin-left: 0;
-            }
-
-            .search-bar {
-                width: 200px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -510,16 +330,9 @@
     </style>
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
-
     <div class="admin-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i class="fas fa-chevron-left"></i>
-            </button>
             <div class="sidebar-header">
                 <h2>Admin Panel</h2>
             </div>
@@ -527,7 +340,7 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="{{ url_for('dashboard_admin') }}" class="nav-item active">
+                    <a href="{{ url_for('dashboard_admin') }}" class="nav-item">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                     </a>
@@ -539,7 +352,7 @@
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Faculty</span>
                     </a>
-                    <a href="{{ url_for('students_admin') }}" class="nav-item">
+                    <a href="{{ url_for('students_admin') }}" class="nav-item active">
                         <i class="fas fa-user-graduate"></i>
                         <span>Students</span>
                     </a>
@@ -551,97 +364,59 @@
         <main class="main-content">
             <!-- Top Navigation -->
             <div class="top-nav">
-                <h1 class="page-title">Dashboard</h1>
+                <h1 class="page-title">Student Management</h1>
+                <div class="table-actions">
+                    <button class="table-btn" onclick="showAddStudentModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Student
+                    </button>
+                </div>
             </div>
 
-            <!-- Dashboard Content -->
-            <div class="dashboard-content">
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-user-graduate"></i>
-                            </div>
-                        </div>
-                        <div class="stat-title">Total Students</div>
-                        <div class="stat-value">{{ stats.total_students }}</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>Active</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-chalkboard-teacher"></i>
-                            </div>
-                        </div>
-                        <div class="stat-title">Total Faculty</div>
-                        <div class="stat-value">{{ stats.total_faculty }}</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>Active</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-book"></i>
-                            </div>
-                        </div>
-                        <div class="stat-title">Total Courses</div>
-                        <div class="stat-value">{{ stats.total_courses }}</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>Active</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                        </div>
-                        <div class="stat-title">Average Attendance</div>
-                        <div class="stat-value">{{ stats.avg_attendance }}%</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>Overall</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activities -->
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3 class="table-title">Recent Activities</h3>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Title</th>
-                                <th>Description</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for activity in recent_activities %}
-                            <tr>
-                                <td>
-                                    <span class="status-badge {% if activity.type == 'assignment' %}status-active{% else %}status-pending{% endif %}">
-                                        {{ activity.type }}
-                                    </span>
-                                </td>
-                                <td>{{ activity.title }}</td>
-                                <td>{{ activity.description }}</td>
-                                <td>{{ activity.date }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Student Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Roll Number</th>
+                            <th>Email</th>
+                            <th>Branch</th>
+                            <th>Section</th>
+                            <th>Semester</th>
+                            <th>Attendance</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.roll_number }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.branch }}</td>
+                            <td>{{ student.section }}</td>
+                            <td>{{ student.semester }}</td>
+                            <td>
+                                <span class="status-badge {% if student.attendance.percentage >= 75 %}status-active{% elif student.attendance.percentage >= 50 %}status-pending{% else %}status-inactive{% endif %}">
+                                    {{ student.attendance.percentage }}%
+                                </span>
+                                <small>({{ student.attendance.attended }}/{{ student.attendance.total }})</small>
+                            </td>
+                            <td>{{ student.created_at }}</td>
+                            <td>
+                                <button class="action-btn" onclick="editStudent('{{ student.id }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteStudent('{{ student.id }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </main>
     </div>
@@ -650,7 +425,6 @@
         // Sidebar toggle functionality
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
-        const menuToggle = document.getElementById('menuToggle');
 
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
@@ -658,46 +432,35 @@
                 sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
         });
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
         // Responsive sidebar
         function handleResize() {
             if (window.innerWidth <= 768) {
                 sidebar.classList.add('collapsed');
                 document.querySelector('.main-content').style.marginLeft = '0';
-                menuToggle.style.display = 'block';
             } else {
                 sidebar.classList.remove('collapsed');
                 document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)';
-                menuToggle.style.display = 'none';
             }
         }
 
         window.addEventListener('resize', handleResize);
         handleResize();
 
-        // Navigation functionality
-        const navItems = document.querySelectorAll('.nav-item');
-        const pageTitle = document.querySelector('.page-title');
+        // Student management functions
+        function showAddStudentModal() {
+            // Implement add student modal
+            alert('Add student functionality coming soon!');
+        }
 
-        navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                // Remove active class from all nav items
-                navItems.forEach(nav => nav.classList.remove('active'));
-                
-                // Add active class to clicked nav item
-                item.classList.add('active');
-                
-                // Update page title
-                const title = item.querySelector('span').textContent;
-                pageTitle.textContent = title;
-                
-                // Here you would typically load the corresponding content
-                // For now, we're just updating the title
-            });
-        });
+        function editStudent(id) {
+            // Implement edit student functionality
+            alert('Edit student functionality coming soon!');
+        }
+
+        function deleteStudent(id) {
+            // Implement delete student functionality
+            alert('Delete student functionality coming soon!');
+        }
     </script>
 </body>
-</html>
+</html> 

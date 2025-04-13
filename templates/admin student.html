@@ -686,6 +686,80 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 212, 255, 0.8);
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            margin: 2rem auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -742,99 +816,83 @@
 
             <!-- Add Student Section -->
             <div class="section-content active" id="add-student-section">
-                <!-- Add Student Form -->
-                <div class="form-container">
-                    <div class="form-header">
-                        <h2 class="form-title">Student Information</h2>
-                        <div class="form-actions">
-                            <button class="form-btn" id="resetFormBtn">
-                                <i class="fas fa-redo"></i>
-                                <span>Reset</span>
-                            </button>
-                            <button class="form-btn cancel" id="cancelFormBtn">
+                <!-- Add Student Modal -->
+                <div class="modal" id="addStudentModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title">Add New Student</h2>
+                            <button class="modal-close" id="closeModalBtn">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addStudentForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="studentName" class="form-label">Student Name</label>
+                                        <input type="text" id="studentName" class="form-input" placeholder="Enter student name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="rollNumber" class="form-label">Roll Number</label>
+                                        <input type="text" id="rollNumber" class="form-input" placeholder="Enter roll number" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="semester" class="form-label">Semester</label>
+                                        <select id="semester" class="form-input" required>
+                                            <option value="" disabled selected>Select semester</option>
+                                            <option value="1">Semester 1</option>
+                                            <option value="2">Semester 2</option>
+                                            <option value="3">Semester 3</option>
+                                            <option value="4">Semester 4</option>
+                                            <option value="5">Semester 5</option>
+                                            <option value="6">Semester 6</option>
+                                            <option value="7">Semester 7</option>
+                                            <option value="8">Semester 8</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="branch" class="form-label">Branch</label>
+                                        <select id="branch" class="form-input" required>
+                                            <option value="" disabled selected>Select branch</option>
+                                            <option value="CSE">Computer Science Engineering</option>
+                                            <option value="ECE">Electronics & Communication Engineering</option>
+                                            <option value="EEE">Electrical & Electronics Engineering</option>
+                                            <option value="ME">Mechanical Engineering</option>
+                                            <option value="CE">Civil Engineering</option>
+                                            <option value="IT">Information Technology</option>
+                                            <option value="AI">Artificial Intelligence</option>
+                                            <option value="DS">Data Science</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="section" class="form-label">Section</label>
+                                        <input type="text" id="section" class="form-input" placeholder="Enter section (e.g., A, B, C)" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">Email ID</label>
+                                        <input type="email" id="email" class="form-input" placeholder="Enter email ID" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" id="password" class="form-input" placeholder="Enter password" required>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="form-btn cancel" id="cancelModalBtn">
                                 <i class="fas fa-times"></i>
                                 <span>Cancel</span>
                             </button>
+                            <button class="form-btn" type="submit" form="addStudentForm" id="saveStudentBtn">
+                                <i class="fas fa-save"></i>
+                                <span>Save Student</span>
+                            </button>
                         </div>
-                    </div>
-                    <div class="form-content">
-                        <form id="addStudentForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="studentName" class="form-label">Student Name</label>
-                                    <input type="text" id="studentName" class="form-input" placeholder="Enter student name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="rollNumber" class="form-label">Roll Number</label>
-                                    <input type="text" id="rollNumber" class="form-input" placeholder="Enter roll number" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="semester" class="form-label">Semester</label>
-                                    <select id="semester" class="form-input" required>
-                                        <option value="" disabled selected>Select semester</option>
-                                        <option value="1">Semester 1</option>
-                                        <option value="2">Semester 2</option>
-                                        <option value="3">Semester 3</option>
-                                        <option value="4">Semester 4</option>
-                                        <option value="5">Semester 5</option>
-                                        <option value="6">Semester 6</option>
-                                        <option value="7">Semester 7</option>
-                                        <option value="8">Semester 8</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="branch" class="form-label">Branch</label>
-                                    <select id="branch" class="form-input" required>
-                                        <option value="" disabled selected>Select branch</option>
-                                        <option value="CSE">Computer Science Engineering</option>
-                                        <option value="ECE">Electronics & Communication Engineering</option>
-                                        <option value="EEE">Electrical & Electronics Engineering</option>
-                                        <option value="ME">Mechanical Engineering</option>
-                                        <option value="CE">Civil Engineering</option>
-                                        <option value="IT">Information Technology</option>
-                                        <option value="AI">Artificial Intelligence</option>
-                                        <option value="DS">Data Science</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="section" class="form-label">Section</label>
-                                    <input type="text" id="section" class="form-input" placeholder="Enter section (e.g., A, B, C)" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="role" class="form-label">Role</label>
-                                    <select id="role" class="form-input" required>
-                                        <option value="" disabled selected>Select role</option>
-                                        <option value="student">Student</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="moderator">Moderator</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="email" class="form-label">Email ID</label>
-                                    <input type="email" id="email" class="form-input" placeholder="Enter email ID" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="password" class="form-label">Password</label>
-                                    <input type="password" id="password" class="form-input" placeholder="Enter password" required>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="form-footer">
-                        <button class="form-btn cancel" id="cancelFormBtn2">
-                            <i class="fas fa-times"></i>
-                            <span>Cancel</span>
-                        </button>
-                        <button class="form-btn" type="submit" form="addStudentForm" id="saveStudentBtn">
-                            <i class="fas fa-save"></i>
-                            <span>Save Student</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -871,51 +929,27 @@
                             </tr>
                         </thead>
                         <tbody id="studentTableBody">
+                            {% for student in students %}
                             <tr>
-                                <td>S001</td>
-                                <td>James Anderson</td>
-                                <td>2021001</td>
-                                <td>3</td>
-                                <td>CSE</td>
-                                <td>A</td>
-                                <td>james.anderson@example.com</td>
-                                <td><span class="status-badge status-active">Active</span></td>
+                                <td>{{ student.id }}</td>
+                                <td>{{ student.name }}</td>
+                                <td>{{ student.roll_number }}</td>
+                                <td>{{ student.semester }}</td>
+                                <td>{{ student.branch }}</td>
+                                <td>{{ student.section }}</td>
+                                <td>{{ student.email }}</td>
                                 <td>
-                                    <button class="action-btn edit-btn" data-id="S001"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn view-btn" data-id="S001"><i class="fas fa-eye"></i></button>
-                                    <button class="action-btn delete-btn" data-id="S001"><i class="fas fa-trash"></i></button>
+                                    <span class="status-badge {% if student.status == 'active' %}status-active{% else %}status-inactive{% endif %}">
+                                        {{ student.status|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="action-btn edit-btn" data-id="{{ student.id }}"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn view-btn" data-id="{{ student.id }}"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn delete-btn" data-id="{{ student.id }}"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>S002</td>
-                                <td>Emma Taylor</td>
-                                <td>2021002</td>
-                                <td>3</td>
-                                <td>ECE</td>
-                                <td>B</td>
-                                <td>emma.taylor@example.com</td>
-                                <td><span class="status-badge status-active">Active</span></td>
-                                <td>
-                                    <button class="action-btn edit-btn" data-id="S002"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn view-btn" data-id="S002"><i class="fas fa-eye"></i></button>
-                                    <button class="action-btn delete-btn" data-id="S002"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>S003</td>
-                                <td>William Martinez</td>
-                                <td>2021003</td>
-                                <td>2</td>
-                                <td>EEE</td>
-                                <td>C</td>
-                                <td>william.martinez@example.com</td>
-                                <td><span class="status-badge status-inactive">Inactive</span></td>
-                                <td>
-                                    <button class="action-btn edit-btn" data-id="S003"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn view-btn" data-id="S003"><i class="fas fa-eye"></i></button>
-                                    <button class="action-btn delete-btn" data-id="S003"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -1017,111 +1051,218 @@
             });
         });
 
-        // Form reset and cancel functionality
-        const resetFormBtn = document.getElementById('resetFormBtn');
-        const cancelFormBtn = document.getElementById('cancelFormBtn');
-        const cancelFormBtn2 = document.getElementById('cancelFormBtn2');
+        // Modal functionality
+        const modal = document.getElementById('addStudentModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
         const addStudentForm = document.getElementById('addStudentForm');
 
-        resetFormBtn.addEventListener('click', () => {
-            addStudentForm.reset();
-            showToast('Form reset successfully', 'success');
-        });
+        // Function to open modal
+        function openModal() {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
 
-        cancelFormBtn.addEventListener('click', () => {
+        // Function to close modal
+        function closeModal() {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
             addStudentForm.reset();
-            showToast('Form cancelled', 'error');
-        });
+        }
 
-        cancelFormBtn2.addEventListener('click', () => {
-            addStudentForm.reset();
-            showToast('Form cancelled', 'error');
+        // Event listeners for modal
+        document.querySelector('.section-tab[data-tab="add-student"]').addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelModalBtn.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
         });
 
         // Form submission
-        const saveStudentBtn = document.getElementById('saveStudentBtn');
-        
         if (addStudentForm) {
-            addStudentForm.addEventListener('submit', (e) => {
+            addStudentForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                // Get form values
-                const studentName = document.getElementById('studentName').value;
-                const rollNumber = document.getElementById('rollNumber').value;
-                const semester = document.getElementById('semester').value;
-                const branch = document.getElementById('branch').value;
-                const section = document.getElementById('section').value;
-                const role = document.getElementById('role').value;
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                
-                // Generate a unique ID (in a real app, this would come from the backend)
-                const studentId = `S${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
-                
-                // Create new student object
-                const newStudent = {
-                    id: studentId,
-                    name: studentName,
-                    rollNumber: rollNumber,
-                    semester: semester,
-                    branch: branch,
-                    section: section,
-                    email: email,
-                    status: 'Active'
+                const studentData = {
+                    name: document.getElementById('studentName').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    roll_number: document.getElementById('rollNumber').value,
+                    branch: document.getElementById('branch').value,
+                    section: document.getElementById('section').value,
+                    semester: document.getElementById('semester').value,
+                    role: 'student'
                 };
                 
-                // Add student to table
-                addStudentToTable(newStudent);
-                
-                // Update statistics
-                updateStatistics();
-                
-                // Show success message
-                showToast('Student added successfully!', 'success');
-                
-                // Reset form
-                addStudentForm.reset();
-                
-                // Switch to student list tab
-                document.querySelector('[data-tab="student-list"]').click();
+                try {
+                    const response = await fetch('/add_student', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(studentData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        showToast('Student added successfully!', 'success');
+                        closeModal();
+                        loadStudentList();
+                    } else {
+                        showToast(data.error || 'Failed to add student', 'error');
+                    }
+                } catch (error) {
+                    showToast('An error occurred while adding student', 'error');
+                    console.error('Error:', error);
+                }
             });
         }
 
-        // Function to add student to table
-        function addStudentToTable(student) {
-            const tableBody = document.getElementById('studentTableBody');
+        // Load student list
+        async function loadStudentList() {
+            try {
+                const response = await fetch('/get_students');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const tbody = document.getElementById('studentTableBody');
+                    tbody.innerHTML = '';
+                    
+                    data.students.forEach(student => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${student.id}</td>
+                            <td>${student.name}</td>
+                            <td>${student.roll_number}</td>
+                            <td>${student.semester}</td>
+                            <td>${student.branch}</td>
+                            <td>${student.section}</td>
+                            <td>${student.email}</td>
+                            <td>
+                                <span class="status-badge ${student.status === 'active' ? 'status-active' : 'status-inactive'}">
+                                    ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="action-btn edit-btn" data-id="${student.id}"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn view-btn" data-id="${student.id}"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn delete-btn" data-id="${student.id}"><i class="fas fa-trash"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    showToast('Failed to load student list', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred while loading student list', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // Handle edit button clicks
+        document.addEventListener('click', async function(e) {
+            if (e.target.closest('.edit-btn')) {
+                const studentId = e.target.closest('.edit-btn').dataset.id;
+                try {
+                    const response = await fetch(`/get_student/${studentId}`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Populate form with student data
+                        document.getElementById('studentName').value = data.name;
+                        document.getElementById('email').value = data.email;
+                        document.getElementById('rollNumber').value = data.roll_number;
+                        document.getElementById('branch').value = data.branch;
+                        document.getElementById('section').value = data.section;
+                        document.getElementById('semester').value = data.semester;
+                        
+                        // Switch to add student tab
+                        document.getElementById('add-student-tab').click();
+                    } else {
+                        showToast(data.error || 'Failed to load student data', 'error');
+                    }
+                } catch (error) {
+                    showToast('An error occurred while loading student data', 'error');
+                    console.error('Error:', error);
+                }
+            }
             
-            // Create new row
-            const newRow = document.createElement('tr');
+            if (e.target.closest('.delete-btn')) {
+                if (confirm('Are you sure you want to delete this student?')) {
+                    const studentId = e.target.closest('.delete-btn').dataset.id;
+                    try {
+                        const response = await fetch(`/delete_student/${studentId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            showToast('Student deleted successfully!', 'success');
+                            loadStudentList();
+                        } else {
+                            const data = await response.json();
+                            showToast(data.error || 'Failed to delete student', 'error');
+                        }
+                    } catch (error) {
+                        showToast('An error occurred while deleting student', 'error');
+                        console.error('Error:', error);
+                    }
+                }
+            }
+        });
+
+        // Notification function
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
             
-            // Set row HTML
-            newRow.innerHTML = `
-                <td>${student.id}</td>
-                <td>${student.name}</td>
-                <td>${student.rollNumber}</td>
-                <td>${student.semester}</td>
-                <td>${student.branch}</td>
-                <td>${student.section}</td>
-                <td>${student.email}</td>
-                <td><span class="status-badge status-active">Active</span></td>
-                <td>
-                    <button class="action-btn edit-btn" data-id="${student.id}"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn view-btn" data-id="${student.id}"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn delete-btn" data-id="${student.id}"><i class="fas fa-trash"></i></button>
-                </td>
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Set toast content
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                </div>
+                <div class="toast-message">${message}</div>
+                <div class="toast-close">
+                    <i class="fas fa-times"></i>
+                </div>
             `;
             
-            // Add row to table
-            tableBody.appendChild(newRow);
+            // Add toast to container
+            toastContainer.appendChild(toast);
             
-            // Add event listeners to new buttons
-            const editBtn = newRow.querySelector('.edit-btn');
-            const viewBtn = newRow.querySelector('.view-btn');
-            const deleteBtn = newRow.querySelector('.delete-btn');
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
             
-            editBtn.addEventListener('click', () => editStudent(student.id));
-            viewBtn.addEventListener('click', () => viewStudent(student.id));
-            deleteBtn.addEventListener('click', () => deleteStudent(student.id));
+            // Add event listener to close button
+            const closeBtn = toast.querySelector('.toast-close');
+            closeBtn.addEventListener('click', () => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            });
+            
+            // Auto remove toast after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode === toastContainer) {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode === toastContainer) {
+                            toastContainer.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            }, 5000);
         }
 
         // Function to update statistics
@@ -1178,94 +1319,6 @@
                 const li = document.createElement('li');
                 li.textContent = `Semester ${semester}: ${semesterStats[semester]}`;
                 semesterStatsList.appendChild(li);
-            }
-        }
-
-        // Function to show toast notification
-        function showToast(message, type = 'success') {
-            const toastContainer = document.getElementById('toastContainer');
-            
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            
-            // Set toast content
-            toast.innerHTML = `
-                <div class="toast-icon">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-                </div>
-                <div class="toast-message">${message}</div>
-                <div class="toast-close">
-                    <i class="fas fa-times"></i>
-                </div>
-            `;
-            
-            // Add toast to container
-            toastContainer.appendChild(toast);
-            
-            // Show toast
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            
-            // Add event listener to close button
-            const closeBtn = toast.querySelector('.toast-close');
-            closeBtn.addEventListener('click', () => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    toastContainer.removeChild(toast);
-                }, 300);
-            });
-            
-            // Auto remove toast after 5 seconds
-            setTimeout(() => {
-                if (toast.parentNode === toastContainer) {
-                    toast.classList.remove('show');
-                    setTimeout(() => {
-                        if (toast.parentNode === toastContainer) {
-                            toastContainer.removeChild(toast);
-                        }
-                    }, 300);
-                }
-            }, 5000);
-        }
-
-        // Add event listeners to existing buttons
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', () => editStudent(btn.getAttribute('data-id')));
-        });
-        
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', () => viewStudent(btn.getAttribute('data-id')));
-        });
-        
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => deleteStudent(btn.getAttribute('data-id')));
-        });
-
-        // Function to edit student
-        function editStudent(id) {
-            showToast(`Editing student with ID: ${id}`, 'success');
-            // In a real app, you would fetch student data and populate the form
-        }
-
-        // Function to view student
-        function viewStudent(id) {
-            showToast(`Viewing student with ID: ${id}`, 'success');
-            // In a real app, you would show a modal with student details
-        }
-
-        // Function to delete student
-        function deleteStudent(id) {
-            if (confirm(`Are you sure you want to delete student with ID: ${id}?`)) {
-                // Find and remove the row
-                const row = document.querySelector(`tr td:first-child:contains('${id}')`).parentNode;
-                row.parentNode.removeChild(row);
-                
-                // Update statistics
-                updateStatistics();
-                
-                showToast(`Student with ID: ${id} deleted successfully`, 'success');
             }
         }
 
