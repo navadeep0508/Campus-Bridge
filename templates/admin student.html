@@ -760,6 +760,59 @@
             justify-content: flex-end;
             gap: 1rem;
         }
+
+        /* Hero Section Styles */
+        .hero-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero-content h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .hero-content p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .hero-btn {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .hero-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .hero-btn i {
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -807,15 +860,26 @@
                 <h1 class="page-title">Student Management</h1>
             </div>
 
+            <!-- Hero Section with Add Student Button -->
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h2>Welcome to Student Management</h2>
+                    <p>Manage your students efficiently with our comprehensive dashboard</p>
+                    <button class="hero-btn" id="addStudentHeroBtn">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Add New Student</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Section Tabs -->
             <div class="section-tabs">
-                <div class="section-tab active" data-tab="add-student">Add Student</div>
-                <div class="section-tab" data-tab="student-list">Student List</div>
+                <div class="section-tab active" data-tab="student-list">Student List</div>
                 <div class="section-tab" data-tab="student-stats">Statistics</div>
             </div>
 
             <!-- Add Student Section -->
-            <div class="section-content active" id="add-student-section">
+            <div class="section-content" id="add-student-section">
                 <!-- Add Student Modal -->
                 <div class="modal" id="addStudentModal">
                     <div class="modal-content">
@@ -1011,7 +1075,7 @@
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
             document.querySelector('.main-content').style.marginLeft = 
-                sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
+                sidebar.classList.contains('collapsed') ? '60px' : '250px';
         });
 
         menuToggle.addEventListener('click', () => {
@@ -1026,7 +1090,7 @@
                 menuToggle.style.display = 'block';
             } else {
                 sidebar.classList.remove('collapsed');
-                document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)';
+                document.querySelector('.main-content').style.marginLeft = '250px';
                 menuToggle.style.display = 'none';
             }
         }
@@ -1056,22 +1120,29 @@
         const closeModalBtn = document.getElementById('closeModalBtn');
         const cancelModalBtn = document.getElementById('cancelModalBtn');
         const addStudentForm = document.getElementById('addStudentForm');
+        const addStudentHeroBtn = document.getElementById('addStudentHeroBtn');
 
         // Function to open modal
         function openModal() {
             modal.style.display = 'block';
             document.body.style.overflow = 'hidden';
+            // Reset form when opening modal
+            if (addStudentForm) {
+                addStudentForm.reset();
+            }
         }
 
         // Function to close modal
         function closeModal() {
             modal.style.display = 'none';
             document.body.style.overflow = '';
-            addStudentForm.reset();
+            if (addStudentForm) {
+                addStudentForm.reset();
+            }
         }
 
         // Event listeners for modal
-        document.querySelector('.section-tab[data-tab="add-student"]').addEventListener('click', openModal);
+        addStudentHeroBtn.addEventListener('click', openModal);
         closeModalBtn.addEventListener('click', closeModal);
         cancelModalBtn.addEventListener('click', closeModal);
 
@@ -1110,9 +1181,9 @@
                     const data = await response.json();
                     
                     if (response.ok) {
-                        showToast('Student added successfully!', 'success');
                         closeModal();
                         loadStudentList();
+                        updateStatistics();
                     } else {
                         showToast(data.error || 'Failed to add student', 'error');
                     }
@@ -1156,6 +1227,7 @@
                         `;
                         tbody.appendChild(tr);
                     });
+                    updateStatistics();
                 } else {
                     showToast('Failed to load student list', 'error');
                 }
@@ -1167,8 +1239,12 @@
 
         // Handle edit button clicks
         document.addEventListener('click', async function(e) {
-            if (e.target.closest('.edit-btn')) {
-                const studentId = e.target.closest('.edit-btn').dataset.id;
+            const editBtn = e.target.closest('.edit-btn');
+            const deleteBtn = e.target.closest('.delete-btn');
+            const viewBtn = e.target.closest('.view-btn');
+
+            if (editBtn) {
+                const studentId = editBtn.dataset.id;
                 try {
                     const response = await fetch(`/get_student/${studentId}`);
                     const data = await response.json();
@@ -1182,8 +1258,8 @@
                         document.getElementById('section').value = data.section;
                         document.getElementById('semester').value = data.semester;
                         
-                        // Switch to add student tab
-                        document.getElementById('add-student-tab').click();
+                        // Open modal
+                        openModal();
                     } else {
                         showToast(data.error || 'Failed to load student data', 'error');
                     }
@@ -1193,9 +1269,9 @@
                 }
             }
             
-            if (e.target.closest('.delete-btn')) {
+            if (deleteBtn) {
                 if (confirm('Are you sure you want to delete this student?')) {
-                    const studentId = e.target.closest('.delete-btn').dataset.id;
+                    const studentId = deleteBtn.dataset.id;
                     try {
                         const response = await fetch(`/delete_student/${studentId}`, {
                             method: 'DELETE'
@@ -1212,6 +1288,25 @@
                         showToast('An error occurred while deleting student', 'error');
                         console.error('Error:', error);
                     }
+                }
+            }
+
+            if (viewBtn) {
+                const studentId = viewBtn.dataset.id;
+                try {
+                    const response = await fetch(`/get_student/${studentId}`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Show student details in a modal or dedicated view
+                        showToast(`Viewing details for ${data.name}`, 'success');
+                        // Implement view functionality as needed
+                    } else {
+                        showToast(data.error || 'Failed to load student data', 'error');
+                    }
+                } catch (error) {
+                    showToast('An error occurred while loading student data', 'error');
+                    console.error('Error:', error);
                 }
             }
         });
@@ -1279,7 +1374,7 @@
             
             rows.forEach(row => {
                 const statusCell = row.querySelector('td:nth-child(8)');
-                if (statusCell.textContent.includes('Active')) {
+                if (statusCell.textContent.trim().toLowerCase() === 'active') {
                     activeCount++;
                 } else {
                     inactiveCount++;
@@ -1322,8 +1417,11 @@
             }
         }
 
-        // Initialize statistics
-        updateStatistics();
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudentList();
+            updateStatistics();
+        });
     </script>
 </body>
 </html>

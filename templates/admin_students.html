@@ -327,9 +327,340 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(0, 212, 255, 0.8);
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            margin: 2rem auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .modal-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn.cancel {
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .modal-btn.cancel:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .modal-btn.submit {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+        }
+
+        .modal-btn.submit:hover {
+            opacity: 0.9;
+        }
+
+        /* Section Styles */
+        .section-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .section-content {
+            padding: 1.5rem;
+        }
+
+        /* Form Styles */
+        .student-form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+        }
+
+        /* Enhanced Select Styles */
+        select.form-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d4ff' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.763L10.825 4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 12px;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        select.form-input:hover {
+            border-color: var(--accent-color);
+        }
+
+        select.form-input option {
+            background-color: var(--primary-color);
+            color: var(--text-primary);
+            padding: 0.8rem;
+        }
+
+        select.form-input option:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Branch and Semester specific styles */
+        #branch, #semester {
+            font-weight: 500;
+        }
+
+        #branch option, #semester option {
+            font-size: 0.9rem;
+            padding: 0.8rem 1rem;
+        }
+
+        /* Placeholder style for select */
+        select.form-input:invalid {
+            color: var(--text-secondary);
+        }
+
+        select.form-input option[value=""] {
+            color: var(--text-secondary);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .submit-btn {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+        }
+
+        .submit-btn i {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            select.form-input {
+                background-position: right 0.8rem center;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Add Student Modal -->
+    <div class="modal" id="addStudentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Student</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addStudentForm">
+                    <div class="form-group">
+                        <label class="form-label" for="studentName">Student Name</label>
+                        <input type="text" id="studentName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="rollNumber">Roll Number</label>
+                        <input type="text" id="rollNumber" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="branch">Branch</label>
+                        <select id="branch" class="form-input" required>
+                            <option value="">Select Branch</option>
+                            <option value="CSE">Computer Science Engineering</option>
+                            <option value="ECE">Electronics & Communication Engineering</option>
+                            <option value="EEE">Electrical & Electronics Engineering</option>
+                            <option value="ME">Mechanical Engineering</option>
+                            <option value="CE">Civil Engineering</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="section">Section</label>
+                        <input type="text" id="section" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="semester">Semester</label>
+                        <select id="semester" class="form-input" required>
+                            <option value="">Select Semester</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" id="cancelBtn">Cancel</button>
+                <button class="modal-btn submit" id="submitBtn">Add Student</button>
+            </div>
+        </div>
+    </div>
+
     <div class="admin-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -352,10 +683,6 @@
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Faculty</span>
                     </a>
-                    <a href="{{ url_for('students_admin') }}" class="nav-item active">
-                        <i class="fas fa-user-graduate"></i>
-                        <span>Students</span>
-                    </a>
                 </div>
             </nav>
         </aside>
@@ -365,11 +692,69 @@
             <!-- Top Navigation -->
             <div class="top-nav">
                 <h1 class="page-title">Student Management</h1>
-                <div class="table-actions">
-                    <button class="table-btn" onclick="showAddStudentModal()">
-                        <i class="fas fa-plus"></i>
-                        Add Student
-                    </button>
+            </div>
+
+            <!-- Add Student Section -->
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Add New Student</h2>
+                </div>
+                <div class="section-content">
+                    <form id="addStudentForm" class="student-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="studentName">Student Name</label>
+                                <input type="text" id="studentName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="rollNumber">Roll Number</label>
+                                <input type="text" id="rollNumber" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="email">Email</label>
+                                <input type="email" id="email" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="branch">Branch</label>
+                                <select id="branch" class="form-input" required>
+                                    <option value="">Select Branch</option>
+                                    <option value="CSE">Computer Science Engineering</option>
+                                    <option value="ECE">Electronics & Communication Engineering</option>
+                                    <option value="EEE">Electrical & Electronics Engineering</option>
+                                    <option value="ME">Mechanical Engineering</option>
+                                    <option value="CE">Civil Engineering</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="section">Section</label>
+                                <input type="text" id="section" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="semester">Semester</label>
+                                <select id="semester" class="form-input" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="1">Semester 1</option>
+                                    <option value="2">Semester 2</option>
+                                    <option value="3">Semester 3</option>
+                                    <option value="4">Semester 4</option>
+                                    <option value="5">Semester 5</option>
+                                    <option value="6">Semester 6</option>
+                                    <option value="7">Semester 7</option>
+                                    <option value="8">Semester 8</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-save"></i>
+                                Add Student
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -443,24 +828,73 @@
             }
         }
 
-        window.addEventListener('resize', handleResize);
-        handleResize();
-
         // Student management functions
-        function showAddStudentModal() {
-            // Implement add student modal
-            alert('Add student functionality coming soon!');
+       
+
+        // Modal functionality
+        const modal = document.getElementById('addStudentModal');
+        const addStudentBtn = document.querySelector('.table-btn');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const addStudentForm = document.getElementById('addStudentForm');
+
+        function showModal() {
+            modal.style.display = 'block';
         }
 
-        function editStudent(id) {
-            // Implement edit student functionality
-            alert('Edit student functionality coming soon!');
+        function hideModal() {
+            modal.style.display = 'none';
+            addStudentForm.reset();
         }
 
-        function deleteStudent(id) {
-            // Implement delete student functionality
-            alert('Delete student functionality coming soon!');
-        }
+        addStudentBtn.addEventListener('click', showModal);
+        closeModal.addEventListener('click', hideModal);
+        cancelBtn.addEventListener('click', hideModal);
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+
+        // Form submission
+        addStudentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('studentName').value,
+                roll_number: document.getElementById('rollNumber').value,
+                email: document.getElementById('email').value,
+                branch: document.getElementById('branch').value,
+                section: document.getElementById('section').value,
+                semester: document.getElementById('semester').value
+            };
+
+            try {
+                const response = await fetch('/add_student', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    // Reset form
+                    addStudentForm.reset();
+                    // Refresh the page to show new student
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to add student');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adding the student');
+            }
+        });
     </script>
 </body>
 </html> 
