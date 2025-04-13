@@ -1790,39 +1790,59 @@ def get_faculty_assignments():
 def add_faculty():
     try:
         data = request.get_json()
-        name = data.get('name')
-        email = data.get('email')
-        password = data.get('password')
-        roll_number = data.get('roll_number')
-        branch = data.get('branch')
-        sections = data.get('sections')
+        print("Received data:", data)  # Debug log
+        
+        # Validate required fields
+        required_fields = ['name', 'email', 'password', 'roll_number', 'branch', 'subject', 'sections']
+        for field in required_fields:
+            if not data.get(field):
+                print(f"Missing required field: {field}")  # Debug log
+                return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+
+        # Check if email already exists
+        existing_user = supabase.table('users').select('id').eq('email', data['email']).execute()
+        print("Existing user check:", existing_user.data)  # Debug log
+        if existing_user.data:
+            return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
         # Hash the password
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        print("Password hashed successfully")  # Debug log
 
-        # Insert faculty into users table
+        # Prepare faculty data
         faculty_data = {
-            'name': name,
-            'email': email,
+            'name': data['name'],
+            'email': data['email'],
             'password': hashed_password,
-            'roll_number': roll_number,
-            'branch': branch,
+            'roll_number': data['roll_number'],
+            'branch': data['branch'],
+            'subject': data['subject'],
             'role': 'faculty'
         }
-        response = supabase.table('users').insert(faculty_data).execute()
-        faculty_id = response.data[0]['id']
+        print("Prepared faculty data:", faculty_data)  # Debug log
 
-        # Insert faculty sections
-        for section in sections.split(','):
+        # Insert faculty into users table
+        response = supabase.table('users').insert(faculty_data).execute()
+        print("Database response:", response.data)  # Debug log
+        
+        if not response.data:
+            print("Failed to insert faculty data")  # Debug log
+            return jsonify({'success': False, 'message': 'Failed to add faculty'}), 500
+
+        # Add faculty sections
+        faculty_id = response.data[0]['id']
+        sections = [section.strip() for section in data['sections'].split(',')]
+        
+        for section in sections:
             section_data = {
                 'faculty_id': faculty_id,
-                'section': section.strip()
+                'section': section
             }
             supabase.table('faculty_sections').insert(section_data).execute()
 
         return jsonify({'success': True, 'message': 'Faculty added successfully'})
     except Exception as e:
-        print(f"Error adding faculty: {e}")
+        print(f"Error adding faculty: {e}")  # Debug log
         traceback.print_exc()
         return jsonify({'success': False, 'message': 'Failed to add faculty'}), 500
 
@@ -1874,6 +1894,7 @@ def add_student():
         # Initialize attendance record
         attendance_data = {
             'student_id': response.data[0]['id'],
+            'section': data['section'],
             'attended_classes': 0,
             'total_classes': 0
         }
