@@ -11,15 +11,16 @@
         :root {
             --sidebar-width: 250px;
             --header-height: 60px;
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --bg-dark: #020024;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
             --danger-color: #ff4757;
             --success-color: #2ed573;
             --warning-color: #ffa502;
@@ -33,7 +34,7 @@
         }
 
         body {
-            background: var(--gradient-bg);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -46,14 +47,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-primary);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
         }
 
         .sidebar.collapsed {
@@ -80,7 +81,7 @@
             right: -12px;
             top: 20px;
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             border: none;
             width: 24px;
             height: 24px;
@@ -107,7 +108,7 @@
 
         .sidebar-header {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -116,6 +117,7 @@
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--accent-color);
         }
 
         .admin-profile {
@@ -138,8 +140,8 @@
             top: 1rem;
             left: 1rem;
             z-index: 1001;
-            background: var(--primary-color);
-            color: white;
+            background: var(--accent-color);
+            color: var(--text-light);
             border: none;
             padding: 0.5rem;
             border-radius: 5px;
@@ -148,11 +150,11 @@
 
         .nav-section {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
+            color: var(--text-secondary);
             font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 1rem;
@@ -171,7 +173,7 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             color: var(--accent-color);
         }
 
@@ -192,7 +194,7 @@
         /* Top Navigation */
         .top-nav {
             height: var(--header-height);
-            background: rgba(2, 0, 36, 0.8);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 0 1.5rem;
             display: flex;
@@ -202,22 +204,24 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
             margin-bottom: 2rem;
         }
 
         .page-title {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--accent-color);
         }
 
         .search-bar {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-light);
             padding: 0.5rem 1rem;
             border-radius: 5px;
             width: 300px;
+            border: 1px solid var(--card-border);
         }
 
         .search-bar i {
@@ -299,7 +303,7 @@
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
             transition: transform 0.3s ease;
         }
 
@@ -317,7 +321,7 @@
         .stat-icon {
             width: 40px;
             height: 40px;
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -334,6 +338,7 @@
             font-size: 1.8rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
+            color: var(--accent-color);
         }
 
         .stat-change {
@@ -357,14 +362,14 @@
             backdrop-filter: blur(10px);
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
             overflow: hidden;
             margin-bottom: 2rem;
         }
 
         .table-header {
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -373,6 +378,7 @@
         .table-title {
             font-size: 1.2rem;
             font-weight: 600;
+            color: var(--accent-color);
         }
 
         .table-actions {
@@ -381,7 +387,7 @@
         }
 
         .table-btn {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
             padding: 0.3rem 0.8rem;
@@ -396,7 +402,7 @@
 
         .table-btn:hover {
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
         }
 
         table {
@@ -407,7 +413,7 @@
         th, td {
             padding: 1rem 1.5rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         th {
@@ -421,7 +427,7 @@
         }
 
         tr:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(76, 175, 80, 0.05);
         }
 
         .status-badge {
@@ -496,7 +502,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(2, 0, 36, 0.5);
+            background: rgba(255, 255, 255, 0.5);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -505,7 +511,7 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
+            background: rgba(76, 175, 80, 0.8);
         }
     </style>
 </head>
