@@ -267,21 +267,46 @@
         }
 
         .logout-btn {
-            background: rgba(255, 71, 87, 0.2);
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--danger-color);
+            text-decoration: none;
+            padding: 0.8rem 1.4rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            border: 1.5px solid var(--danger-color);
+            position: relative;
+            overflow: hidden;
         }
 
         .logout-btn:hover {
             background: var(--danger-color);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .logout-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(255, 71, 87, 0.2);
+        }
+
+        .logout-btn i {
+            font-size: 1.15rem;
+            transition: transform 0.3s ease;
+        }
+
+        .logout-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        .logout-btn span {
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            font-weight: 500;
         }
 
         /* Dashboard Content */
@@ -558,6 +583,12 @@
             <!-- Top Navigation -->
             <div class="top-nav">
                 <h1 class="page-title">Dashboard</h1>
+                <div class="top-nav-actions">
+                    <a href="{{ url_for('home') }}" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Dashboard Content -->
