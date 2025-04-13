@@ -1994,8 +1994,14 @@ def delete_student(student_id):
 
 @app.route('/code_review')
 def code_review():
-    if not session.get('user_id'):
-        return redirect(url_for('login'))
     return render_template('code_review.html')
+
+@app.route('/job_match_recommender')
+def job_match_recommender():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    return render_template('job match recommender.html')
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -32,7 +32,7 @@
         }
 
         body {
-            background: var(--primary-gradient);
+            background: var(--gradient-bg);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -170,7 +170,7 @@
             flex: 1;
             margin-left: var(--sidebar-width);
             transition: margin-left 0.3s ease;
-            background: var(--primary-gradient);
+            padding: 2rem;
         }
 
         /* Top Navigation */
@@ -199,7 +199,7 @@
         }
 
         .search-bar i {
-            color: var(--text-secondary);
+            color: var(--text-light);
             margin-right: 0.5rem;
         }
 
@@ -234,8 +234,8 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background: var(--accent-color);
-            color: var(--text-light);
+            background: var(--primary-color);
+            color: white;
             font-size: 0.7rem;
             padding: 0.2rem 0.4rem;
             border-radius: 50%;
@@ -279,8 +279,6 @@
             object-fit: cover;
             border: 3px solid var(--accent-color);
             position: relative;
-            overflow: hidden;
-            background-color: var(--bg-light);
         }
 
         .profile-photo-edit {
@@ -288,7 +286,7 @@
             bottom: 10px;
             right: 10px;
             background: var(--accent-color);
-            color: var(--text-light);
+            color: var(--primary-color);
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -308,13 +306,7 @@
 
         .profile-photo-container {
             position: relative;
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
         }
 
         .profile-info h1 {
@@ -344,9 +336,9 @@
             align-items: flex-start;
             gap: 1rem;
             padding: 1.5rem;
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .detail-item i {
@@ -389,15 +381,15 @@
         /* Welcome Section Styles */
         .welcome-section {
             margin-bottom: 2rem;
-            background: var(--card-bg);
+            background: rgba(2, 0, 36, 0.5);
             backdrop-filter: blur(10px);
             padding: 2.5rem;
             border-radius: 15px;
-            color: var(--text-primary);
+            color: white;
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .welcome-section::before {
@@ -449,11 +441,11 @@
 
         .welcome-btn-primary {
             background: var(--accent-color);
-            color: var(--text-light);
+            color: var(--primary-color);
         }
 
         .welcome-btn-secondary {
-            background: transparent;
+            background: rgba(0, 212, 255, 0.1);
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
         }
@@ -520,7 +512,7 @@
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .stat-icon {
@@ -589,7 +581,7 @@
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .schedule-time {
@@ -619,7 +611,7 @@
             padding: 0.2rem 0.5rem;
             border-radius: 5px;
             margin-top: 0.5rem;
-            background: rgba(76, 175, 80, 0.1);
+            background: rgba(0, 212, 255, 0.1);
             color: var(--accent-color);
         }
 
@@ -658,7 +650,7 @@
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .activity-icon {
@@ -748,7 +740,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--dark-gradient);
+            background: rgba(2, 0, 36, 0.5);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -771,7 +763,7 @@
             top: 50%;
             transform: translateY(-50%);
             background: var(--accent-color);
-            color: var(--text-light);
+            color: var(--primary-color);
             font-size: 0.7rem;
             padding: 0.2rem 0.4rem;
             border-radius: 50%;
@@ -811,19 +803,278 @@
             border-radius: 2px;
         }
 
-        .notification-btn {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 1.2rem;
+        /* Problem Card Styles */
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .problem-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
             cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .problem-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        .problem-card h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .problem-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .problem-difficulty {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .difficulty-easy {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .difficulty-medium {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .difficulty-hard {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+
+        .problem-points {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+
+        .hero-section {
+            padding: 3rem 2rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--card-border);
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .career-paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .career-path-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--card-border);
             transition: all 0.3s ease;
         }
 
-        .notification-btn:hover {
+        .career-path-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .path-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .path-icon i {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .language-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .tag {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--accent-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .career-path-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .career-path-card ul li {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .career-path-card ul li:before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+        .view-roadmap {
+            color: var(--accent-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .view-roadmap:hover {
+            text-decoration: underline;
+            color: var(--text-primary);
+        }
+
+        .skill-roadmap-section {
+            margin-top: 3rem;
+        }
+
+        .skill-roadmap-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .roadmap-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .roadmap-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .roadmap-card h4 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .roadmap-steps {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+
+        .roadmap-steps li {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .roadmap-steps li:before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .career-paths-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn i {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+
+        .nav-btn span {
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
         .logout-btn {
@@ -855,11 +1106,6 @@
             font-size: 0.95rem;
             letter-spacing: 0.5px;
         }
-
-        /* Remove old notification button styles */
-        .notification-btn, .notification-badge {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -874,13 +1120,13 @@
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
-                <h2>Campus Bridge</h2>
+                <h2>Myinfocam</h2>
             </div>
-
+            
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
-                    <a href="{{ url_for('home_page') }}" class="nav-item active">
+                    <a href="{{ url_for('home_page') }}" class="nav-item">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
@@ -892,7 +1138,7 @@
 
                 <div class="nav-section">
                     <h3>Institution</h3>
-                    <a href="{{ url_for('institution') }}" class="nav-item">
+                    <a href="#" class="nav-item">
                         <i class="fas fa-university"></i>
                         <span>My Institution</span>
                     </a>
@@ -903,13 +1149,12 @@
                     <a href="{{ url_for('attendance') }}" class="nav-item">
                         <i class="fas fa-user-check"></i>
                         <span>Attendance</span>
-                    
-                    
-                    <a href="{{ url_for('student_assignments') }}" class="nav-item">
-                        <i class="fas fa-tasks"></i>
-                        <span>Assignments</span>    
                     </a>
-                    <a href="{{ url_for('timetable') }}" class="nav-item">
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a>
+                    <a href="#" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
                     </a>
@@ -921,7 +1166,7 @@
                         <i class="fas fa-code-branch"></i>
                         <span>Coding Tracks</span>
                     </a>
-                    <a href="{{ url_for('myverse') }}" class="nav-item">
+                    <a href="{{ url_for('myverse') }}" class="nav-item active">
                         <i class="fas fa-laptop-code"></i>
                         <span>My Verse</span>
                     </a>
@@ -929,7 +1174,7 @@
                         <i class="fas fa-terminal"></i>
                         <span>Online Compiler</span>
                     </a>
-                    <a href="{{ url_for('student_coding_assesment') }}" class="nav-item">
+                    <a href="#" class="nav-item">
                         <i class="fas fa-file-code"></i>
                         <span>Coding Assignment</span>
                     </a>
@@ -937,15 +1182,15 @@
                 
                 <div class="nav-section">
                     <h3>Community</h3>
-                    <a href="{{ url_for('code_room') }}" class="nav-item">
+                    <a href="#" class="nav-item">
                         <i class="fas fa-code"></i>
                         <span>Live Group Code Room</span>
                     </a>
-                    <a href="{{ url_for('job_match_recommender') }}" class="nav-item">
+                    <a href="#" class="nav-item">
                         <i class="fas fa-briefcase"></i>
                         <span>Job Match Recommender</span>
                     </a>
-                    <a href="{{ url_for('code_review') }}" class="nav-item">
+                    <a href="#" class="nav-item">
                         <i class="fas fa-robot"></i>
                         <span>Smart Code Review Bot</span>
                     </a>
@@ -959,10 +1204,14 @@
             <header class="top-nav">
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search courses, topics, or code problems...">
+                    <input type="text" placeholder="Search career paths, skills, or job roles...">
                 </div>
                 
                 <div class="top-nav-actions">
+                    <a href="{{ url_for('home_page') }}" class="nav-btn">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
                     <a href="{{ url_for('home') }}" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
@@ -970,165 +1219,147 @@
                 </div>
             </header>
 
-            <!-- Dashboard Content -->
-            <div class="dashboard-content">
-                <!-- Student Profile Section -->
-                <section class="welcome-section">
-                    <div class="welcome-content">
-                        <div class="student-profile">
-                            <div class="profile-header">
-                                <div class="profile-photo-container">
-                                    <img src="{{ url_for('static', filename='images/student profile campus bridge.jpg') }}" alt="Student Photo" class="profile-photo">
-                                </div>
-                                <div class="profile-info">
-                                    <h1>{{ user.name }}</h1>
-                                    <p class="student-id">Roll Number: {{ user.roll_number }}</p>
-                                </div>
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1>Your Tech Career Compass</h1>
+                    <p class="hero-subtitle">Discover personalized career paths based on your programming skills and interests</p>
+                    
+                    <div class="career-paths-grid">
+                        <div class="career-path-card">
+                            <div class="path-icon"><i class="fas fa-laptop-code"></i></div>
+                            <h3>Software Development</h3>
+                            <div class="language-tags">
+                                <span class="tag">C++</span>
+                                <span class="tag">Java</span>
+                                <span class="tag">Python</span>
                             </div>
-                            <div class="student-details">
-                                <div class="detail-group">
-                                    <div class="detail-item">
-                                        <i class="fas fa-user-tag"></i>
-                                        <div>
-                                            <h3>Role</h3>
-                                            <p>{{ user.role }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="fas fa-code-branch"></i>
-                                        <div>
-                                            <h3>Branch</h3>
-                                            <p>{{ user.branch }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="detail-group">
-                                    <div class="detail-item">
-                                        <i class="fas fa-users"></i>
-                                        <div>
-                                            <h3>Section</h3>
-                                            <p>{{ user.section }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        <div>
-                                            <h3>Semester</h3>
-                                            <p>{{ user.semester }}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                            <p>Career Options:</p>
+                            <ul>
+                                <li>Software Engineer</li>
+                                <li>Full Stack Developer</li>
+                                <li>Mobile App Developer</li>
+                                <li>Game Developer</li>
+                            </ul>
+                            <div class="roadmap-link">
+                                <a href="#" class="view-roadmap">View Development Roadmap <i class="fas fa-arrow-right"></i></a>
                             </div>
                         </div>
-                    </div>
-                </section>
 
-                <!-- Quick Stats -->
-                <section class="quick-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-code"></i>
+                        <div class="career-path-card">
+                            <div class="path-icon"><i class="fas fa-database"></i></div>
+                            <h3>Data Science & Analytics</h3>
+                            <div class="language-tags">
+                                <span class="tag">Python</span>
+                                <span class="tag">R</span>
+                                <span class="tag">SQL</span>
+                            </div>
+                            <p>Career Options:</p>
+                            <ul>
+                                <li>Data Scientist</li>
+                                <li>Data Analyst</li>
+                                <li>Business Intelligence Analyst</li>
+                                <li>Machine Learning Engineer</li>
+                            </ul>
+                            <div class="roadmap-link">
+                                <a href="#" class="view-roadmap">View Analytics Roadmap <i class="fas fa-arrow-right"></i></a>
+                            </div>
                         </div>
-                        <div class="stat-info">
-                            <h3>Current Coding Streak</h3>
-                            <p>7 days</p>
+
+                        <div class="career-path-card">
+                            <div class="path-icon"><i class="fas fa-network-wired"></i></div>
+                            <h3>System Architecture</h3>
+                            <div class="language-tags">
+                                <span class="tag">C</span>
+                                <span class="tag">C++</span>
+                                <span class="tag">Java</span>
+                            </div>
+                            <p>Career Options:</p>
+                            <ul>
+                                <li>Systems Architect</li>
+                                <li>DevOps Engineer</li>
+                                <li>Cloud Solutions Architect</li>
+                                <li>Technical Lead</li>
+                            </ul>
+                            <div class="roadmap-link">
+                                <a href="#" class="view-roadmap">View Architecture Roadmap <i class="fas fa-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
-                </section>
+
+                    <div class="skill-roadmap-section">
+                        <h2>Essential Skills Roadmap</h2>
+                        <div class="roadmap-cards">
+                            <div class="roadmap-card">
+                                <h4>DSA Mastery</h4>
+                                <p>Master Data Structures & Algorithms to excel in technical interviews and problem-solving</p>
+                                <ul class="roadmap-steps">
+                                    <li>Basic Data Structures</li>
+                                    <li>Advanced Data Structures</li>
+                                    <li>Algorithm Analysis</li>
+                                    <li>Problem-Solving Patterns</li>
+                                </ul>
+                            </div>
+
+                            <div class="roadmap-card">
+                                <h4>Development Skills</h4>
+                                <p>Build a strong foundation in software development practices</p>
+                                <ul class="roadmap-steps">
+                                    <li>Version Control (Git)</li>
+                                    <li>Clean Code Practices</li>
+                                    <li>Testing & Debugging</li>
+                                    <li>System Design</li>
+                                </ul>
+                            </div>
+
+                            <div class="roadmap-card">
+                                <h4>Soft Skills</h4>
+                                <p>Develop essential non-technical skills for career growth</p>
+                                <ul class="roadmap-steps">
+                                    <li>Communication</li>
+                                    <li>Team Collaboration</li>
+                                    <li>Problem-Solving</li>
+                                    <li>Time Management</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Toggle sidebar on mobile
-        const menuToggle = document.getElementById('menuToggle');
+        // Sidebar toggle functionality
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
+        const menuToggle = document.getElementById('menuToggle');
 
-        // Function to handle navigation and active states
-        function handleNavigation() {
-            // Remove active class from all nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // Get current path
-            const currentPath = window.location.pathname;
-            
-            // Add active class to current nav item
-            const currentNavItem = document.querySelector(`.nav-item[href="${currentPath}"]`);
-            if (currentNavItem) {
-                currentNavItem.classList.add('active');
-            }
-        }
-
-        // Function to toggle sidebar
-        function toggleSidebar() {
+        sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
-            // Adjust main content margin when sidebar is collapsed
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '60px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
+            document.querySelector('.main-content').style.marginLeft = 
+                sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
+        });
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-visible');
+        });
+
+        // Responsive sidebar
+        function handleResize() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                document.querySelector('.main-content').style.marginLeft = '0';
+                menuToggle.style.display = 'block';
             } else {
-                mainContent.style.marginLeft = '250px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
+                sidebar.classList.remove('collapsed');
+                document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)';
+                menuToggle.style.display = 'none';
             }
         }
 
-        // Event listeners
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
-        sidebarToggle.addEventListener('click', toggleSidebar);
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-        // Initialize sidebar state and navigation
-        document.addEventListener('DOMContentLoaded', () => {
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '60px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
-            } else {
-                mainContent.style.marginLeft = '250px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
-            }
-            
-            // Set initial active state
-            handleNavigation();
-        });
-
-        // Handle navigation clicks
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                // Remove active class from all nav items
-                document.querySelectorAll('.nav-item').forEach(navItem => {
-                    navItem.classList.remove('active');
-                });
-                // Add active class to clicked item
-                e.currentTarget.classList.add('active');
-            });
-        });
+        window.addEventListener('resize', handleResize);
+        handleResize();
     </script>
 </body>
-</html> 
+</html>
