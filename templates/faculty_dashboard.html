@@ -181,7 +181,7 @@
                 padding: 0 1.5rem;
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
+                justify-content: flex-end;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 position: sticky;
                 top: 0;
@@ -956,11 +956,6 @@
         <main class="main-content">
             <!-- Top Navigation -->
             <header class="top-nav">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search courses, students, or reports...">
-                </div>
-                
                 <div class="top-nav-actions">
                     <a href="{{ url_for('home') }}" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>

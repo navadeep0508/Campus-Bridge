@@ -189,6 +189,13 @@
             border-bottom: 1px solid var(--card-border);
         }
 
+        .nav-title h2 {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
         .search-bar {
             display: flex;
             align-items: center;
@@ -957,11 +964,9 @@
         <main class="main-content">
             <!-- Top Navigation -->
             <header class="top-nav">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search courses, topics, or code problems...">
+                <div class="nav-title">
+                    <h2>Campus Bridge</h2>
                 </div>
-                
                 <div class="top-nav-actions">
                     <a href="{{ url_for('home') }}" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>

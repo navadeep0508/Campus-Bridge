@@ -181,6 +181,36 @@
         .leave-room:hover {
             background-color: #c0392b;
         }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: #357abd;
+        }
+
+        .nav-btn i {
+            font-size: 1rem;
+        }
+
+        .nav-btn span {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -189,7 +219,13 @@
             <span class="room-name">{{ room.name }}</span>
             <span class="language-badge">{{ room.language }}</span>
         </div>
-        <button class="leave-room" onclick="leaveRoom()">Leave Room</button>
+        <div class="header-actions">
+            <a href="{{ url_for('job_match_recommender') }}" class="nav-btn">
+                <i class="fas fa-briefcase"></i>
+                <span>Job Match</span>
+            </a>
+            <button class="leave-room" onclick="leaveRoom()">Leave Room</button>
+        </div>
     </div>
 
     <div class="main-content">

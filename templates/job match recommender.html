@@ -181,39 +181,12 @@
             padding: 0 1.5rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
             border-bottom: 1px solid var(--card-border);
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            width: 300px;
-        }
-
-        .search-bar i {
-            color: var(--text-light);
-            margin-right: 0.5rem;
-        }
-
-        .search-bar input {
-            border: none;
-            background: none;
-            outline: none;
-            width: 100%;
-            color: var(--text-light);
-        }
-
-        .search-bar input::placeholder {
-            color: var(--text-light);
-            opacity: 0.7;
         }
 
         .top-nav-actions {
@@ -697,10 +670,6 @@
                 margin-left: 0;
             }
 
-            .search-bar {
-                width: 200px;
-            }
-
             .welcome-section {
                 padding: 2rem 1.5rem;
             }
@@ -1120,7 +1089,7 @@
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
-                <h2>Myinfocam</h2>
+                <h2>Course Bridge</h2>
             </div>
             
             <nav class="sidebar-nav">
@@ -1202,12 +1171,11 @@
         <main class="main-content">
             <!-- Top Navigation -->
             <header class="top-nav">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search career paths, skills, or job roles...">
-                </div>
-                
                 <div class="top-nav-actions">
+                    <a href="{{ url_for('code_room') }}" class="nav-btn">
+                        <i class="fas fa-code"></i>
+                        <span>Code Room</span>
+                    </a>
                     <a href="{{ url_for('home_page') }}" class="nav-btn">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
