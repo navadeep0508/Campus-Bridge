@@ -1115,7 +1115,7 @@
 
                 <div class="nav-section">
                     <h3>Institution</h3>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('institution') }}" class="nav-item">
                         <i class="fas fa-university"></i>
                         <span>My Institution</span>
                     </a>
@@ -1127,11 +1127,11 @@
                         <i class="fas fa-user-check"></i>
                         <span>Attendance</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('student_assignments') }}" class="nav-item active">
                         <i class="fas fa-tasks"></i>
                         <span>Assignments</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('timetable') }}" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
                     </a>
@@ -1143,7 +1143,7 @@
                         <i class="fas fa-code-branch"></i>
                         <span>Coding Tracks</span>
                     </a>
-                    <a href="{{ url_for('myverse') }}" class="nav-item active">
+                    <a href="{{ url_for('myverse') }}" class="nav-item">
                         <i class="fas fa-laptop-code"></i>
                         <span>My Verse</span>
                     </a>
@@ -1151,7 +1151,7 @@
                         <i class="fas fa-terminal"></i>
                         <span>Online Compiler</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ url_for('student_coding_assesment') }}" class="nav-item">
                         <i class="fas fa-file-code"></i>
                         <span>Coding Assignment</span>
                     </a>
@@ -1252,6 +1252,23 @@
         const sidebarToggle = document.getElementById('sidebarToggle');
         const menuToggle = document.getElementById('menuToggle');
 
+        // Function to handle navigation and active states
+        function handleNavigation() {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Get current path
+            const currentPath = window.location.pathname;
+            
+            // Add active class to current nav item
+            const currentNavItem = document.querySelector(`.nav-item[href="${currentPath}"]`);
+            if (currentNavItem) {
+                currentNavItem.classList.add('active');
+            }
+        }
+
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
             document.querySelector('.main-content').style.marginLeft = 
@@ -1262,21 +1279,22 @@
             sidebar.classList.toggle('mobile-visible');
         });
 
-        // Responsive sidebar
-        function handleResize() {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.add('collapsed');
-                document.querySelector('.main-content').style.marginLeft = '0';
-                menuToggle.style.display = 'block';
-            } else {
-                sidebar.classList.remove('collapsed');
-                document.querySelector('.main-content').style.marginLeft = 'var(--sidebar-width)';
-                menuToggle.style.display = 'none';
-            }
-        }
+        // Handle navigation clicks
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Remove active class from all nav items
+                document.querySelectorAll('.nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                });
+                // Add active class to clicked item
+                e.currentTarget.classList.add('active');
+            });
+        });
 
-        window.addEventListener('resize', handleResize);
-        handleResize();
+        // Initialize sidebar state and navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            handleNavigation();
+        });
 
         // Modal functionality
         const modal = document.getElementById('submissionModal');
