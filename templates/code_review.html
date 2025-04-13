@@ -20,6 +20,7 @@
             --card-border: rgba(76, 175, 80, 0.4);
             --accent-color: #4CAF50;
             --sidebar-width: 250px;
+            --header-height: 60px;
         }
 
         * {
@@ -400,6 +401,88 @@
             .checkbox-group {
                 flex-direction: column;
             }
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            height: var(--header-height);
+            background: var(--dark-gradient);
+            backdrop-filter: blur(10px);
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            width: 300px;
+        }
+
+        .search-bar i {
+            color: var(--text-secondary);
+            margin-right: 0.5rem;
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            color: var(--text-light);
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        .top-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: absolute;
+            right: 1.5rem;
+            top: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-btn i {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        .logout-btn span {
+            font-size: 1rem;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
