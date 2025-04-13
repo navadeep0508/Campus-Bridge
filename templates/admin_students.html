@@ -761,8 +761,8 @@
                         <div class="form-actions">
                             <button type="submit" class="submit-btn">
                                 <i class="fas fa-save"></i>
-                                Add Student
-                            </button>
+                        Add Student
+                    </button>
                         </div>
                     </form>
                 </div>
@@ -822,11 +822,11 @@
         const sidebarToggle = document.getElementById('sidebarToggle');
 
         if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-                document.querySelector('.main-content').style.marginLeft = 
-                    sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
-            });
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            document.querySelector('.main-content').style.marginLeft = 
+                sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
+        });
         }
 
         // Responsive sidebar

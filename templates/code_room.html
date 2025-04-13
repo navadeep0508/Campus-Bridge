@@ -210,10 +210,25 @@
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 800px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
             margin-bottom: 1rem;
+        }
+
+        .header-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            opacity: 0.9;
         }
 
         .create-room-container {
@@ -558,7 +573,10 @@
 
         <div class="container">
             <div class="header">
-                <h1>Live Code Rooms</h1>
+                <div class="header-content">
+                    <h1>Live Code Rooms</h1>
+                    <p class="header-description">Join collaborative coding sessions, work on projects together, and learn from peers in real-time. Create your own room or join existing ones to start coding together.</p>
+                </div>
             </div>
             <div class="create-room-container">
                 <button class="create-room-btn" onclick="openCreateRoomModal()">
