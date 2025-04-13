@@ -658,6 +658,88 @@
                 padding: 0.5rem 1rem;
             }
         }
+
+        /* Updated Preview Section Styles */
+        .preview-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(76, 175, 80, 0.2);
+        }
+
+        .preview-content {
+            color: var(--text-primary);
+        }
+
+        .preview-content h3 {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .preview-content p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .preview-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .preview-features li {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .preview-features li i {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            background: var(--highlight-bg);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-card {
+                padding: 1.5rem;
+            }
+
+            .preview-content h3 {
+                font-size: 1.3rem;
+            }
+
+            .preview-features li {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -770,24 +852,51 @@
             <h2 class="section-title">Platform Preview</h2>
             <div class="preview-grid">
                 <div class="preview-card">
-                    <img src="{{ url_for('static', filename='images/dashboard-preview.jpg') }}" alt="Student Dashboard">
-                    <div class="p-4">
+                    <div class="preview-content">
                         <h3>Student Dashboard</h3>
-                        <p>Comprehensive overview of your academic journey</p>
+                        <p>A comprehensive dashboard that provides students with:</p>
+                        <ul class="preview-features">
+                            <li><i class="fas fa-chart-line"></i> Real-time academic performance tracking</li>
+                            <li><i class="fas fa-calendar-check"></i> Attendance monitoring and statistics</li>
+                            <li><i class="fas fa-tasks"></i> Assignment deadlines and submissions</li>
+                            <li><i class="fas fa-clock"></i> Dynamic class schedule view</li>
+                        </ul>
                     </div>
                 </div>
                 <div class="preview-card">
-                    <img src="{{ url_for('static', filename='images/compiler-preview.jpg') }}" alt="Online Compiler">
-                    <div class="p-4">
+                    <div class="preview-content">
                         <h3>Online Compiler</h3>
-                        <p>Code, compile, and learn in real-time</p>
+                        <p>Advanced coding environment featuring:</p>
+                        <ul class="preview-features">
+                            <li><i class="fas fa-code"></i> Support for multiple programming languages</li>
+                            <li><i class="fas fa-play-circle"></i> Real-time code execution</li>
+                            <li><i class="fas fa-bug"></i> Integrated debugging tools</li>
+                            <li><i class="fas fa-save"></i> Code saving and sharing capabilities</li>
+                        </ul>
                     </div>
                 </div>
                 <div class="preview-card">
-                    <img src="{{ url_for('static', filename='images/attendance-preview.jpg') }}" alt="Attendance Tracking">
-                    <div class="p-4">
-                        <h3>Attendance Tracking</h3>
-                        <p>Monitor your attendance across all courses</p>
+                    <div class="preview-content">
+                        <h3>Live Code Room</h3>
+                        <p>Collaborative coding environment with:</p>
+                        <ul class="preview-features">
+                            <li><i class="fas fa-users"></i> Real-time collaborative coding</li>
+                            <li><i class="fas fa-comments"></i> Integrated chat functionality</li>
+                            <li><i class="fas fa-share-alt"></i> Code sharing and version control</li>
+                            <li><i class="fas fa-video"></i> Video conferencing capabilities</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-content">
+                        <h3>Course Management</h3>
+                        <p>Streamlined course organization featuring:</p>
+                        <ul class="preview-features">
+                            <li><i class="fas fa-book"></i> Centralized course materials</li>
+                            <li><i class="fas fa-file-alt"></i> Assignment submission system</li>
+                            <li><i class="fas fa-comment-dots"></i> Discussion forums</li>
+                            <li><i class="fas fa-chart-bar"></i> Performance analytics</li>
+                        </ul>
                     </div>
                 </div>
             </div>

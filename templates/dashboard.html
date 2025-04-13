@@ -810,6 +810,56 @@
             background: var(--accent-color);
             border-radius: 2px;
         }
+
+        .notification-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-btn i {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+
+        .logout-btn span {
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Remove old notification button styles */
+        .notification-btn, .notification-badge {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -913,9 +963,10 @@
                 </div>
                 
                 <div class="top-nav-actions">
-                    <button class="notification-btn">
-                        <i class="fas fa-bell"></i>
-                    </button>
+                    <a href="{{ url_for('home') }}" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
                 </div>
             </header>
 
