@@ -1,6 +1,6 @@
 Flask==2.0.1
 supabase
-requests
+requests>=2.31.0
 psycopg2-binary
 bcrypt
 openai>=1.0.0
