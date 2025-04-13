@@ -12,15 +12,16 @@
         :root {
             --sidebar-width: 250px;
             --header-height: 60px;
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --bg-dark: #020024;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
         }
 
         * {
@@ -31,7 +32,7 @@
         }
 
         body {
-            background: var(--gradient-bg);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -44,14 +45,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-light);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
         }
 
         .sidebar-header {
@@ -62,6 +63,7 @@
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--text-light);
         }
 
         .nav-section {
@@ -70,17 +72,15 @@
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
+            color: var(--text-light);
+            opacity: 0.8;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
@@ -89,8 +89,8 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--accent-color);
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--text-light);
         }
 
         .nav-item i {
@@ -104,12 +104,13 @@
             flex: 1;
             margin-left: var(--sidebar-width);
             transition: margin-left 0.3s ease;
+            background: var(--primary-gradient);
         }
 
         /* Top Navigation */
         .top-nav {
             height: var(--header-height);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
             padding: 0 1.5rem;
             display: flex;
@@ -119,13 +120,13 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .search-bar {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             padding: 0.5rem 1rem;
             border-radius: 5px;
             width: 300px;
@@ -144,6 +145,10 @@
             color: var(--text-primary);
         }
 
+        .search-bar input::placeholder {
+            color: var(--text-secondary);
+        }
+
         /* Attendance Content Styles */
         .attendance-container {
             background: var(--card-bg);
@@ -151,7 +156,7 @@
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
             margin: 2rem;
         }
 
@@ -187,8 +192,8 @@
 
         .filter-group select,
         .filter-group input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--card-border);
             color: var(--text-primary);
             padding: 0.5rem 1rem;
             border-radius: 5px;
@@ -205,27 +210,32 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
             border-radius: 10px;
             overflow: hidden;
+            border: 1px solid var(--card-border);
         }
 
         .attendance-table th,
         .attendance-table td {
             padding: 1rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .attendance-table th {
+            background: rgba(76, 175, 80, 0.1);
             color: var(--text-secondary);
             font-weight: 500;
-            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .attendance-table td {
+            color: var(--text-primary);
         }
 
         .status-select {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--card-border);
             color: var(--text-primary);
             padding: 0.5rem;
             border-radius: 5px;
@@ -239,7 +249,7 @@
 
         .save-button {
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             padding: 0.8rem 1.5rem;
             border-radius: 5px;
             border: none;
@@ -253,8 +263,7 @@
         }
 
         .save-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: rgba(76, 175, 80, 0.8);
         }
 
         .save-button i {

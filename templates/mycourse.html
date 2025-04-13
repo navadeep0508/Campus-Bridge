@@ -12,15 +12,16 @@
         :root {
             --sidebar-width: 250px;
             --header-height: 60px;
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --bg-dark: #020024;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
         }
 
         * {
@@ -31,7 +32,7 @@
         }
 
         body {
-            background: var(--gradient-bg);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -44,14 +45,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-light);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
         }
 
         .sidebar.collapsed {
@@ -78,7 +79,7 @@
             right: -12px;
             top: 20px;
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             border: none;
             width: 24px;
             height: 24px;
@@ -93,6 +94,7 @@
 
         .sidebar-toggle:hover {
             transform: scale(1.1);
+            background: var(--secondary-gradient);
         }
 
         .sidebar-toggle i {
@@ -105,12 +107,13 @@
 
         .sidebar-header {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--text-light);
         }
 
         .menu-toggle {
@@ -129,21 +132,22 @@
 
         .nav-section {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
+            color: var(--text-light);
             font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 1rem;
+            opacity: 0.8;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
@@ -152,7 +156,7 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             color: var(--accent-color);
         }
 
@@ -172,7 +176,7 @@
         /* Top Navigation */
         .top-nav {
             height: var(--header-height);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
             padding: 0 1.5rem;
             display: flex;
@@ -182,13 +186,13 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .search-bar {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--bg-light);
             padding: 0.5rem 1rem;
             border-radius: 5px;
             width: 300px;
@@ -616,7 +620,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(2, 0, 36, 0.5);
+            background: var(--bg-light);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -625,7 +629,7 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
+            background: var(--secondary-gradient);
         }
 
         /* Sidebar Notification Badge */
@@ -695,7 +699,7 @@
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -721,6 +725,7 @@
             font-size: 1.8rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
+            color: var(--text-primary);
         }
 
         .course-stats {
@@ -744,7 +749,7 @@
             width: 100%;
             padding: 0.8rem;
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -757,8 +762,9 @@
         }
 
         .download-btn:hover {
+            background: var(--secondary-gradient);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
 
         @media (max-width: 768px) {

@@ -12,15 +12,16 @@
         :root {
             --sidebar-width: 250px;
             --header-height: 60px;
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --bg-dark: #020024;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
         }
 
         * {
@@ -31,7 +32,7 @@
         }
 
         body {
-            background: var(--gradient-bg);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -44,14 +45,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-light);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
         }
 
         .sidebar.collapsed {
@@ -111,7 +112,7 @@
         .college-info-section {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 212, 255, 0.05);
+            background: rgba(76, 175, 80, 0.1);
         }
 
         .college-name {
@@ -134,6 +135,7 @@
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--text-light);
         }
 
         .menu-toggle {
@@ -156,17 +158,18 @@
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
+            color: var(--text-light);
             font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 1rem;
+            opacity: 0.8;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
@@ -175,8 +178,8 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--accent-color);
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--text-light);
         }
 
         .nav-item i {
@@ -190,6 +193,7 @@
             flex: 1;
             margin-left: var(--sidebar-width);
             transition: margin-left 0.3s ease;
+            background: var(--primary-gradient);
         }
 
         /* Top Navigation */
@@ -252,8 +256,8 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background: var(--primary-color);
-            color: white;
+            background: var(--accent-color);
+            color: var(--text-light);
             font-size: 0.7rem;
             padding: 0.2rem 0.4rem;
             border-radius: 50%;
@@ -340,11 +344,11 @@
 
         .welcome-btn-primary {
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
         }
 
         .welcome-btn-secondary {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
         }
@@ -620,13 +624,13 @@
 
         /* Footer */
         .footer {
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid var(--card-border);
         }
 
         .footer-links a {
-            color: var(--text-secondary);
+            color: var(--text-light);
         }
 
         .footer-links a:hover {
@@ -639,7 +643,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(2, 0, 36, 0.5);
+            background: var(--bg-light);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -648,7 +652,7 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
+            background: rgba(76, 175, 80, 0.8);
         }
 
         /* Sidebar Notification Badge */
@@ -662,7 +666,7 @@
             top: 50%;
             transform: translateY(-50%);
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             font-size: 0.7rem;
             padding: 0.2rem 0.4rem;
             border-radius: 50%;
@@ -767,7 +771,7 @@
             width: 100%;
             padding: 0.8rem;
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             border: none;
             border-radius: 8px;
             font-weight: 600;
@@ -793,6 +797,35 @@
                 flex-direction: column;
                 gap: 1rem;
             }
+        }
+
+        /* C Language Info Styles */
+        .c-language-info {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .c-language-info h2 {
+            color: var(--accent-color);
+        }
+
+        .info-section h3 {
+            color: var(--text-primary);
+        }
+
+        .topic-card {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--card-border);
+        }
+
+        .topic-card h4 {
+            color: var(--accent-color);
+        }
+
+        pre {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
         }
     </style>
 </head>
@@ -939,7 +972,7 @@
 
                     <div class="info-section" style="margin-bottom: 2rem;">
                         <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Basic Structure of a C Program</h3>
-                        <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; overflow-x: auto;">
+                        <pre style="background: var(--card-bg); padding: 1rem; border-radius: 8px; overflow-x: auto;">
 <code>#include &lt;stdio.h&gt;
 
 int main() {
@@ -951,7 +984,7 @@ int main() {
                     <div class="info-section" style="margin-bottom: 2rem;">
                         <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Topics Covered in C Programming</h3>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                            <div class="topic-card" style="background: rgba(0,212,255,0.1); padding: 1rem; border-radius: 8px;">
+                            <div class="topic-card" style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: 8px;">
                                 <h4 style="color: var(--accent-color); margin-bottom: 0.5rem;">Basics</h4>
                                 <ul style="list-style-type: none;">
                                     <li>Variables & Data Types</li>
@@ -960,7 +993,7 @@ int main() {
                                     <li>Control Statements</li>
                                 </ul>
                             </div>
-                            <div class="topic-card" style="background: rgba(0,212,255,0.1); padding: 1rem; border-radius: 8px;">
+                            <div class="topic-card" style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: 8px;">
                                 <h4 style="color: var(--accent-color); margin-bottom: 0.5rem;">Functions & Arrays</h4>
                                 <ul style="list-style-type: none;">
                                     <li>Function Declaration</li>
@@ -969,7 +1002,7 @@ int main() {
                                     <li>Multi-dimensional Arrays</li>
                                 </ul>
                             </div>
-                            <div class="topic-card" style="background: rgba(0,212,255,0.1); padding: 1rem; border-radius: 8px;">
+                            <div class="topic-card" style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: 8px;">
                                 <h4 style="color: var(--accent-color); margin-bottom: 0.5rem;">Advanced Concepts</h4>
                                 <ul style="list-style-type: none;">
                                     <li>Pointers</li>

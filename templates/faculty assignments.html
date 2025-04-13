@@ -12,15 +12,16 @@
         :root {
             --sidebar-width: 250px;
             --header-height: 60px;
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --bg-dark: #020024;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
         }
 
         * {
@@ -31,7 +32,7 @@
         }
 
         body {
-            background: var(--gradient-bg);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -44,14 +45,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-light);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -71,7 +72,7 @@
         }
 
         .sidebar-nav::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             border-radius: 3px;
         }
 
@@ -115,13 +116,14 @@
             text-overflow: ellipsis;
             margin-right: 15px;
             transition: opacity 0.3s ease;
+            color: var(--text-light);
         }
 
         .sidebar-toggle {
             position: relative;
-            background: #00d4ff;
-            color: #020024;
-            border: 3px solid #ffffff;
+            background: var(--accent-color);
+            color: var(--text-light);
+            border: 3px solid var(--text-light);
             width: 30px;
             height: 30px;
             min-width: 30px;
@@ -138,7 +140,7 @@
         }
 
         .sidebar-toggle:hover {
-            background: #00e5ff;
+            background: rgba(76, 175, 80, 0.8);
             transform: scale(1.05);
         }
 
@@ -205,17 +207,18 @@
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
+            color: var(--text-light);
             font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 1rem;
+            opacity: 0.8;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
@@ -224,8 +227,8 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--accent-color);
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--text-light);
         }
 
         .nav-item i {
@@ -240,6 +243,7 @@
             margin-left: var(--sidebar-width);
             transition: margin-left 0.3s ease;
             padding: 2rem;
+            background: var(--primary-gradient);
         }
 
         .container {
@@ -261,7 +265,7 @@
 
         .create-btn {
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             border: none;
             padding: 0.8rem 1.5rem;
             border-radius: 8px;
@@ -274,6 +278,7 @@
         }
 
         .create-btn:hover {
+            background: rgba(76, 175, 80, 0.8);
             transform: translateY(-2px);
         }
 
@@ -297,12 +302,12 @@
         }
 
         .modal-content {
-            background: var(--bg-dark);
+            background: var(--card-bg);
             padding: 2rem;
             border-radius: 15px;
             width: 90%;
             max-width: 600px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
         }
 
         .modal-header {
@@ -315,6 +320,7 @@
         .modal-title {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .close-btn {
@@ -338,8 +344,8 @@
         .form-control {
             width: 100%;
             padding: 0.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            background: var(--bg-light);
             border-radius: 8px;
             color: var(--text-primary);
             font-size: 1rem;
@@ -365,7 +371,7 @@
 
         .assignment-card {
             background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
             border-radius: 12px;
             padding: 1.5rem;
             transition: transform 0.3s ease;
@@ -393,7 +399,7 @@
             justify-content: space-between;
             align-items: center;
             padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid var(--card-border);
         }
 
         .deadline {
@@ -439,12 +445,12 @@
 
         /* Hero Section Styles */
         .hero-section {
-            background: rgba(2, 0, 36, 0.5);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 15px;
             margin-bottom: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
         }
 
         .stats-grid {
@@ -459,7 +465,7 @@
             padding: 1.5rem;
             border-radius: 10px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
         }
 
         .stat-number {
@@ -497,17 +503,18 @@
             background: var(--card-bg);
             border-radius: 10px;
             overflow: hidden;
+            border: 1px solid var(--card-border);
         }
 
         .submissions-table th,
         .submissions-table td {
             padding: 1rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .submissions-table th {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             color: var(--accent-color);
             font-weight: 500;
         }
@@ -529,8 +536,8 @@
         }
 
         .status-submitted {
-            background: rgba(40, 167, 69, 0.2);
-            color: #28a745;
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--accent-color);
         }
 
         .status-late {
@@ -569,14 +576,14 @@
         }
 
         .submissions-modal-content {
-            background: var(--bg-dark);
+            background: var(--card-bg);
             padding: 2rem;
             border-radius: 15px;
             width: 90%;
             max-width: 900px;
             max-height: 80vh;
             overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
         }
 
         .submissions-modal-header {
@@ -585,7 +592,7 @@
             align-items: flex-start;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .submissions-modal-title {
@@ -652,8 +659,8 @@
         .filter-dropdown select {
             width: 100%;
             padding: 0.8rem 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--bg-light);
+            border: 1px solid var(--card-border);
             border-radius: 8px;
             color: var(--text-primary);
             font-size: 1rem;
@@ -678,11 +685,11 @@
         .filter-dropdown select:focus {
             outline: none;
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
 
         .filter-dropdown select option {
-            background: var(--bg-dark);
+            background: var(--bg-light);
             color: var(--text-primary);
             padding: 1rem;
         }
@@ -723,8 +730,8 @@
         .form-select {
             width: 100%;
             padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-light);
+            border: 1px solid var(--card-border);
             border-radius: 8px;
             color: var(--text-primary);
             font-size: 1rem;
@@ -753,11 +760,11 @@
         .form-select:focus {
             outline: none;
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
 
         .form-select option {
-            background: var(--bg-dark);
+            background: var(--bg-light);
             color: var(--text-primary);
             padding: 0.5rem;
         }
@@ -768,7 +775,7 @@
 
         /* Add styles for the badges */
         .badge {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             color: var(--accent-color);
             padding: 0.2rem 0.5rem;
             border-radius: 4px;

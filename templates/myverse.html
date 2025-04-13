@@ -12,15 +12,16 @@
         :root {
             --sidebar-width: 250px;
             --header-height: 60px;
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --bg-dark: #020024;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
         }
 
         * {
@@ -31,7 +32,7 @@
         }
 
         body {
-            background: var(--gradient-bg);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -44,14 +45,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-light);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
         }
 
         .sidebar.collapsed {
@@ -111,6 +112,7 @@
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--text-light);
         }
 
         .menu-toggle {
@@ -133,17 +135,18 @@
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
+            color: var(--text-light);
             font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 1rem;
+            opacity: 0.8;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
@@ -152,8 +155,8 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--accent-color);
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--text-light);
         }
 
         .nav-item i {
@@ -736,7 +739,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(2, 0, 36, 0.5);
+            background: var(--dark-gradient);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -745,7 +748,7 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
+            background: var(--secondary-gradient);
         }
 
         /* Sidebar Notification Badge */
@@ -808,17 +811,19 @@
         }
 
         .problem-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
             border-radius: 10px;
             padding: 1.5rem;
             transition: transform 0.3s ease;
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .problem-card:hover {
             transform: translateY(-5px);
             border-color: var(--accent-color);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
         }
 
         .problem-card h3 {
@@ -839,7 +844,7 @@
             align-items: center;
             margin-top: 1rem;
             padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid var(--card-border);
         }
 
         .problem-difficulty {
@@ -849,18 +854,18 @@
         }
 
         .difficulty-easy {
-            background: rgba(72, 187, 120, 0.2);
-            color: #48bb78;
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--accent-color);
         }
 
         .difficulty-medium {
-            background: rgba(237, 137, 54, 0.2);
-            color: #ed8936;
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
         }
 
         .difficulty-hard {
-            background: rgba(245, 101, 101, 0.2);
-            color: #f56565;
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
         }
 
         .problem-points {

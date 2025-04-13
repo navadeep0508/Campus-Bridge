@@ -6,6 +6,19 @@
     <title>Class Verse - Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #434944 100%);
+            --secondary-gradient: linear-gradient(90deg, #184b1a 0%, #39573b 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -19,29 +32,29 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #020024;
-            background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+            background: var(--primary-gradient);
         }
 
         .main-heading {
             text-align: center;
             margin-bottom: 2rem;
-            color: white;
+            color: var(--text-primary);
             font-size: 3.5rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 2px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .container {
             display: flex;
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg);
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             width: 100%;
             max-width: 1000px;
+            border: 1px solid var(--card-border);
         }
 
         .illustration {
@@ -50,7 +63,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            background: rgba(248, 249, 250, 0.9);
+            background: var(--bg-light);
         }
 
         .illustration svg {
@@ -67,7 +80,7 @@
 
         .login-container h2 {
             text-align: center;
-            color: #1a237e;
+            color: var(--accent-color);
             margin-bottom: 1.5rem;
             font-size: 1.8rem;
         }
@@ -79,28 +92,29 @@
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .form-group input {
             width: 100%;
             padding: 0.8rem;
-            border: 1px solid #ddd;
+            border: 1px solid var(--card-border);
             border-radius: 5px;
             font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--bg-light);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #1a237e;
-            background: white;
+            border-color: var(--accent-color);
+            background: var(--text-light);
         }
 
         .remember-me {
             display: flex;
             align-items: center;
             margin-bottom: 1.5rem;
+            color: var(--text-primary);
         }
 
         .remember-me input {
@@ -110,8 +124,8 @@
         .submit-btn {
             width: 100%;
             padding: 0.8rem;
-            background: #1a237e;
-            color: white;
+            background: var(--accent-color);
+            color: var(--text-light);
             border: none;
             border-radius: 5px;
             font-size: 1rem;
@@ -120,9 +134,22 @@
         }
 
         .submit-btn:hover {
-            background: #283593;
+            background: var(--secondary-gradient);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            margin-bottom: 1.5rem;
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--text-primary);
         }
 
         @media (max-width: 768px) {
@@ -144,7 +171,7 @@
             }
         }
 
-        /* Simple modal styles */
+        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -154,28 +181,31 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.4);
             padding-top: 60px;
         }
+
         .modal-content {
-            background-color: #fefefe;
+            background-color: var(--card-bg);
             margin: 5% auto;
             padding: 20px;
-            border: 1px solid #888;
+            border: 1px solid var(--card-border);
             width: 80%;
+            border-radius: 5px;
         }
+
         .close {
-            color: #aaa;
+            color: var(--text-secondary);
             float: right;
             font-size: 28px;
             font-weight: bold;
+            cursor: pointer;
         }
+
         .close:hover,
         .close:focus {
-            color: black;
+            color: var(--text-primary);
             text-decoration: none;
-            cursor: pointer;
         }
     </style>
 </head>

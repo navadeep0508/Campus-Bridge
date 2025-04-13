@@ -12,15 +12,16 @@
         :root {
             --sidebar-width: 250px;
             --header-height: 60px;
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --bg-dark: #020024;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
         }
 
         * {
@@ -31,7 +32,7 @@
         }
 
         body {
-            background: var(--gradient-bg);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -44,14 +45,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-light);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
         }
 
         .sidebar.collapsed {
@@ -105,13 +106,13 @@
 
         .sidebar-header {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .college-info-section {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 212, 255, 0.05);
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(76, 175, 80, 0.05);
         }
 
         .college-name {
@@ -123,7 +124,7 @@
 
         .department-name {
             font-size: 0.9rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             opacity: 0.9;
         }
 
@@ -152,21 +153,22 @@
 
         .nav-section {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
+            color: var(--text-light);
             font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 1rem;
+            opacity: 0.8;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
@@ -175,7 +177,7 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             color: var(--accent-color);
         }
 
@@ -639,7 +641,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(2, 0, 36, 0.5);
+            background: var(--bg-light);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -648,7 +650,7 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
+            background: var(--secondary-gradient);
         }
 
         /* Sidebar Notification Badge */
@@ -797,13 +799,15 @@
 
         /* Institution Information Styles */
         .institution-content {
-            background: rgba(2, 0, 36, 0.5);
+            background: var(--card-bg);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
             color: var(--text-primary);
             text-align: left;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .institution-section {
@@ -831,13 +835,13 @@
         .section-header h2 {
             font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(45deg, #00d4ff, #ffffff);
+            background: var(--secondary-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             text-align: left;
             margin: 0;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
             position: relative;
             padding-bottom: 0.5rem;
         }
@@ -849,7 +853,7 @@
             left: 0;
             width: 50px;
             height: 3px;
-            background: linear-gradient(90deg, #00d4ff, transparent);
+            background: var(--secondary-gradient);
             border-radius: 2px;
         }
 
@@ -872,27 +876,27 @@
             gap: 0.8rem;
             margin-bottom: 1rem;
             padding: 1rem;
-            background: rgba(0, 212, 255, 0.05);
+            background: rgba(76, 175, 80, 0.05);
             border-radius: 8px;
             transition: all 0.3s ease;
             text-align: left;
+            border: 1px solid var(--card-border);
         }
 
         .institution-list li:hover {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             transform: translateX(5px);
         }
 
         .institution-list i {
-            color: #00d4ff;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
         }
 
         .institution-list li span {
             text-align: left;
             font-weight: 500;
             color: var(--text-primary);
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
         }
 
         .institution-info p {
@@ -909,28 +913,40 @@
         }
 
         .stat-card {
-            background: rgba(0, 212, 255, 0.05);
+            background: rgba(76, 175, 80, 0.05);
             padding: 1.5rem;
             border-radius: 10px;
             text-align: left;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
         }
 
         .stat-card h3 {
             font-size: 1.2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            background: linear-gradient(45deg, #00d4ff, #ffffff);
+            background: var(--secondary-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
         }
 
         .stat-card p {
             font-size: 0.9rem;
             opacity: 0.9;
             color: var(--text-primary);
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-card i {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {

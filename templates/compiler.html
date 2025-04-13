@@ -9,20 +9,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #020024;
-            --secondary-color: #090979;
-            --accent-color: #00d4ff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --bg-light: rgba(255, 255, 255, 0.1);
-            --card-bg: rgba(2, 0, 36, 0.8);
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
             --sidebar-width: 250px;
         }
 
         body { 
             font-family: 'JetBrains Mono', monospace; 
-            background: #020024;
-            background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+            background: var(--primary-gradient);
             color: var(--text-primary);
             min-height: 100vh;
         }
@@ -35,14 +37,14 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: rgba(2, 0, 36, 0.8);
+            background: var(--dark-gradient);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-light);
             position: fixed;
             height: 100vh;
             transition: all 0.3s ease;
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
         }
@@ -71,7 +73,7 @@
             right: -12px;
             top: 20px;
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             border: none;
             width: 24px;
             height: 24px;
@@ -98,21 +100,21 @@
 
         .sidebar-header {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
             flex-shrink: 0;
         }
 
         .college-info-section {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 212, 255, 0.05);
+            border-bottom: 1px solid var(--card-border);
+            background: var(--accent-color);
             flex-shrink: 0;
         }
 
         .college-name {
             font-size: 1.1rem;
             font-weight: 600;
-            color: var(--accent-color);
+            color: var(--text-light);
             margin-bottom: 0.5rem;
         }
 
@@ -129,6 +131,7 @@
         .sidebar-header h2 {
             font-size: 1.5rem;
             font-weight: 600;
+            color: var(--text-light);
         }
 
         .menu-toggle {
@@ -137,8 +140,8 @@
             top: 1rem;
             left: 1rem;
             z-index: 1001;
-            background: var(--primary-color);
-            color: white;
+            background: var(--text-light);
+            color: var(--text-primary);
             border: none;
             padding: 0.5rem;
             border-radius: 5px;
@@ -167,12 +170,12 @@
         }
 
         .sidebar-nav::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
+            background: var(--secondary-gradient);
         }
 
         .nav-section {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .nav-section:last-child {
@@ -180,17 +183,18 @@
         }
 
         .nav-section h3 {
-            color: #A0AEC0;
+            color: var(--text-light);
             font-size: 0.8rem;
             text-transform: uppercase;
             margin-bottom: 1rem;
+            opacity: 0.8;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             padding: 0.8rem 1rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 0.5rem;
@@ -199,8 +203,8 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--accent-color);
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--text-light);
         }
 
         .nav-item i {
@@ -225,7 +229,7 @@
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
         }
 
         .rounded { 
@@ -238,13 +242,13 @@
 
         .hover\:bg-blue-700:hover { 
             background-color: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
         }
 
         select, textarea {
-            background: rgba(2, 0, 36, 0.5) !important;
+            background: var(--card-bg) !important;
             color: var(--text-primary) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid var(--card-border) !important;
         }
 
         select:focus, textarea:focus {
@@ -258,8 +262,8 @@
         }
 
         .output-container {
-            background: rgba(2, 0, 36, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             color: var(--text-primary);
         }
 
@@ -269,7 +273,7 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(2, 0, 36, 0.5);
+            background: var(--dark-gradient);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -278,19 +282,41 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.8);
+            background: var(--secondary-gradient);
         }
 
         /* Button Styles */
         .submit-btn {
             background: var(--accent-color);
-            color: var(--primary-color);
+            color: var(--text-light);
             transition: all 0.3s ease;
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Problem Difficulty Styles */
+        .problem-difficulty {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .difficulty-easy {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--accent-color);
+        }
+
+        .difficulty-medium {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .difficulty-hard {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
         }
 
         /* Responsive Design */
