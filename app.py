@@ -1,14 +1,20 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 import requests
+import os
+from dotenv import load_dotenv
 import time
 from supabase import create_client, Client
 import bcrypt
 import traceback
 from functools import wraps
-from code_review_bot import CodeReviewBot
+
 import json
 
-import os
+# Explicitly import Cohere to handle potential import issues
+try:
+    import cohere
+except ImportError:
+    cohere = None
 
 app = Flask(__name__)
 app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDM1MjYxNSwiZXhwIjoyMDU5OTI4NjE1fQ.qeufhcj6ypy97jOu0BHIRfqTnz9ZJNHoktibYy_p2NY'  # Ensure a proper secret key is set
@@ -71,7 +77,6 @@ CODING_PROBLEMS = {
 }
 
 # Initialize the code review bot
-code_review_bot = CodeReviewBot()
 
 # Initialize the job match bot
 
@@ -1992,16 +1997,80 @@ def delete_student(student_id):
         traceback.print_exc()
         return jsonify({'success': False, 'message': 'Failed to delete student'}), 500
 
-@app.route('/code_review')
-def code_review():
-    return render_template('code_review.html')
 
+
+# Instead of directly hardcoding the key, use a more secure method
+COHERE_API_KEY = os.environ.get('COHERE_API_KEY', 'tF4ybICjnFpt29D5IiFOIoDlLnRxj3M0VxdbY755')
+
+# Safely initialize Cohere client
+co = None
+try:
+    if cohere and COHERE_API_KEY:
+        co = cohere.Client(COHERE_API_KEY)
+except Exception as e:
+    print(f"Failed to initialize Cohere client: {e}")
 @app.route('/job_match_recommender')
 def job_match_recommender():
     user_id = session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))
     return render_template('job match recommender.html')
+@app.route('/code-review')
+def code_review():
+    return render_template('code_review.html')
+
+
+@app.route('/api/review', methods=['POST'])
+def review_code_api():
+    code = request.form['code']
+    language = request.form['language']
+
+    prompt = f"""
+You are an expert code reviewer.
+
+Evaluate the following {language} code and provide a detailed review. Include:
+
+1. A score out of 100, considering:
+   - Time complexity
+   - Space complexity
+   - Readability
+   - Maintainability
+   - Code structure and style
+   - Error handling and edge cases
+
+2. Comments on strengths and weaknesses.
+
+3. Specific suggestions for improvement.
+
+Format your response like this:
+- **Score**: XX/100
+- **Time Complexity**: 
+- **Readability**: 
+- **Maintainability**: 
+- **Error Handling**: 
+- **Suggestions**: 
+- **Overall Feedback**: 
+
+Here is the code to review:
+```{language}
+{code}
+```
+"""
+
+    try:
+        response = co.generate(
+            model='command-r-plus',
+            prompt=prompt,
+            max_tokens=300,
+            temperature=0.7
+        )
+
+        feedback = response.generations[0].text
+        return jsonify({'feedback': feedback})
+
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
