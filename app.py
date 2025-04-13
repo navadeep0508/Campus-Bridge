@@ -5,6 +5,8 @@ from supabase import create_client, Client
 import bcrypt
 import traceback
 from functools import wraps
+from code_review_bot import CodeReviewBot
+import json
 
 app = Flask(__name__)
 app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDM1MjYxNSwiZXhwIjoyMDU5OTI4NjE1fQ.qeufhcj6ypy97jOu0BHIRfqTnz9ZJNHoktibYy_p2NY'  # Ensure a proper secret key is set
@@ -65,6 +67,9 @@ CODING_PROBLEMS = {
         ]
     }
 }
+
+# Initialize the code review bot
+code_review_bot = CodeReviewBot()
 
 def admin_required(f):
     @wraps(f)
@@ -1977,6 +1982,283 @@ def delete_student(student_id):
         print(f"Error deleting student: {e}")
         traceback.print_exc()
         return jsonify({'success': False, 'message': 'Failed to delete student'}), 500
+
+@app.route('/code_review')
+@admin_required
+def code_review():
+    """
+    Render the code review page.
+    """
+    return render_template('code_review.html')
+
+@app.route('/analyze_code', methods=['POST'])
+@admin_required
+def analyze_code():
+    """
+    Analyze code using the code review bot.
+    """
+    try:
+        data = request.get_json()
+        code = data.get('code')
+        language = data.get('language')
+        focus_areas = data.get('focus_areas', [])
+
+        if not code or not language:
+            return jsonify({
+                'error': 'Code and language are required'
+            }), 400
+
+        # Analyze the code
+        analysis = code_review_bot.analyze_code(code, language)
+        
+        # If focus areas are specified, get additional suggestions
+        if focus_areas:
+            improvements = code_review_bot.suggest_improvements(code, language, focus_areas)
+            analysis['improvements'] = improvements
+
+        return jsonify(analysis)
+
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
+
+@app.route('/job_match')
+def job_match():
+    """
+    Render the job matching page.
+    """
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    try:
+        # Fetch user's skills and education
+        user_response = supabase.table('users').select('*').eq('id', user_id).execute()
+        user = user_response.data[0] if user_response.data else None
+        
+        if not user:
+            return render_template('job_match.html', error='User not found')
+            
+        # Fetch user's skills from the database
+        skills_response = supabase.table('user_skills').select('*').eq('user_id', user_id).execute()
+        skills = [skill['skill_name'] for skill in skills_response.data] if skills_response.data else []
+        
+        # Fetch user's education
+        education_response = supabase.table('education').select('*').eq('user_id', user_id).execute()
+        education = education_response.data if education_response.data else []
+        
+        return render_template('job_match.html', 
+                             user=user,
+                             skills=skills,
+                             education=education)
+    except Exception as e:
+        print(f"Error in job_match route: {e}")
+        return render_template('job_match.html', error='Failed to load job matching data')
+
+@app.route('/get_job_recommendations', methods=['POST'])
+def get_job_recommendations():
+    """
+    Get job recommendations based on user profile and search criteria.
+    """
+    try:
+        data = request.get_json()
+        user_id = session.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        # Fetch user's profile data
+        user_response = supabase.table('users').select('*').eq('id', user_id).execute()
+        user = user_response.data[0] if user_response.data else None
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Fetch user's skills
+        skills_response = supabase.table('user_skills').select('*').eq('user_id', user_id).execute()
+        skills = [skill['skill_name'] for skill in skills_response.data] if skills_response.data else []
+        
+        # Fetch user's education
+        education_response = supabase.table('education').select('*').eq('user_id', user_id).execute()
+        education = education_response.data if education_response.data else []
+        
+        # Get search skills from the request
+        search_skills = data.get('skillSearch', [])
+        
+        # Prepare user profile for AI analysis
+        user_profile = {
+            'name': user['name'],
+            'branch': user['branch'],
+            'skills': skills,
+            'education': education,
+            'preferences': {
+                'location': data.get('location'),
+                'salary': data.get('salary'),
+                'jobType': data.get('jobType'),
+                'industry': data.get('industry'),
+                'searchSkills': search_skills
+            }
+        }
+        
+        # Call the AI service for job recommendations
+        recommendations = get_ai_job_recommendations(user_profile)
+        
+        # If search skills are provided, filter recommendations
+        if search_skills:
+            filtered_recommendations = filter_recommendations_by_skills(recommendations, search_skills)
+            recommendations = filtered_recommendations
+        
+        return jsonify({
+            'recommendations': recommendations
+        })
+        
+    except Exception as e:
+        print(f"Error getting job recommendations: {e}")
+        return jsonify({'error': 'Failed to get job recommendations'}), 500
+
+def filter_recommendations_by_skills(recommendations, search_skills):
+    """
+    Filter job recommendations based on search skills.
+    """
+    if not recommendations or not search_skills:
+        return recommendations
+        
+    filtered_roles = []
+    for role in recommendations.get('job_roles', []):
+        # Check if any of the search skills match the role's required skills
+        role_skills = [skill.lower() for skill in role.get('skills', [])]
+        search_skills_lower = [skill.lower() for skill in search_skills]
+        
+        # If any search skill matches a role skill, include the role
+        if any(search_skill in role_skill for search_skill in search_skills_lower 
+               for role_skill in role_skills):
+            filtered_roles.append(role)
+    
+    return {
+        'job_roles': filtered_roles,
+        'skill_gaps': recommendations.get('skill_gaps', []),
+        'learning_resources': recommendations.get('learning_resources', [])
+    }
+
+def get_ai_job_recommendations(user_profile):
+    """
+    Get job recommendations from AI service.
+    """
+    try:
+        # Prepare the prompt for the AI
+        prompt = f"""
+        Based on the following user profile, suggest suitable job roles and companies:
+        
+        Name: {user_profile['name']}
+        Branch: {user_profile['branch']}
+        Skills: {', '.join(user_profile['skills'])}
+        Education: {json.dumps(user_profile['education'])}
+        Preferences: {json.dumps(user_profile['preferences'])}
+        
+        Please provide:
+        1. Top 5 job roles that match the profile
+        2. For each role:
+           - Required skills
+           - Expected salary range
+           - Growth opportunities
+           - Companies hiring for this role
+        3. Skill gaps to address
+        4. Learning resources to bridge the gaps
+        """
+        
+        # Use the code review bot's API to get recommendations
+        response = code_review_bot._make_api_request(prompt)
+        
+        if response and 'candidates' in response:
+            recommendations = []
+            for candidate in response['candidates']:
+                if 'content' in candidate:
+                    try:
+                        # Parse the AI response into structured recommendations
+                        content = candidate['content']['parts'][0]['text']
+                        recommendations.append(parse_recommendations(content))
+                    except Exception as e:
+                        print(f"Error parsing recommendation: {e}")
+                        continue
+            
+            return recommendations
+            
+        return []
+        
+    except Exception as e:
+        print(f"Error getting AI recommendations: {e}")
+        return []
+
+def parse_recommendations(content):
+    """
+    Parse the AI response into structured recommendations.
+    """
+    try:
+        # Split the content into sections
+        sections = content.split('\n\n')
+        
+        recommendations = {
+            'job_roles': [],
+            'skill_gaps': [],
+            'learning_resources': []
+        }
+        
+        current_section = None
+        
+        for section in sections:
+            if 'Top 5 job roles' in section:
+                current_section = 'job_roles'
+            elif 'Skill gaps' in section:
+                current_section = 'skill_gaps'
+            elif 'Learning resources' in section:
+                current_section = 'learning_resources'
+            else:
+                if current_section == 'job_roles':
+                    # Parse job role details
+                    if section.strip() and not section.startswith('Please provide'):
+                        role_info = {
+                            'title': '',
+                            'skills': [],
+                            'salary': '',
+                            'growth': '',
+                            'companies': []
+                        }
+                        
+                        lines = section.split('\n')
+                        for line in lines:
+                            if ':' in line:
+                                key, value = line.split(':', 1)
+                                key = key.strip().lower()
+                                value = value.strip()
+                                
+                                if 'role' in key:
+                                    role_info['title'] = value
+                                elif 'skills' in key:
+                                    role_info['skills'] = [s.strip() for s in value.split(',')]
+                                elif 'salary' in key:
+                                    role_info['salary'] = value
+                                elif 'growth' in key:
+                                    role_info['growth'] = value
+                                elif 'companies' in key:
+                                    role_info['companies'] = [c.strip() for c in value.split(',')]
+                        
+                        if role_info['title']:
+                            recommendations['job_roles'].append(role_info)
+                
+                elif current_section == 'skill_gaps':
+                    if section.strip() and not section.startswith('Please provide'):
+                        recommendations['skill_gaps'].append(section.strip())
+                
+                elif current_section == 'learning_resources':
+                    if section.strip() and not section.startswith('Please provide'):
+                        recommendations['learning_resources'].append(section.strip())
+        
+        return recommendations
+        
+    except Exception as e:
+        print(f"Error parsing recommendations: {e}")
+        return {}
 
 if __name__ == '__main__':
     app.run(debug=True)

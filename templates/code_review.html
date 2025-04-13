@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Review - Campus Bridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
+</head>
+<body>
+    <div class="admin-panel">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Campus Bridge</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/students/admin">Students</a></li>
+                <li><a href="/faculty/admin">Faculty</a></li>
+                <li><a href="/attendance/admin">Attendance</a></li>
+                <li><a href="/code_review" class="active">Code Review</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1>Smart Code Review</h1>
+            </div>
+
+            <div class="code-review-container">
+                <!-- Code Input Section -->
+                <div class="code-input-section">
+                    <div class="form-group">
+                        <label for="language">Programming Language:</label>
+                        <select id="language" class="form-control">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="codeInput">Enter Code:</label>
+                        <textarea id="codeInput" class="code-editor" rows="15" placeholder="Paste your code here..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="focusAreas">Focus Areas (Optional):</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="performance"> Performance</label>
+                            <label><input type="checkbox" value="security"> Security</label>
+                            <label><input type="checkbox" value="readability"> Readability</label>
+                            <label><input type="checkbox" value="best_practices"> Best Practices</label>
+                        </div>
+                    </div>
+
+                    <button id="analyzeBtn" class="btn btn-primary">Analyze Code</button>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section">
+                    <div class="loading-indicator" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Analyzing code...</p>
+                    </div>
+
+                    <div id="analysisResults" style="display: none;">
+                        <div class="score-section">
+                            <h3>Overall Score: <span id="overallScore">0</span>/10</h3>
+                        </div>
+
+                        <div class="feedback-section">
+                            <h3>Feedback</h3>
+                            <div class="feedback-categories">
+                                <div class="feedback-category">
+                                    <h4>Code Quality</h4>
+                                    <p id="codeQuality"></p>
+                                </div>
+                                <div class="feedback-category">
+                                    <h4>Potential Bugs</h4>
+                                    <p id="potentialBugs"></p>
+                                </div>
+                                <div class="feedback-category">
+                                    <h4>Security</h4>
+                                    <p id="security"></p>
+                                </div>
+                                <div class="feedback-category">
+                                    <h4>Performance</h4>
+                                    <p id="performance"></p>
+                                </div>
+                                <div class="feedback-category">
+                                    <h4>Readability</h4>
+                                    <p id="readability"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="suggestions-section">
+                            <h3>Suggestions</h3>
+                            <ul id="suggestionsList"></ul>
+                        </div>
+
+                        <div class="critical-issues-section">
+                            <h3>Critical Issues</h3>
+                            <ul id="criticalIssuesList"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInput = document.getElementById('codeInput');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loadingIndicator = document.querySelector('.loading-indicator');
+            const analysisResults = document.getElementById('analysisResults');
+            
+            // Initialize code highlighting
+            hljs.highlightAll();
+
+            analyzeBtn.addEventListener('click', async function() {
+                const code = codeInput.value.trim();
+                const language = document.getElementById('language').value;
+                const focusAreas = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(checkbox => checkbox.value);
+
+                if (!code) {
+                    showToast('Please enter some code to analyze', 'error');
+                    return;
+                }
+
+                try {
+                    loadingIndicator.style.display = 'block';
+                    analysisResults.style.display = 'none';
+
+                    const response = await fetch('/analyze_code', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            code,
+                            language,
+                            focus_areas: focusAreas
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        showToast(data.error, 'error');
+                        return;
+                    }
+
+                    // Update UI with analysis results
+                    document.getElementById('overallScore').textContent = data.overall_score;
+                    document.getElementById('codeQuality').textContent = data.feedback.code_quality;
+                    document.getElementById('potentialBugs').textContent = data.feedback.potential_bugs;
+                    document.getElementById('security').textContent = data.feedback.security;
+                    document.getElementById('performance').textContent = data.feedback.performance;
+                    document.getElementById('readability').textContent = data.feedback.readability;
+
+                    // Update suggestions
+                    const suggestionsList = document.getElementById('suggestionsList');
+                    suggestionsList.innerHTML = '';
+                    data.suggestions.forEach(suggestion => {
+                        const li = document.createElement('li');
+                        li.textContent = suggestion;
+                        suggestionsList.appendChild(li);
+                    });
+
+                    // Update critical issues
+                    const criticalIssuesList = document.getElementById('criticalIssuesList');
+                    criticalIssuesList.innerHTML = '';
+                    data.critical_issues.forEach(issue => {
+                        const li = document.createElement('li');
+                        li.textContent = issue;
+                        criticalIssuesList.appendChild(li);
+                    });
+
+                    analysisResults.style.display = 'block';
+                    showToast('Code analysis completed successfully!', 'success');
+
+                } catch (error) {
+                    showToast('An error occurred while analyzing the code', 'error');
+                    console.error('Error:', error);
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                }
+            });
+
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html> 
