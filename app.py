@@ -1831,20 +1831,24 @@ def add_faculty():
 def add_student():
     try:
         data = request.get_json()
+        print("Received data:", data)  # Debug log
         
         # Validate required fields
         required_fields = ['name', 'email', 'password', 'roll_number', 'branch', 'section', 'semester']
         for field in required_fields:
             if not data.get(field):
+                print(f"Missing required field: {field}")  # Debug log
                 return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
 
         # Check if email already exists
         existing_user = supabase.table('users').select('id').eq('email', data['email']).execute()
+        print("Existing user check:", existing_user.data)  # Debug log
         if existing_user.data:
             return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
         # Hash the password
         hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        print("Password hashed successfully")  # Debug log
 
         # Prepare student data
         student_data = {
@@ -1857,11 +1861,14 @@ def add_student():
             'semester': data['semester'],
             'role': 'student'
         }
+        print("Prepared student data:", student_data)  # Debug log
 
         # Insert student into users table
         response = supabase.table('users').insert(student_data).execute()
+        print("Database response:", response.data)  # Debug log
         
         if not response.data:
+            print("Failed to insert student data")  # Debug log
             return jsonify({'success': False, 'message': 'Failed to add student'}), 500
 
         # Initialize attendance record
@@ -1870,13 +1877,85 @@ def add_student():
             'attended_classes': 0,
             'total_classes': 0
         }
+        print("Initializing attendance record:", attendance_data)  # Debug log
         supabase.table('attendance').insert(attendance_data).execute()
 
         return jsonify({'success': True, 'message': 'Student added successfully'})
     except Exception as e:
-        print(f"Error adding student: {e}")
+        print(f"Error adding student: {e}")  # Debug log
         traceback.print_exc()
         return jsonify({'success': False, 'message': 'Failed to add student'}), 500
+
+@app.route('/edit_student/<int:student_id>', methods=['PUT'])
+@admin_required
+def edit_student(student_id):
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['name', 'email', 'roll_number', 'branch', 'section', 'semester']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+
+        # Check if email already exists for another student
+        existing_user = supabase.table('users')\
+            .select('id')\
+            .eq('email', data['email'])\
+            .neq('id', student_id)\
+            .execute()
+        if existing_user.data:
+            return jsonify({'success': False, 'message': 'Email already exists'}), 400
+
+        # Prepare student data
+        student_data = {
+            'name': data['name'],
+            'email': data['email'],
+            'roll_number': data['roll_number'],
+            'branch': data['branch'],
+            'section': data['section'],
+            'semester': data['semester']
+        }
+
+        # Update student in users table
+        response = supabase.table('users')\
+            .update(student_data)\
+            .eq('id', student_id)\
+            .execute()
+        
+        if not response.data:
+            return jsonify({'success': False, 'message': 'Failed to update student'}), 500
+
+        return jsonify({'success': True, 'message': 'Student updated successfully'})
+    except Exception as e:
+        print(f"Error updating student: {e}")
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': 'Failed to update student'}), 500
+
+@app.route('/delete_student/<int:student_id>', methods=['DELETE'])
+@admin_required
+def delete_student(student_id):
+    try:
+        # Delete student's attendance records
+        supabase.table('attendance')\
+            .delete()\
+            .eq('student_id', student_id)\
+            .execute()
+
+        # Delete student from users table
+        response = supabase.table('users')\
+            .delete()\
+            .eq('id', student_id)\
+            .execute()
+        
+        if not response.data:
+            return jsonify({'success': False, 'message': 'Failed to delete student'}), 500
+
+        return jsonify({'success': True, 'message': 'Student deleted successfully'})
+    except Exception as e:
+        print(f"Error deleting student: {e}")
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': 'Failed to delete student'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -624,6 +624,10 @@
                         <input type="email" id="email" class="form-input" required>
                     </div>
                     <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label" for="branch">Branch</label>
                         <select id="branch" class="form-input" required>
                             <option value="">Select Branch</option>
@@ -700,25 +704,31 @@
                     <h2>Add New Student</h2>
                 </div>
                 <div class="section-content">
-                    <form id="addStudentForm" class="student-form">
+                    <form id="mainStudentForm" class="student-form">
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="studentName">Student Name</label>
-                                <input type="text" id="studentName" class="form-input" required>
+                                <label class="form-label" for="mainStudentName">Student Name</label>
+                                <input type="text" id="mainStudentName" class="form-input" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="rollNumber">Roll Number</label>
-                                <input type="text" id="rollNumber" class="form-input" required>
+                                <label class="form-label" for="mainRollNumber">Roll Number</label>
+                                <input type="text" id="mainRollNumber" class="form-input" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="email">Email</label>
-                                <input type="email" id="email" class="form-input" required>
+                                <label class="form-label" for="mainEmail">Email</label>
+                                <input type="email" id="mainEmail" class="form-input" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="branch">Branch</label>
-                                <select id="branch" class="form-input" required>
+                                <label class="form-label" for="mainPassword">Password</label>
+                                <input type="password" id="mainPassword" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="mainBranch">Branch</label>
+                                <select id="mainBranch" class="form-input" required>
                                     <option value="">Select Branch</option>
                                     <option value="CSE">Computer Science Engineering</option>
                                     <option value="ECE">Electronics & Communication Engineering</option>
@@ -727,15 +737,15 @@
                                     <option value="CE">Civil Engineering</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label class="form-label" for="mainSection">Section</label>
+                                <input type="text" id="mainSection" class="form-input" required>
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label" for="section">Section</label>
-                                <input type="text" id="section" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="semester">Semester</label>
-                                <select id="semester" class="form-input" required>
+                                <label class="form-label" for="mainSemester">Semester</label>
+                                <select id="mainSemester" class="form-input" required>
                                     <option value="">Select Semester</option>
                                     <option value="1">Semester 1</option>
                                     <option value="2">Semester 2</option>
@@ -811,11 +821,13 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
 
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            document.querySelector('.main-content').style.marginLeft = 
-                sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
-        });
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                document.querySelector('.main-content').style.marginLeft = 
+                    sidebar.classList.contains('collapsed') ? '60px' : 'var(--sidebar-width)';
+            });
+        }
 
         // Responsive sidebar
         function handleResize() {
@@ -828,8 +840,35 @@
             }
         }
 
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial call
+
         // Student management functions
-       
+        function editStudent(studentId) {
+            // Implementation for editing student
+            console.log('Editing student:', studentId);
+        }
+
+        function deleteStudent(studentId) {
+            if (confirm('Are you sure you want to delete this student?')) {
+                fetch(`/delete_student/${studentId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Student deleted successfully', 'success');
+                        window.location.reload();
+                    } else {
+                        showToast(data.message || 'Failed to delete student', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred while deleting the student', 'error');
+                });
+            }
+        }
 
         // Modal functionality
         const modal = document.getElementById('addStudentModal');
@@ -839,18 +878,32 @@
         const submitBtn = document.getElementById('submitBtn');
         const addStudentForm = document.getElementById('addStudentForm');
 
+        if (addStudentBtn) {
+            addStudentBtn.addEventListener('click', showModal);
+        }
+
+        if (closeModal) {
+            closeModal.addEventListener('click', hideModal);
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', hideModal);
+        }
+
         function showModal() {
-            modal.style.display = 'block';
+            if (modal) {
+                modal.style.display = 'block';
+            }
         }
 
         function hideModal() {
-            modal.style.display = 'none';
-            addStudentForm.reset();
+            if (modal) {
+                modal.style.display = 'none';
+                if (addStudentForm) {
+                    addStudentForm.reset();
+                }
+            }
         }
-
-        addStudentBtn.addEventListener('click', showModal);
-        closeModal.addEventListener('click', hideModal);
-        cancelBtn.addEventListener('click', hideModal);
 
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
@@ -860,41 +913,116 @@
         });
 
         // Form submission
-        addStudentForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = {
-                name: document.getElementById('studentName').value,
-                roll_number: document.getElementById('rollNumber').value,
-                email: document.getElementById('email').value,
-                branch: document.getElementById('branch').value,
-                section: document.getElementById('section').value,
-                semester: document.getElementById('semester').value
-            };
+        const mainStudentForm = document.getElementById('mainStudentForm');
+        if (mainStudentForm) {
+            mainStudentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('mainStudentName').value,
+                    roll_number: document.getElementById('mainRollNumber').value,
+                    email: document.getElementById('mainEmail').value,
+                    password: document.getElementById('mainPassword').value,
+                    branch: document.getElementById('mainBranch').value,
+                    section: document.getElementById('mainSection').value,
+                    semester: document.getElementById('mainSemester').value,
+                    role: 'student'
+                };
 
-            try {
-                const response = await fetch('/add_student', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                if (response.ok) {
-                    // Reset form
-                    addStudentForm.reset();
-                    // Refresh the page to show new student
-                    window.location.reload();
-                } else {
-                    const data = await response.json();
-                    alert(data.error || 'Failed to add student');
+                // Validate required fields
+                if (!formData.name || !formData.roll_number || !formData.email || !formData.password || 
+                    !formData.branch || !formData.section || !formData.semester) {
+                    showToast('Please fill in all required fields', 'error');
+                    return;
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while adding the student');
-            }
-        });
+
+                try {
+                    const response = await fetch('/add_student', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        mainStudentForm.reset();
+                        showToast('Student added successfully!', 'success');
+                        // Redirect to students admin page
+                        window.location.href = '/students/admin';
+                    } else {
+                        showToast(data.message || 'Failed to add student', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('An error occurred while adding the student', 'error');
+                }
+            });
+        }
+
+        // Handle modal form submission
+        const modalForm = document.getElementById('addStudentForm');
+        if (modalForm) {
+            modalForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('studentName').value,
+                    roll_number: document.getElementById('rollNumber').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    branch: document.getElementById('branch').value,
+                    section: document.getElementById('section').value,
+                    semester: document.getElementById('semester').value,
+                    role: 'student'
+                };
+
+                // Validate required fields
+                if (!formData.name || !formData.roll_number || !formData.email || !formData.password || 
+                    !formData.branch || !formData.section || !formData.semester) {
+                    showToast('Please fill in all required fields', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/add_student', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        hideModal();
+                        showToast('Student added successfully!', 'success');
+                        // Redirect to students admin page
+                        window.location.href = '/students/admin';
+                    } else {
+                        showToast(data.message || 'Failed to add student', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('An error occurred while adding the student', 'error');
+                }
+            });
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
     </script>
 </body>
 </html> 
