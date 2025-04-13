@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         :root {
             --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
@@ -611,17 +612,7 @@
                         <textarea id="codeInput" class="code-editor" rows="15" placeholder="Paste your code here..."></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="focusAreas">Focus Areas (Optional):</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" value="performance"> Performance</label>
-                            <label><input type="checkbox" value="security"> Security</label>
-                            <label><input type="checkbox" value="readability"> Readability</label>
-                            <label><input type="checkbox" value="best_practices"> Best Practices</label>
-                        </div>
-                    </div>
-
-                    <button id="analyzeBtn" class="btn btn-primary">Analyze Code</button>
+                    <button id="analyzeBtn" class="btn-primary">Analyze Code</button>
                 </div>
 
                 <!-- Results Section -->
@@ -642,22 +633,6 @@
                                 <div class="feedback-category">
                                     <h4>Code Quality</h4>
                                     <p id="codeQuality"></p>
-                                </div>
-                                <div class="feedback-category">
-                                    <h4>Potential Bugs</h4>
-                                    <p id="potentialBugs"></p>
-                                </div>
-                                <div class="feedback-category">
-                                    <h4>Security</h4>
-                                    <p id="security"></p>
-                                </div>
-                                <div class="feedback-category">
-                                    <h4>Performance</h4>
-                                    <p id="performance"></p>
-                                </div>
-                                <div class="feedback-category">
-                                    <h4>Readability</h4>
-                                    <p id="readability"></p>
                                 </div>
                             </div>
                         </div>
@@ -702,15 +677,14 @@
                     loadingIndicator.style.display = 'block';
                     analysisResults.style.display = 'none';
 
-                    const response = await fetch('/analyze_code', {
+                    const response = await fetch('/api/review', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: JSON.stringify({
-                            code,
-                            language,
-                            focus_areas: focusAreas
+                        body: new URLSearchParams({
+                            code: code,
+                            language: language
                         })
                     });
 
@@ -722,30 +696,8 @@
                     }
 
                     // Update UI with analysis results
-                    document.getElementById('overallScore').textContent = data.overall_score;
-                    document.getElementById('codeQuality').textContent = data.feedback.code_quality;
-                    document.getElementById('potentialBugs').textContent = data.feedback.potential_bugs;
-                    document.getElementById('security').textContent = data.feedback.security;
-                    document.getElementById('performance').textContent = data.feedback.performance;
-                    document.getElementById('readability').textContent = data.feedback.readability;
-
-                    // Update suggestions
-                    const suggestionsList = document.getElementById('suggestionsList');
-                    suggestionsList.innerHTML = '';
-                    data.suggestions.forEach(suggestion => {
-                        const li = document.createElement('li');
-                        li.textContent = suggestion;
-                        suggestionsList.appendChild(li);
-                    });
-
-                    // Update critical issues
-                    const criticalIssuesList = document.getElementById('criticalIssuesList');
-                    criticalIssuesList.innerHTML = '';
-                    data.critical_issues.forEach(issue => {
-                        const li = document.createElement('li');
-                        li.textContent = issue;
-                        criticalIssuesList.appendChild(li);
-                    });
+                    document.getElementById('overallScore').textContent = data.overall_score || 'N/A';
+                    document.getElementById('codeQuality').textContent = data.feedback || 'No detailed feedback available';
 
                     analysisResults.style.display = 'block';
                     showToast('Code analysis completed successfully!', 'success');
@@ -769,96 +721,6 @@
                 }, 3000);
             }
         });
-
-        // Toggle sidebar on mobile
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        // Function to handle navigation and active states
-        function handleNavigation() {
-            // Remove active class from all nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // Get current path
-            const currentPath = window.location.pathname;
-            
-            // Add active class to current nav item
-            const currentNavItem = document.querySelector(`.nav-item[href="${currentPath}"]`);
-            if (currentNavItem) {
-                currentNavItem.classList.add('active');
-            }
-        }
-
-        // Function to toggle sidebar
-        function toggleSidebar() {
-            sidebar.classList.toggle('collapsed');
-            // Adjust main content margin when sidebar is collapsed
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '60px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
-            } else {
-                mainContent.style.marginLeft = '250px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
-            }
-        }
-
-        // Event listeners
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
-        sidebarToggle.addEventListener('click', toggleSidebar);
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-        // Initialize sidebar state and navigation
-        document.addEventListener('DOMContentLoaded', () => {
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '60px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
-            } else {
-                mainContent.style.marginLeft = '250px';
-                sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
-                sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
-            }
-            
-            // Set initial active state
-            handleNavigation();
-        });
-
-        // Handle navigation clicks
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                // Remove active class from all nav items
-                document.querySelectorAll('.nav-item').forEach(navItem => {
-                    navItem.classList.remove('active');
-                });
-                // Add active class to clicked item
-                e.currentTarget.classList.add('active');
-            });
-        });
     </script>
 </body>
-</html> 
+</html>
