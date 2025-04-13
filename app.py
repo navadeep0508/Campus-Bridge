@@ -356,6 +356,10 @@ def c_plus_plus():
 def python():
     return render_template('python.html')
 
+@app.route('/timetable/faculty')
+def timetable_faculty():
+    return render_template('timetable for tac.html')
+
 @app.route('/faculty/assignments', methods=['GET', 'POST'])
 def faculty_assignments():
     if request.method == 'POST':
