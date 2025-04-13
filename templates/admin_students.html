@@ -912,55 +912,56 @@
             }
         });
 
-        // Form submission
-        const mainStudentForm = document.getElementById('mainStudentForm');
-        if (mainStudentForm) {
-            mainStudentForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
+        // Handle form submission
+        document.getElementById('mainStudentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                name: document.getElementById('mainStudentName').value,
+                email: document.getElementById('mainEmail').value,
+                password: document.getElementById('mainPassword').value,
+                roll_number: document.getElementById('mainRollNumber').value,
+                branch: document.getElementById('mainBranch').value,
+                section: document.getElementById('mainSection').value,
+                semester: document.getElementById('mainSemester').value,
+                role: 'student'
+            };
+
+            // Validate required fields
+            if (!formData.name || !formData.email || !formData.password || !formData.roll_number || 
+                !formData.branch || !formData.section || !formData.semester) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/add_student', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
                 
-                const formData = {
-                    name: document.getElementById('mainStudentName').value,
-                    roll_number: document.getElementById('mainRollNumber').value,
-                    email: document.getElementById('mainEmail').value,
-                    password: document.getElementById('mainPassword').value,
-                    branch: document.getElementById('mainBranch').value,
-                    section: document.getElementById('mainSection').value,
-                    semester: document.getElementById('mainSemester').value,
-                    role: 'student'
-                };
-
-                // Validate required fields
-                if (!formData.name || !formData.roll_number || !formData.email || !formData.password || 
-                    !formData.branch || !formData.section || !formData.semester) {
-                    showToast('Please fill in all required fields', 'error');
-                    return;
+                if (data.success) {
+                    showToast('Student added successfully', 'success');
+                    // Reset form
+                    this.reset();
+                    // Reload page after a short delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'Failed to add student', 'error');
                 }
-
-                try {
-                    const response = await fetch('/add_student', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        mainStudentForm.reset();
-                        showToast('Student added successfully!', 'success');
-                        // Redirect to students admin page
-                        window.location.href = '/students/admin';
-                    } else {
-                        showToast(data.message || 'Failed to add student', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showToast('An error occurred while adding the student', 'error');
-                }
-            });
-        }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('An error occurred while adding student', 'error');
+            }
+        });
 
         // Handle modal form submission
         const modalForm = document.getElementById('addStudentForm');
@@ -997,11 +998,13 @@
 
                     const data = await response.json();
 
-                    if (response.ok) {
+                    if (data.success) {
                         hideModal();
                         showToast('Student added successfully!', 'success');
-                        // Redirect to students admin page
-                        window.location.href = '/students/admin';
+                        // Reload page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
                         showToast(data.message || 'Failed to add student', 'error');
                     }
