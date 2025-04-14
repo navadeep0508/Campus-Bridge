@@ -1,0 +1,95 @@
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <div class="sidebar-header">
+        <h2>Campus Bridge</h2>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <h3>Main</h3>
+            <a href="{{ url_for('home_page') }}" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('mycourse') }}" class="nav-item">
+                <i class="fas fa-book"></i>
+                <span>My Courses</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <h3>Institution</h3>
+            <a href="{{ url_for('institution') }}" class="nav-item">
+                <i class="fas fa-university"></i>
+                <span>My Institution</span>
+            </a>
+            <a href="{{ url_for('chat_page') }}" class="nav-item">
+                <i class="fas fa-clock"></i>
+                <span>Faculty interaction</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <h3>Academic</h3>
+            <a href="{{ url_for('attendance') }}" class="nav-item">
+                <i class="fas fa-user-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="{{ url_for('student_assignments') }}" class="nav-item">
+                <i class="fas fa-tasks"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="{{ url_for('timetable') }}" class="nav-item">
+                <i class="fas fa-clock"></i>
+                <span>Timetable</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <h3>Coding</h3>
+            <a href="{{ url_for('coding_tracks') }}" class="nav-item active">
+                <i class="fas fa-code-branch"></i>
+                <span>Coding Tracks</span>
+            </a>
+            <a href="{{ url_for('myverse') }}" class="nav-item">
+                <i class="fas fa-laptop-code"></i>
+                <span>My Verse</span>
+            </a>
+            <a href="{{ url_for('compiler') }}" class="nav-item">
+                <i class="fas fa-terminal"></i>
+                <span>Online Compiler</span>
+            </a>
+            <a href="{{ url_for('student_coding_assesment') }}" class="nav-item">
+                <i class="fas fa-file-code"></i>
+                <span>Coding Assignment</span>
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+            <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
+                <i class="fas fa-code"></i>
+                <span>AI Code Assistant</span>
+            </a>
+            <a href="{{ url_for('code_review') }}" class="nav-item">
+                <i class="fas fa-check-double"></i>
+                <span>Smart Code Review Bot</span>
+            </a>
+            <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
+                <i class="fas fa-briefcase"></i>
+                <span>Job Match Recommender</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <h3><i class="fas fa-users"></i> Community</h3>
+            <a href="{{ url_for('code_room') }}" class="nav-item">
+                <i class="fas fa-code"></i>
+                <span>Live Group Code Room</span>
+            </a>
+        </div>
+    </nav>
+</aside>
