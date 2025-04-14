@@ -1,5 +1,5 @@
-
-flask==2.1.0
+flask==2.0.3
+werkzeug==2.0.3
 supabase==0.5.8
 requests==2.26.0
 psycopg2-binary
@@ -8,5 +8,5 @@ cohere==4.2.0
 python-dotenv==0.19.2
 gunicorn==20.1.0
 flask-cors==3.0.10
-python-jose
+python-jose==3.3.0
 jsonify==0.5
