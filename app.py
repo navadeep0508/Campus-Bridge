@@ -2153,6 +2153,42 @@ def recommend_jobs():
         recommendation = f"Error: {str(e)}"
 
     return render_template('job_match_recomender.html', recommendation=recommendation)
+@app.route('/ai_code_assistant')
+def ai_code_assistant():
+    return render_template('ai_code_assistant.html')
+
+@app.route('/solve', methods=['POST'])
+def solve_code_problem():
+    question = request.form['question']
+
+    prompt = f"""
+    You are a helpful coding assistant.
+
+    A student has the following coding question:
+    "{question}"
+
+    Please:
+    1. Solve the problem with clean, well-commented code (in Python).
+    2. Explain the code step-by-step in simple terms.
+    3. Mention any alternatives or improvements if applicable.
+
+    Format:
+    - Code:
+    - Explanation:
+    """
+
+    try:
+        response = co.generate(
+            model='command-r-plus',
+            prompt=prompt,
+            max_tokens=500,
+            temperature=0.7
+        )
+        result = response.generations[0].text
+    except Exception as e:
+        result = f"Error: {str(e)}"
+
+    return render_template('ai_code_assistant.html', result=result)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
