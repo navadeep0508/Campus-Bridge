@@ -2071,6 +2071,9 @@ Here is the code to review:
 @app.route('/job_match_recomender', methods=['GET'])
 def job_match_recomender1():
     return render_template('job_match_recomender.html')
+@app.route('/student leaderboard', methods=['GET'])
+def student_leaderboard():
+    return render_template('student leaderboard.html')   
 
 @app.route('/recommend', methods=['POST'])
 def recommend_jobs():
