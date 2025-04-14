@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Code Assistant</title>
+</head>
+<body>
+  <h1>🤖 AI Code Assistant</h1>
+  <form action="/solve" method="post">
+    <label for="question">Enter your coding problem:</label><br><br>
+    <textarea name="question" rows="5" cols="60" placeholder="e.g. How do I reverse a linked list in Python?"></textarea><br><br>
+    <button type="submit">Get Help</button>
+  </form>
+
+  {% if result %}
+    <h2>🧠 AI Response</h2>
+    <pre>{{ result }}</pre>
+  {% endif %}
+</body>
+</html>
