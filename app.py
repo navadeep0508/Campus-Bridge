@@ -2109,6 +2109,42 @@ Here is the code to review:
 
     except Exception as e:
         return jsonify({'error': str(e)})
+@app.route('/job_match_recomender', methods=['GET'])
+def index():
+    return render_template('job_match_recomender.html')
+
+@app.route('/recommend', methods=['POST'])
+def recommend_jobs():
+    skills_input = request.form['skills']
+
+    prompt = f"""
+    You are an expert career advisor.
+
+    A user has the following skills:
+    {skills_input}
+
+    1. Recommend 3–5 job roles that match these skills.
+    2. Identify the major skills the user is missing for better job opportunities.
+    3. Suggest a personalized learning path to develop those missing skills.
+
+    Format:
+    - Matching Jobs: 
+    - Missing Skills:
+    - Suggested Skills to Learn:
+    """
+
+    try:
+        response = co.generate(
+            model='command-r-plus',
+            prompt=prompt,
+            max_tokens=400,
+            temperature=0.7
+        )
+        recommendation = response.generations[0].text
+    except Exception as e:
+        recommendation = f"Error: {str(e)}"
+
+    return render_template('job_match_recomender.html', recommendation=recommendation)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
