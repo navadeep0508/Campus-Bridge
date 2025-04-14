@@ -813,6 +813,39 @@
         .hero-btn i {
             font-size: 1.2rem;
         }
+
+        /* Reload Note */
+        .reload-note {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            animation: fadeIn 0.5s ease;
+            z-index: 1000;
+        }
+
+        .reload-note i {
+            font-size: 1.1rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1066,6 +1099,12 @@
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Reload Note -->
+    <div class="reload-note">
+        <i class="fas fa-info-circle"></i>
+        <span>Please reload the page after adding a student</span>
+    </div>
+
     <script>
         // Sidebar toggle functionality
         const sidebar = document.getElementById('sidebar');
@@ -1182,8 +1221,11 @@
                     
                     if (response.ok) {
                         closeModal();
-                        loadStudentList();
-                        updateStatistics();
+                        showToast('Student added successfully!', 'success');
+                        // Reload the page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     } else {
                         showToast(data.error || 'Failed to add student', 'error');
                     }

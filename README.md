@@ -128,6 +128,7 @@ Campus Bridge is a comprehensive university management system designed to stream
 
 ## Login Credentials
 
+
 ### Admin Access
 - **Email:** admin@gmail.com
 - **Password:** sunny
@@ -135,10 +136,12 @@ Campus Bridge is a comprehensive university management system designed to stream
 ### Faculty Access
 - **Email:** faculty@gmail.com
 - **Password:** sunny
+- **Faculty name:** john
 
 ### Student Access 1
 - **Email:** 23102a040719@mbu.asia
 - **Password:** sunny
+- **Student Name:** sunny
 
 ### Student Access 2
 - **Email:** raghs@gmail.com

@@ -603,6 +603,64 @@
                 background-position: right 0.8rem center;
             }
         }
+
+        /* Reload Note Styles */
+        .reload-note {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            animation: fadeIn 0.5s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .reload-note i {
+            font-size: 1.2rem;
+            color: #000000;
+        }
+
+        .reload-note span {
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.3px;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Add responsive styles */
+        @media (max-width: 768px) {
+            .reload-note {
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+                text-align: center;
+                justify-content: center;
+                font-size: 1.1rem;
+                padding: 15px 25px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -690,13 +748,11 @@
                     <a href="{{ url_for('faculty_admin') }}" class="nav-item">
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Faculty</span>
-                    
                     </a>
-                </a>
-                <a href="{{ url_for('students_admin') }}" class="nav-item">
-                    <i class="fas fa-user-graduate"></i>
-                    <span>Students</span>
-                </a>
+                    <a href="{{ url_for('students_admin') }}" class="nav-item active">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Students</span>
+                    </a>
                 </div>
             </nav>
         </aside>
@@ -706,6 +762,12 @@
             <!-- Top Navigation -->
             <div class="top-nav">
                 <h1 class="page-title">Student Management</h1>
+            </div>
+
+            <!-- Reload Note -->
+            <div class="reload-note">
+                <i class="fas fa-info-circle"></i>
+                <span>Please reload the page after adding a student</span>
             </div>
 
             <!-- Add Student Section -->
@@ -773,7 +835,9 @@
                                 <i class="fas fa-save"></i>
                         Add Student
                     </button>
+                    
                         </div>
+                        <p>please reload the page after submission</p>
                     </form>
                 </div>
             </div>
