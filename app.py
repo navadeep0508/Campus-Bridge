@@ -2118,7 +2118,7 @@ Here is the code to review:
     except Exception as e:
         return jsonify({'error': str(e)})
 @app.route('/job_match_recomender', methods=['GET'])
-def index():
+def job_match_recomender1():
     return render_template('job_match_recomender.html')
 
 @app.route('/recommend', methods=['POST'])
