@@ -1171,18 +1171,26 @@
                 </div>
                 
                 <div class="nav-section">
+                    <h3>AI Code Assistant</h3>
+                    <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="{{ url_for('code_review') }}" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Smart Code Review Bot</span>
+                    </a>
+                    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
                     <h3>Community</h3>
                     <a href="{{ url_for('code_room') }}" class="nav-item">
                         <i class="fas fa-code"></i>
                         <span>Live Group Code Room</span>
-                    </a>
-                    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
-                        <i class="fas fa-briefcase"></i>
-                        <span>Job Match Recommender</span>
-                    </a>
-                    <a href="{{ url_for('code_review') }}" class="nav-item">
-                        <i class="fas fa-robot"></i>
-                        <span>Smart Code Review Bot</span>
                     </a>
                 </div>
             </nav>
