@@ -1,20 +1,574 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Code Assistant</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Assistant - Campus Bridge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
+            --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
+            --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
+            --text-primary: #333333;
+            --text-light: #ffffff;
+            --text-secondary: #555555;
+            --bg-light: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(76, 175, 80, 0.4);
+            --accent-color: #4CAF50;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --danger-color: #F44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--primary-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark-gradient);
+            backdrop-filter: blur(10px);
+            color: var(--text-light);
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border-right: 1px solid var(--card-border);
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-header h2,
+        .sidebar.collapsed .nav-section h3,
+        .sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item {
+            padding: 0.8rem;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .nav-item i {
+            margin-right: 0;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            right: -12px;
+            top: 20px;
+            background: var(--accent-color);
+            color: var(--text-light);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1) rotate(180deg);
+        }
+
+        .sidebar.collapsed .sidebar-toggle {
+            transform: rotate(180deg);
+        }
+
+        .sidebar.collapsed .sidebar-toggle:hover {
+            transform: scale(1.1) rotate(0deg);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .sidebar-nav {
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .nav-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-section h3 {
+            color: var(--text-light);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-section h3 i {
+            font-size: 1rem;
+            color: var(--accent-color);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            background: transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--text-light);
+            transform: translateX(5px);
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            padding: 2rem;
+        }
+
+        /* AI Assistant Styles */
+        .assistant-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--card-border);
+        }
+
+        .assistant-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .assistant-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .assistant-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .assistant-form {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .submit-btn {
+            background: var(--secondary-gradient);
+            color: var(--text-light);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 auto;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+        }
+
+        .submit-btn i {
+            font-size: 1.1rem;
+        }
+
+        .result-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-section h2 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-section h2 i {
+            color: var(--accent-color);
+        }
+
+        .result-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--secondary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .info-card i {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .info-card h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .main-content {
+                margin-left: 60px;
+            }
+
+            .assistant-container {
+                padding: 1rem;
+            }
+
+            .info-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>🤖 AI Code Assistant</h1>
-  <form action="/solve" method="post">
-    <label for="question">Enter your coding problem:</label><br><br>
-    <textarea name="question" rows="5" cols="60" placeholder="e.g. How do I reverse a linked list in Python?"></textarea><br><br>
-    <button type="submit">Get Help</button>
-  </form>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="sidebar-header">
+                <h2>Campus Bridge</h2>
+            </div>
 
-  {% if result %}
-    <h2>🧠 AI Response</h2>
-    <pre>{{ result }}</pre>
-  {% endif %}
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3><i class="fas fa-th-large"></i> Main</h3>
+                    <a href="{{ url_for('home_page') }}" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('mycourse') }}" class="nav-item">
+                        <i class="fas fa-book-open"></i>
+                        <span>My Courses</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-university"></i> Institution</h3>
+                    <a href="{{ url_for('institution') }}" class="nav-item">
+                        <i class="fas fa-building"></i>
+                        <span>My Institution</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-graduation-cap"></i> Academic</h3>
+                    <a href="{{ url_for('attendance') }}" class="nav-item">
+                        <i class="fas fa-user-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                    <a href="{{ url_for('student_assignments') }}" class="nav-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Assignments</span>
+                    </a>
+                    <a href="{{ url_for('timetable') }}" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Timetable</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-code"></i> Coding</h3>
+                    <a href="{{ url_for('coding_tracks') }}" class="nav-item">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>Coding Tracks</span>
+                    </a>
+                    <a href="{{ url_for('myverse') }}" class="nav-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>My Verse</span>
+                    </a>
+                    <a href="{{ url_for('compiler') }}" class="nav-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Online Compiler</span>
+                    </a>
+                    <a href="{{ url_for('student_coding_assesment') }}" class="nav-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>Coding Assignment</span>
+                    </a>
+                    <a href="{{ url_for('ai_code_assistant') }}" class="nav-item active">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Code Assistant</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <h3><i class="fas fa-users"></i> Community</h3>
+                    <a href="{{ url_for('code_room') }}" class="nav-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Live Group Code Room</span>
+                    </a>
+                    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
+                    </a>
+                    <a href="{{ url_for('code_review') }}" class="nav-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Smart Code Review Bot</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="assistant-container">
+                <div class="assistant-header">
+                    <h1>AI Code Assistant</h1>
+                    <p>Get instant help with your coding problems. Our AI-powered assistant can help you with debugging, code optimization, and learning new concepts.</p>
+                </div>
+
+                <div class="info-cards">
+                    <div class="info-card">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Smart Solutions</h3>
+                        <p>Get instant solutions to your coding problems with detailed explanations and best practices.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-code"></i>
+                        <h3>Code Optimization</h3>
+                        <p>Learn how to write cleaner, more efficient code with AI-powered suggestions and improvements.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-book"></i>
+                        <h3>Learning Support</h3>
+                        <p>Get help understanding complex programming concepts and improve your coding skills.</p>
+                    </div>
+                </div>
+
+                <form action="/solve" method="post" class="assistant-form">
+                    <div class="form-group">
+                        <label for="question">Enter your coding problem or question:</label>
+                        <textarea name="question" id="question" placeholder="e.g. How do I reverse a linked list in Python? Or explain the concept of recursion with examples."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-robot"></i>
+                        Get AI Help
+                    </button>
+                </form>
+
+                {% if result %}
+                <div class="result-section">
+                    <h2>
+                        <i class="fas fa-robot"></i>
+                        AI Response
+                    </h2>
+                    <div class="result-content">{{ result }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar Toggle Functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.querySelector('.main-content');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '60px';
+            } else {
+                mainContent.style.marginLeft = '250px';
+            }
+        }
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.style.marginLeft = '60px';
+            }
+        });
+
+        // Initialize sidebar state
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.style.marginLeft = '60px';
+            }
+        });
+    </script>
 </body>
 </html>
