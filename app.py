@@ -7,8 +7,8 @@ from supabase import create_client, Client
 import bcrypt
 import traceback
 from functools import wraps
-
 import json
+from datetime import datetime as dt
 
 # Explicitly import Cohere to handle potential import issues
 try:
@@ -1365,48 +1365,7 @@ def get_room_messages(room_id):
         print(f"Error fetching messages: {str(e)}")
         return jsonify({'error': 'Failed to fetch messages'}), 500
 
-@app.route('/send_message/<room_id>', methods=['POST'])
-def send_message(room_id):
-    try:
-        data = request.json
-        message = data.get('message')
-        user_id = session.get('user_id')
-        
-        if not all([message, user_id]):
-            return jsonify({'error': 'Missing required fields'}), 400
-            
-        # Convert room_id to integer
-        try:
-            room_id = int(room_id)
-        except ValueError:
-            return jsonify({'error': 'Invalid room ID'}), 400
-            
-        # Check if user is a participant
-        participant_response = supabase.table('code_room_participants')\
-            .select('*')\
-            .eq('room_id', room_id)\
-            .eq('user_id', user_id)\
-            .execute()
-            
-        if not participant_response.data:
-            return jsonify({'error': 'Not a participant in this room'}), 403
-            
-        # Send message
-        message_data = {
-            'room_id': room_id,
-            'user_id': user_id,
-            'message': message,
-            'created_at': 'now()'
-        }
-        
-        supabase.table('code_room_messages').insert(message_data).execute()
-        
-        return jsonify({'message': 'Message sent successfully'})
-    except Exception as e:
-        print(f"Error sending message: {e}")
-        return jsonify({'error': 'Failed to send message'}), 500
-
-@app.route('/send_code_room_message/<int:room_id>', methods=['POST'])
+@app.route('/send_code_room_message/<room_id>', methods=['POST'])
 def send_code_room_message(room_id):
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -2185,7 +2144,236 @@ def solve_code_problem():
 
     return render_template('ai_code_assistant.html', result=result)
 
+@app.route('/chat')
+def chat_page():
+    """
+    Render the chat page for users
+    """
+    user_id = session.get('user_id')
+    user_role = session.get('role')
+    
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    try:
+        # Fetch user details
+        user_response = supabase.table('users').select('*').eq('id', user_id).execute()
+        user_details = user_response.data[0] if user_response.data else None
+        
+        # Fetch recent chat rooms or create a default room
+        chat_rooms_response = supabase.table('chat_rooms').select('*').or_(
+            f"user1_id = {user_id}",
+            f"user2_id = {user_id}"
+        ).execute()
+        
+        return render_template('chat.html', 
+                               user=user_details, 
+                               chat_rooms=chat_rooms_response.data,
+                               user_role=user_role)
+    
+    except Exception as e:
+        return render_template('chat.html', error=str(e))
+
+@app.route('/create_chat_room', methods=['POST'])
+def create_chat_room():
+    """
+    Create a new chat room between two users
+    Using integer-based IDs
+    """
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    try:
+        other_user_id = request.form.get('other_user_id')
+        
+        # Validate inputs
+        if not other_user_id:
+            return jsonify({'status': 'error', 'message': 'Recipient user ID is required'}), 400
+        
+        # Convert to integers
+        try:
+            user_id = int(user_id)
+            other_user_id = int(other_user_id)
+        except (ValueError, TypeError):
+            return jsonify({'status': 'error', 'message': 'Invalid user IDs'}), 400
+        
+        # Validate that the other user exists and is of the appropriate role
+        other_user_response = supabase.table('users').select('id', 'role').eq('id', other_user_id).execute()
+        
+        if not other_user_response.data:
+            return jsonify({'status': 'error', 'message': 'Recipient user not found'}), 404
+        
+        # Additional role-based validation if needed
+        other_user_role = other_user_response.data[0]['role']
+        
+        # Prevent creating chat rooms with the same user
+        if user_id == other_user_id:
+            return jsonify({'status': 'error', 'message': 'Cannot create a chat room with yourself'}), 400
+        
+        # Check if a chat room already exists
+        existing_room_query1 = supabase.table('chat_rooms').select('*').eq('user1_id', user_id).eq('user2_id', other_user_id)
+        existing_room_query2 = supabase.table('chat_rooms').select('*').eq('user1_id', other_user_id).eq('user2_id', user_id)
+        
+        existing_room_response1 = existing_room_query1.execute()
+        existing_room_response2 = existing_room_query2.execute()
+        
+        # Combine results
+        existing_rooms = existing_room_response1.data + existing_room_response2.data
+        
+        if existing_rooms:
+            return jsonify({
+                'status': 'success', 
+                'room_id': existing_rooms[0]['id'],
+                'message': 'Existing chat room found'
+            })
+        
+        # Create a new chat room
+        new_room_data = {
+            'user1_id': user_id,
+            'user2_id': other_user_id,
+            'created_at': dt.utcnow().isoformat()
+        }
+        
+        room_response = supabase.table('chat_rooms').insert(new_room_data).execute()
+        
+        if room_response.data:
+            return jsonify({
+                'status': 'success', 
+                'room_id': room_response.data[0]['id'],
+                'message': 'New chat room created'
+            })
+        else:
+            return jsonify({'status': 'error', 'message': 'Failed to create chat room'}), 500
+    
+    except Exception as e:
+        print(f"Error creating chat room: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/send_chat_message', methods=['POST'])
+def send_chat_message():
+    """
+    Send a message in a chat room
+    """
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    try:
+        # Get the other user's ID from the request
+        room_id = request.form.get('room_id')
+        message_content = request.form.get('message')
+        
+        # Validate inputs
+        if not room_id or not message_content:
+            return jsonify({'status': 'error', 'message': 'Missing room_id or message'}), 400
+        
+        message_data = {
+            'room_id': int(room_id),
+            'sender_id': int(user_id),
+            'message': message_content,
+            'timestamp': dt.utcnow().isoformat()
+        }
+        
+        message_response = supabase.table('chat_messages').insert(message_data).execute()
+        
+        if message_response.data:
+            return jsonify({'status': 'success', 'message': 'Message sent'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Failed to send message'}), 500
+    
+    except Exception as e:
+        print(f"Error sending message: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/get_chat_messages/<int:room_id>')
+def get_chat_messages(room_id):
+    """
+    Retrieve messages for a specific chat room
+    """
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    try:
+        # Fetch messages for the room, ordered by timestamp
+        messages_response = supabase.table('chat_messages').select('*').eq('room_id', room_id).order('timestamp').execute()
+        
+        return jsonify({
+            'status': 'success', 
+            'messages': messages_response.data
+        })
+    
+    except Exception as e:
+        print(f"Error fetching messages: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/get_users', methods=['POST'])
+def get_users():
+    """
+    Retrieve users based on search criteria
+    Supports filtering by role and search term
+    """
+    try:
+        # Get search parameters
+        search_term = request.form.get('search_term', '').strip()
+        role = request.form.get('role')
+        
+        # Start with base query
+        query = supabase.table('users').select('id', 'name', 'role')
+        
+        # Apply role filter if specified
+        if role:
+            query = query.eq('role', role)
+        
+        # Apply search term if provided
+        if search_term:
+            # Use multiple filter conditions
+            query = query.filter('name', 'ilike', f'%{search_term}%')
+        
+        # Execute query
+        response = query.execute()
+        
+        # Return results
+        if response.data:
+            return jsonify(response.data)
+        else:
+            return jsonify([])
+    
+    except Exception as e:
+        print(f"Error fetching users: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/get_current_user_id')
+def get_current_user_id():
+    """
+    Retrieve the current logged-in user's ID
+    """
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    try:
+        # Validate user exists
+        user_response = supabase.table('users').select('id', 'role').eq('id', user_id).execute()
+        
+        if not user_response.data:
+            return jsonify({'status': 'error', 'message': 'User not found'}), 404
+        
+        return jsonify({
+            'status': 'success', 
+            'user_id': int(user_id),
+            'role': user_response.data[0]['role']
+        })
+    
+    except Exception as e:
+        print(f"Error retrieving user ID: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
