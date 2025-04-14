@@ -410,27 +410,31 @@
 
             <nav class="sidebar-nav">
                 <div class="nav-section">
-                    <h3><i class="fas fa-th-large"></i> Main</h3>
+                    <h3>Main</h3>
                     <a href="{{ url_for('home_page') }}" class="nav-item">
                         <i class="fas fa-home"></i>
                         <span>Dashboard</span>
                     </a>
                     <a href="{{ url_for('mycourse') }}" class="nav-item">
-                        <i class="fas fa-book-open"></i>
+                        <i class="fas fa-book"></i>
                         <span>My Courses</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <h3><i class="fas fa-university"></i> Institution</h3>
+                    <h3>Institution</h3>
                     <a href="{{ url_for('institution') }}" class="nav-item">
-                        <i class="fas fa-building"></i>
+                        <i class="fas fa-university"></i>
                         <span>My Institution</span>
+                    </a>
+                    <a href="{{ url_for('chat_page') }}" class="nav-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Faculty interaction</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <h3><i class="fas fa-graduation-cap"></i> Academic</h3>
+                    <h3>Academic</h3>
                     <a href="{{ url_for('attendance') }}" class="nav-item">
                         <i class="fas fa-user-check"></i>
                         <span>Attendance</span>
@@ -440,15 +444,15 @@
                         <span>Assignments</span>
                     </a>
                     <a href="{{ url_for('timetable') }}" class="nav-item">
-                        <i class="fas fa-calendar-alt"></i>
+                        <i class="fas fa-clock"></i>
                         <span>Timetable</span>
                     </a>
                 </div>
 
                 <div class="nav-section">
-                    <h3><i class="fas fa-code"></i> Coding</h3>
+                    <h3>Coding</h3>
                     <a href="{{ url_for('coding_tracks') }}" class="nav-item">
-                        <i class="fas fa-project-diagram"></i>
+                        <i class="fas fa-code-branch"></i>
                         <span>Coding Tracks</span>
                     </a>
                     <a href="{{ url_for('myverse') }}" class="nav-item">
@@ -463,25 +467,29 @@
                         <i class="fas fa-file-code"></i>
                         <span>Coding Assignment</span>
                     </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-robot"></i> AI Assistant</h3>
                     <a href="{{ url_for('ai_code_assistant') }}" class="nav-item active">
-                        <i class="fas fa-robot"></i>
+                        <i class="fas fa-code"></i>
                         <span>AI Code Assistant</span>
+                    </a>
+                    <a href="{{ url_for('code_review') }}" class="nav-item">
+                        <i class="fas fa-check-double"></i>
+                        <span>Smart Code Review Bot</span>
+                    </a>
+                    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Job Match Recommender</span>
                     </a>
                 </div>
                 
                 <div class="nav-section">
                     <h3><i class="fas fa-users"></i> Community</h3>
                     <a href="{{ url_for('code_room') }}" class="nav-item">
-                        <i class="fas fa-code-branch"></i>
+                        <i class="fas fa-code"></i>
                         <span>Live Group Code Room</span>
-                    </a>
-                    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
-                        <i class="fas fa-briefcase"></i>
-                        <span>Job Match Recommender</span>
-                    </a>
-                    <a href="{{ url_for('code_review') }}" class="nav-item">
-                        <i class="fas fa-robot"></i>
-                        <span>Smart Code Review Bot</span>
                     </a>
                 </div>
             </nav>

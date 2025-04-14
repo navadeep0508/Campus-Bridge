@@ -661,6 +661,10 @@
                         <i class="fas fa-university"></i>
                         <span>My Institution</span>
                     </a>
+                    <a href="{{ url_for('chat_page') }}" class="nav-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Faculty interaction</span>
+                    </a>
                 </div>
 
                 <div class="nav-section">
@@ -698,20 +702,28 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-
+                
                 <div class="nav-section">
-                    <h3>Community</h3>
-                    <a href="{{ url_for('code_room') }}" class="nav-item">
+                    <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+                    <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
                         <i class="fas fa-code"></i>
-                        <span>Live Group Code Room</span>
+                        <span>AI Code Assistant</span>
+                    </a>
+                    <a href="{{ url_for('code_review') }}" class="nav-item">
+                        <i class="fas fa-check-double"></i>
+                        <span>Smart Code Review Bot</span>
                     </a>
                     <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
                         <i class="fas fa-briefcase"></i>
                         <span>Job Match Recommender</span>
                     </a>
-                    <a href="{{ url_for('code_review') }}" class="nav-item">
-                        <i class="fas fa-robot"></i>
-                        <span>Smart Code Review Bot</span>
+                </div>
+
+                <div class="nav-section">
+                    <h3><i class="fas fa-users"></i> Community</h3>
+                    <a href="{{ url_for('code_room') }}" class="nav-item">
+                        <i class="fas fa-code"></i>
+                        <span>Live Group Code Room</span>
                     </a>
                 </div>
             </nav>
