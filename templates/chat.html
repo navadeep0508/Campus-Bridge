@@ -1,0 +1,568 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Faculty Search Section -->
+        <div class="col-md-4 faculty-search-section">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Search Faculty</h4>
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <input type="text" id="faculty-search-input" class="form-control" 
+                               placeholder="Search faculty by name or department">
+                        <div class="input-group-append">
+                            <button id="search-faculty-btn" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="faculty-search-results" class="list-group">
+                        <!-- Faculty search results will be dynamically populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Messages Section -->
+        <div class="col-md-8 chat-section">
+            <div class="card">
+                <div class="card-header" id="chat-header">
+                    <h4>Chat</h4>
+                    <span id="selected-faculty-name" class="text-muted">Select a faculty to start chatting</span>
+                </div>
+                <div id="chat-messages" class="card-body chat-messages">
+                    <!-- Messages will be displayed here -->
+                </div>
+                <div class="card-footer message-input-area">
+                    <div class="input-group">
+                        <input type="text" id="message-input" class="form-control" 
+                               placeholder="Type a message..." enabled>
+                        <div class="input-group-append">
+                            <button id="send-message-btn" class="btn btn-success" enabled>
+                                Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.faculty-search-section, .chat-section {
+    height: calc(100vh - 100px);
+}
+
+.chat-messages {
+    height: calc(100% - 200px);
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    max-width: 80%;
+}
+
+.message.sent {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.message.received {
+    background-color: #ffffff;
+    align-self: flex-start;
+}
+
+#faculty-search-results .list-group-item {
+    cursor: pointer;
+}
+
+#faculty-search-results .list-group-item:hover {
+    background-color: #f1f3f5;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const facultySearchInput = document.getElementById('faculty-search-input');
+    const searchFacultyBtn = document.getElementById('search-faculty-btn');
+    const facultySearchResults = document.getElementById('faculty-search-results');
+    const chatMessages = document.getElementById('chat-messages');
+    const messageInput = document.getElementById('message-input');
+    const sendMessageBtn = document.getElementById('send-message-btn');
+    const selectedFacultyName = document.getElementById('selected-faculty-name');
+    
+    let currentFacultyId = null;
+    let currentRoomId = null;
+    let currentUserId = null;
+
+    // Fetch current user ID on page load
+    function fetchCurrentUserId() {
+        fetch('/get_current_user_id')
+        .then(response => {
+            // Log full response for debugging
+            console.log('Get User ID Response Status:', response.status);
+            console.log('Get User ID Response Headers:', response.headers);
+            
+            // Check if response is ok
+            if (!response.ok) {
+                // Try to get error message from response
+                return response.text().then(errorText => {
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(result => {
+            // Validate response
+            if (!result || !result.user_id) {
+                throw new Error('Failed to retrieve user ID');
+            }
+
+            // Set current user ID
+            currentUserId = result.user_id;
+            console.log('Current User ID:', currentUserId);
+        })
+        .catch(error => {
+            console.error('Error fetching user ID:', error);
+            alert(`Failed to retrieve user information: ${error.message}`);
+        });
+    }
+
+    // Call on page load
+    fetchCurrentUserId();
+
+    // Search faculty
+    searchFacultyBtn.addEventListener('click', function() {
+        const searchTerm = facultySearchInput.value.trim();
+        
+        // Clear previous results
+        facultySearchResults.innerHTML = '';
+        
+        if (!searchTerm) {
+            facultySearchResults.innerHTML = `
+                <div class="list-group-item text-center text-danger">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    Please enter a search term
+                </div>
+            `;
+            return;
+        }
+        
+        // Show loading indicator
+        facultySearchResults.innerHTML = `
+            <div class="list-group-item text-center text-muted">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                Searching for faculty...
+            </div>
+        `;
+        
+        fetch('/get_users', {
+            method: 'POST',
+            body: new URLSearchParams({
+                'search_term': searchTerm,
+                'role': 'faculty'
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            // Log full response for debugging
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            // Check if response is ok
+            if (!response.ok) {
+                // Try to get error message from response
+                return response.text().then(errorText => {
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(users => {
+            // Clear previous results
+            facultySearchResults.innerHTML = '';
+            
+            // Validate users is an array
+            if (!Array.isArray(users)) {
+                throw new Error('Invalid response format');
+            }
+            
+            if (users.length === 0) {
+                facultySearchResults.innerHTML = `
+                    <div class="list-group-item text-center text-muted">
+                        <i class="fas fa-search"></i> 
+                        No faculty found matching "` + searchTerm + `"
+                    </div>
+                `;
+                return;
+            }
+            
+            users.forEach(faculty => {
+                const facultyItem = document.createElement('div');
+                facultyItem.classList.add('list-group-item', 'list-group-item-action');
+                facultyItem.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">
+                            <i class="fas fa-user-tie mr-2"></i>${faculty.name || 'Unknown Name'}
+                        </h5>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-id-badge mr-1"></i>Role: ${faculty.role || 'Unknown'}
+                    </small>
+                `;
+                
+                facultyItem.addEventListener('click', function() {
+                    // Validate faculty ID before creating chat room
+                    if (!faculty.id) {
+                        alert('Invalid faculty selection. Please try again.');
+                        return;
+                    }
+                    
+                    // Create or load chat room
+                    createChatRoom(faculty.id);
+                });
+                
+                facultySearchResults.appendChild(facultyItem);
+            });
+        })
+        .catch(error => {
+            console.error('Error searching faculty:', error);
+            facultySearchResults.innerHTML = `
+                <div class="list-group-item text-center text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    Failed to search faculty. 
+                    <br><small>${error.message || 'Please check your connection and try again.'}</small>
+                </div>
+            `;
+        });
+    });
+
+    // Create or load chat room
+    function createChatRoom(facultyId) {
+        // Validate faculty ID
+        if (!facultyId) {
+            alert('Invalid faculty selection. Please try again.');
+            return;
+        }
+
+        // Show loading state
+        selectedFacultyName.innerHTML = 'Loading...';
+        chatMessages.innerHTML = `
+            <div class="text-center text-muted">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                Creating chat room...
+            </div>
+        `;
+
+        // Create chat room
+        fetch('/create_chat_room', {
+            method: 'POST',
+            body: new URLSearchParams({
+                'other_user_id': facultyId
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            // Log full response for debugging
+            console.log('Create Chat Room Response Status:', response.status);
+            console.log('Create Chat Room Response Headers:', response.headers);
+            
+            // Check if response is ok
+            if (!response.ok) {
+                // Try to get error message from response
+                return response.text().then(errorText => {
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(result => {
+            // Validate response
+            if (!result || !result.room_id) {
+                throw new Error('Invalid chat room response');
+            }
+
+            // Set current room and faculty
+            currentRoomId = result.room_id;
+            currentFacultyId = facultyId;
+
+            // Update UI
+            selectedFacultyName.innerHTML = 'Chat with Faculty';
+            chatMessages.innerHTML = `
+                <div class="text-center text-success">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    ${result.message}
+                </div>
+            `;
+
+            // Load initial messages
+            loadChatMessages(currentRoomId);
+        })
+        .catch(error => {
+            console.error('Error creating chat room:', error);
+            
+            // Reset UI
+            currentRoomId = null;
+            currentFacultyId = null;
+
+            // Show error message
+            selectedFacultyName.innerHTML = 'Chat Error';
+            chatMessages.innerHTML = `
+                <div class="list-group-item text-center text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    Failed to create chat room. 
+                    <br><small>${error.message || 'Please check your connection and try again.'}</small>
+                </div>
+            `;
+        });
+    }
+
+    // Load chat messages
+    function loadChatMessages(roomId) {
+        // Validate room ID
+        if (!roomId) {
+            console.error('Invalid room ID');
+            chatMessages.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Unable to load messages. Invalid room.
+                </div>
+            `;
+            return;
+        }
+
+        // Show loading indicator
+        chatMessages.innerHTML = `
+            <div class="text-center text-muted">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                Loading messages...
+            </div>
+        `;
+
+        // Fetch messages
+        fetch(`/get_chat_messages/${roomId}`)
+        .then(response => {
+            // Log full response for debugging
+            console.log('Get Messages Response Status:', response.status);
+            console.log('Get Messages Response Headers:', response.headers);
+            
+            // Check if response is ok
+            if (!response.ok) {
+                // Try to get error message from response
+                return response.text().then(errorText => {
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(result => {
+            // Validate response
+            if (!result || result.status !== 'success') {
+                throw new Error(result.message || 'Failed to load messages');
+            }
+
+            // Clear previous messages
+            chatMessages.innerHTML = '';
+
+            // No messages
+            if (!result.messages || result.messages.length === 0) {
+                chatMessages.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-comments"></i>
+                        No messages yet. Start the conversation!
+                    </div>
+                `;
+                return;
+            }
+
+            // Render messages
+            result.messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(message.sender_id === parseInt(currentUserId) ? 'sent' : 'received');
+                
+                messageElement.innerHTML = `
+                    <div class="message-content">
+                        ${message.message}
+                    </div>
+                    <small class="message-timestamp">
+                        ${new Date(message.timestamp).toLocaleString()}
+                    </small>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+            });
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+            chatMessages.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Failed to load messages. 
+                    <br><small>${error.message || 'Please try again.'}</small>
+                </div>
+            `;
+        });
+    }
+
+    // Debug logging for input and button
+    console.log('Message Input Element:', messageInput);
+    console.log('Send Message Button Element:', sendMessageBtn);
+
+    // Ensure elements are correctly selected
+    if (!messageInput || !sendMessageBtn) {
+        console.error('Message input or send button not found!');
+    }
+
+    // Add comprehensive event listeners for debugging
+    messageInput.addEventListener('focus', function() {
+        console.log('Message input focused');
+    });
+
+    messageInput.addEventListener('input', function(event) {
+        console.log('Message input changed:', event.target.value);
+    });
+
+    // Comprehensive error handling for event listeners
+    try {
+        // Enable sending message on Enter key
+        messageInput.addEventListener('keypress', function(event) {
+            console.log('Keypress event:', event.key);
+            
+            // Check if Enter key is pressed (key code 13)
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // Prevent default Enter key behavior
+                console.log('Enter key pressed, triggering send');
+                sendMessageBtn.click(); // Trigger send message
+            }
+        });
+
+        // Send message functionality
+        sendMessageBtn.addEventListener('click', function() {
+            console.log('Send message button clicked');
+            
+            // Validate inputs
+            const messageText = messageInput.value.trim();
+            console.log('Message text:', messageText);
+            
+            if (!messageText) {
+                console.warn('Empty message attempt');
+                // Highlight input if empty
+                messageInput.classList.add('is-invalid');
+                messageInput.focus();
+                return;
+            }
+            
+            // Remove any previous error highlighting
+            messageInput.classList.remove('is-invalid');
+            
+            if (!currentRoomId) {
+                console.warn('No room selected');
+                // Show modal or alert about selecting a faculty first
+                alert('Please select a faculty to chat with first');
+                return;
+            }
+
+            // Disable send button and show loading
+            sendMessageBtn.disabled = true;
+            sendMessageBtn.innerHTML = `
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="sr-only">Sending...</span>
+                </div>
+            `;
+
+            // Send message
+            fetch('/send_chat_message', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'room_id': currentRoomId,
+                    'message': messageText
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => {
+                console.log('Send Message Response Status:', response.status);
+                console.log('Send Message Response Headers:', response.headers);
+                
+                // Check if response is ok
+                if (!response.ok) {
+                    // Try to get error message from response
+                    return response.text().then(errorText => {
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log('Send message result:', result);
+                
+                // Validate response
+                if (!result || result.status !== 'success') {
+                    throw new Error(result.message || 'Failed to send message');
+                }
+
+                // Clear input
+                messageInput.value = '';
+                console.log('Message sent successfully');
+
+                // Reload messages to show the new message
+                loadChatMessages(currentRoomId);
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                
+                // Show error to user
+                const errorToast = document.createElement('div');
+                errorToast.classList.add('toast', 'show', 'position-fixed', 'bottom-0', 'end-0', 'm-3', 'bg-danger', 'text-white');
+                errorToast.innerHTML = `
+                    <div class="toast-header bg-danger text-white">
+                        <strong class="me-auto">Send Error</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${error.message || 'Failed to send message'}
+                    </div>
+                `;
+                
+                // Append to body and auto-remove
+                document.body.appendChild(errorToast);
+                setTimeout(() => {
+                    errorToast.remove();
+                }, 3000);
+            })
+            .finally(() => {
+                // Re-enable send button
+                sendMessageBtn.disabled = false;
+                sendMessageBtn.innerHTML = 'Send';
+            });
+        });
+    } catch (error) {
+        console.error('Error setting up message input listeners:', error);
+    }
+});
+</script>
+{% endblock %}
