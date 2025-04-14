@@ -1,3 +1,9 @@
+## Getting Started
+1. Clone the repository : git clone https://github.com/navadeep0508/Campus-Bridge.git
+2. Install dependencies: `pip install -r requirements.txt`
+3.. Run the application: `python app.py`
+4.. Access the application at `http://localhost:5000`
+
 # Campus Bridge - University Management System
 
 ## Project Title
@@ -35,6 +41,7 @@ Campus Bridge is a comprehensive university management system designed to stream
 - Student Management
   - Track attendance
   - Manage assignments
+  - Timetable Management
 - Assessment Tools
   - Create and grade assignments
   - Conduct coding assessments
@@ -43,18 +50,60 @@ Campus Bridge is a comprehensive university management system designed to stream
   - Access course materials
   - Submit assignments
   - View grades and feedback
+  - Track academic progress
+  - View attendance records
+  - Access timetable
+
+- MyVerse (Personal Learning Space)
+  - Personalized dashboard
+  - Track learning progress
+  - Access learning resources
+  - View academic calendar
+  - Manage personal notes
+
 - Coding Environment
-  - Real-time code collaboration
-  - Practice coding problems
-  - Take coding assessments
-- Communication
+  - Online Compiler
+    - Support for multiple languages (C, C++, Java, Python)
+    - Real-time code execution
+    - Syntax highlighting
+    - Error detection and debugging
+  - Code Collaboration Rooms
+    - Real-time code sharing
+    - Collaborative coding sessions
+    - Peer programming support
+  - Code Review Bot
+    - AI-powered code analysis
+    - Automated code review
+    - Best practices suggestions
+    - Performance optimization tips
+
+- Course Management
+  - My Courses
+    - View enrolled courses
+    - Access course materials
+    - Track course progress
+    - Submit assignments
+    - View course announcements
+  - Coding Assignments
+    - Submit coding solutions
+    - View assignment feedback
+    - Track submission status
+    - Access coding templates
+    - View grading criteria
+
+- Communication & Collaboration
   - Chat with faculty
   - Collaborate with peers
   - Access shared resources
+  - Participate in discussions
+  - Share code snippets
+
 - Personal Dashboard
-  - View attendance
-  - Track academic progress
+  - View attendance statistics
+  - Track academic performance
   - Access timetable
+  - View upcoming deadlines
+  - Monitor course progress
 
 ## Tech Stack Used
 - **Frontend:**
@@ -67,9 +116,11 @@ Campus Bridge is a comprehensive university management system designed to stream
 - **Backend:**
   - Python
   - Flask (Web Framework)
-  - SQLAlchemy (ORM)
-  - SQLite (Database)
+  - Supabase(Database)
 
+- **API's Used:**
+  - Cohere used for Code Review Bot
+  - judge0 user for online compiler
 
 - **Additional Tools:**
   - Git (Version Control)
@@ -130,13 +181,6 @@ Campus-Bridge/
 ├── app.py
 └── README.md
 ```
-
-## Getting Started
-1. Clone the repository : git clone https://github.com/navadeep0508/Campus-Bridge.git
-2. Install dependencies: `pip install -r requirements.txt`
-3. Initialize the database: `python init_db.py`
-4. Run the application: `python app.py`
-5. Access the application at `http://localhost:5000`
 
 ## Contributing
 This project is maintained by the university administration team. For any issues or suggestions, please contact the system administrator.
