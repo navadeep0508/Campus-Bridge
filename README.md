@@ -1,92 +1,145 @@
-# Campus-Bridge
+# Campus Bridge - University Management System
 
-## Overview
-Campus-Bridge is a comprehensive web application designed to enhance the educational experience by providing a suite of tools for students, faculty, and administrators. The platform offers features such as course management, coding assessments, code collaboration, job matching, and more.
+## Project Title
+Campus Bridge - A Comprehensive University Management System
 
-## Features
+## Selected Domain
+Education Technology (EdTech) / University Management System
 
-### 1. User Authentication
-- Secure login system for students, faculty, and administrators
-- Role-based access control
-- Password management and recovery
+## Problem Statement / Use Case
+The modern university ecosystem requires a centralized platform that can effectively manage academic activities, student-faculty interactions, and administrative tasks. Traditional systems often lack integration, leading to inefficiencies in communication, resource management, and academic tracking. There is a need for a secure, role-based system where university administrators can manage student and faculty accounts while providing them with specialized tools for their academic needs.
 
-### 2. Course Management
-- Course tracking
-- Semester-based course listings
-- Personalized course dashboards
+## Abstract / Problem Description
+Campus Bridge is a comprehensive university management system designed to streamline academic operations and enhance collaboration between students, faculty, and administrators. The platform provides a secure, role-based access system where only administrators can create and manage user accounts, ensuring proper verification and data integrity.
 
-### 3. Coding Assessment Platform
-- Coding problem repository
-- Multiple programming language support (C, C++, Java, Python)
-- Automated code submission and evaluation
-- Difficulty-based coding challenges
+### Admin Features
+- User Management
+  - Create and manage student accounts
+  - Create and manage faculty accounts
+  - View and track user activities
+- Dashboard Analytics
+  - View total students and faculty count
+  - Monitor attendance statistics
+  - Track course enrollment
+  - View recent activities
+- System Management
+  - Manage academic departments
+  - Configure system settings
+  - Monitor system usage
 
-### 4. Code Collaboration
-- Code Room feature for real-time collaborative coding
-- Messaging and interaction within code rooms
-- Code sharing and peer programming
+### Faculty Features
+- Course Management
+  - Create and manage courses
+  - Upload course materials
+  - Track student enrollment
+- Student Management
+  - Track attendance
+  - Manage assignments
+- Assessment Tools
+  - Create and grade assignments
+  - Conduct coding assessments
+### Student Features
+- Academic Tools
+  - Access course materials
+  - Submit assignments
+  - View grades and feedback
+- Coding Environment
+  - Real-time code collaboration
+  - Practice coding problems
+  - Take coding assessments
+- Communication
+  - Chat with faculty
+  - Collaborate with peers
+  - Access shared resources
+- Personal Dashboard
+  - View attendance
+  - Track academic progress
+  - Access timetable
 
-### 5. Additional Tools
-- Code Review AI Assistant
-- Job Match Recommender
-- Attendance Tracking
-- Faculty and Student Dashboards
-- Time Table Management
+## Tech Stack Used
+- **Frontend:**
+  - HTML5, CSS3, JavaScript
+  - Bootstrap 5
+  - CodeMirror (for code editor)
+  - Font Awesome (for icons)
+  - Google Fonts (Poppins)
 
-## Technology Stack
-- **Backend**: Flask (Python)
-- **Frontend**: HTML, CSS, JavaScript
-- **Database**: Supabase
-- **External APIs**: 
-  - Judge0 (Code Compilation)
-  - Cohere AI (Code Review, Job Matching)
+- **Backend:**
+  - Python
+  - Flask (Web Framework)
+  - SQLAlchemy (ORM)
+  - SQLite (Database)
 
-## Prerequisites
-- Python 3.8+
-- Flask
-- Supabase Account
-- Cohere API Key
-- Judge0 API Key
 
-## Installation
+- **Additional Tools:**
+  - Git (Version Control)
+  - VS Code (Development Environment)
 
-1. Clone the repository
-```bash
-git clone https://github.com/navadeep0508/Campus-Bridge.git
-cd Campus-Bridge
+## Login Credentials
+
+### Admin Access
+- **Email:** admin@gmail.com
+- **Password:** sunny
+
+### Faculty Access
+- **Email:** faculty@gmail.com
+- **Password:** sunny
+
+### Student Access 1
+- **Email:** 23102a040719@mbu.asia
+- **Password:** sunny
+
+### Student Access 2
+- **Email:** raghs@gmail.com
+- **Password:** sunny
+
+## Important Notes
+1. **Account Creation Policy:**
+   - Only administrators can create new student and faculty accounts
+   - Students and faculty members cannot register themselves
+   - This ensures proper verification and data integrity
+
+2. **Security Features:**
+   - Role-based access control
+   - Secure password storage
+   - Session management
+   - Input validation and sanitization
+
+3. **Key Features:**
+   - Code collaboration rooms
+   - Assignment management
+   - Timetable scheduling
+   - Academic tracking
+   - Faculty-student communication
+   - Resource sharing
+
+## Project Structure
+```
+Campus-Bridge/
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── templates/
+│   ├── admin/
+│   ├── faculty/
+│   └── student/
+├── models/
+├── routes/
+├── config.py
+├── app.py
+└── README.md
 ```
 
-2. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-
-
-3. Run the application
-```bash
-python app.py
-```
-
-## Configuration
-- Modify `app.py` to update API configurations
-- Customize templates in the `templates/` directory
-- Update styles in `static/css/style.css`
-
-## Security Notes
-- Use strong, unique passwords
-- Rotate API keys periodically
-- Keep sensitive information in environment variables
+## Getting Started
+1. Clone the repository : git clone https://github.com/navadeep0508/Campus-Bridge.git
+2. Install dependencies: `pip install -r requirements.txt`
+3. Initialize the database: `python init_db.py`
+4. Run the application: `python app.py`
+5. Access the application at `http://localhost:5000`
 
 ## Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+This project is maintained by the university administration team. For any issues or suggestions, please contact the system administrator.
 
 ## License
-[Specify your license, e.g., MIT License]
-
-## Contact
-[Your contact information or project maintainer details]
+This project is proprietary and confidential. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
