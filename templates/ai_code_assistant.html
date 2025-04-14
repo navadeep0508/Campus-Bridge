@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Match Recommender - Campus Bridge</title>
+    <title>AI Code Assistant - Campus Bridge</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -189,8 +189,8 @@
             padding: 2rem;
         }
 
-        /* Job Recommender Styles */
-        .recommender-container {
+        /* AI Assistant Styles */
+        .assistant-container {
             max-width: 800px;
             margin: 0 auto;
             padding: 2rem;
@@ -200,12 +200,12 @@
             border: 1px solid var(--card-border);
         }
 
-        .recommender-header {
+        .assistant-header {
             text-align: center;
             margin-bottom: 2rem;
         }
 
-        .recommender-header h1 {
+        .assistant-header h1 {
             font-size: 2rem;
             color: var(--text-primary);
             margin-bottom: 1rem;
@@ -214,13 +214,13 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .recommender-header p {
+        .assistant-header p {
             color: var(--text-secondary);
             font-size: 1.1rem;
             line-height: 1.6;
         }
 
-        .recommender-form {
+        .assistant-form {
             margin-bottom: 2rem;
         }
 
@@ -309,6 +309,10 @@
             color: var(--text-secondary);
             line-height: 1.6;
             white-space: pre-wrap;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
         }
 
         /* Info Cards */
@@ -373,61 +377,6 @@
             line-height: 1.6;
         }
 
-        /* Skill Tags */
-        .skill-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .skill-tag {
-            background: var(--accent-color);
-            color: var(--text-light);
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .skill-tag i {
-            font-size: 0.8rem;
-        }
-
-        /* Match Score */
-        .match-score {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: var(--bg-light);
-            border-radius: 8px;
-            border: 1px solid var(--card-border);
-        }
-
-        .match-score-bar {
-            flex: 1;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .match-score-fill {
-            height: 100%;
-            background: var(--secondary-gradient);
-            border-radius: 4px;
-            transition: width 1s ease;
-        }
-
-        .match-score-value {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
@@ -438,7 +387,7 @@
                 margin-left: 60px;
             }
 
-            .recommender-container {
+            .assistant-container {
                 padding: 1rem;
             }
 
@@ -514,6 +463,10 @@
                         <i class="fas fa-file-code"></i>
                         <span>Coding Assignment</span>
                     </a>
+                    <a href="{{ url_for('ai_code_assistant') }}" class="nav-item active">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Code Assistant</span>
+                    </a>
                 </div>
                 
                 <div class="nav-section">
@@ -522,7 +475,7 @@
                         <i class="fas fa-code-branch"></i>
                         <span>Live Group Code Room</span>
                     </a>
-                    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item active">
+                    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item">
                         <i class="fas fa-briefcase"></i>
                         <span>Job Match Recommender</span>
                     </a>
@@ -536,68 +489,48 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="recommender-container">
-                <div class="recommender-header">
-                    <h1>Job Match Recommender</h1>
-                    <p>Get personalized job recommendations based on your skills and experience. Our AI-powered system analyzes your profile and matches you with the most suitable job opportunities.</p>
+            <div class="assistant-container">
+                <div class="assistant-header">
+                    <h1>AI Code Assistant</h1>
+                    <p>Get instant help with your coding problems. Our AI-powered assistant can help you with debugging, code optimization, and learning new concepts.</p>
                 </div>
 
                 <div class="info-cards">
                     <div class="info-card">
-                        <i class="fas fa-brain"></i>
-                        <h3>AI-Powered Matching</h3>
-                        <p>Our advanced algorithm analyzes your skills and matches them with job requirements to find the perfect fit.</p>
-                    </div>
-                    <div class="info-card">
-                        <i class="fas fa-chart-line"></i>
-                        <h3>Career Growth</h3>
-                        <p>Discover opportunities that align with your career goals and help you grow professionally.</p>
-                    </div>
-                    <div class="info-card">
                         <i class="fas fa-lightbulb"></i>
-                        <h3>Skill Insights</h3>
-                        <p>Get valuable insights about in-demand skills and how to improve your job prospects.</p>
+                        <h3>Smart Solutions</h3>
+                        <p>Get instant solutions to your coding problems with detailed explanations and best practices.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-code"></i>
+                        <h3>Code Optimization</h3>
+                        <p>Learn how to write cleaner, more efficient code with AI-powered suggestions and improvements.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-book"></i>
+                        <h3>Learning Support</h3>
+                        <p>Get help understanding complex programming concepts and improve your coding skills.</p>
                     </div>
                 </div>
 
-                <form action="/recommend" method="post" class="recommender-form">
+                <form action="/solve" method="post" class="assistant-form">
                     <div class="form-group">
-                        <label for="skills">Enter your skills (comma-separated):</label>
-                        <textarea name="skills" id="skills" placeholder="e.g. Python, HTML, SQL, Machine Learning, Data Analysis, Web Development"></textarea>
+                        <label for="question">Enter your coding problem or question:</label>
+                        <textarea name="question" id="question" placeholder="e.g. How do I reverse a linked list in Python? Or explain the concept of recursion with examples."></textarea>
                     </div>
                     <button type="submit" class="submit-btn">
-                        <i class="fas fa-search"></i>
-                        Get Recommendations
+                        <i class="fas fa-robot"></i>
+                        Get AI Help
                     </button>
                 </form>
 
-                {% if recommendation %}
+                {% if result %}
                 <div class="result-section">
                     <h2>
-                        <i class="fas fa-lightbulb"></i>
-                        AI Suggestions
+                        <i class="fas fa-robot"></i>
+                        AI Response
                     </h2>
-                    <div class="result-content">{{ recommendation }}</div>
-                    
-                    {% if match_score %}
-                    <div class="match-score">
-                        <div class="match-score-bar">
-                            <div class="match-score-fill" style="width: {{ match_score }}%;"></div>
-                        </div>
-                        <span class="match-score-value">{{ match_score }}% Match</span>
-                    </div>
-                    {% endif %}
-
-                    {% if recommended_skills %}
-                    <div class="skill-tags">
-                        {% for skill in recommended_skills %}
-                        <span class="skill-tag">
-                            <i class="fas fa-check"></i>
-                            {{ skill }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
+                    <div class="result-content">{{ result }}</div>
                 </div>
                 {% endif %}
             </div>
@@ -634,16 +567,6 @@
             if (window.innerWidth <= 768) {
                 sidebar.classList.add('collapsed');
                 mainContent.style.marginLeft = '60px';
-            }
-        });
-
-        // Animate match score bar
-        document.addEventListener('DOMContentLoaded', () => {
-            const matchScoreFill = document.querySelector('.match-score-fill');
-            if (matchScoreFill) {
-                setTimeout(() => {
-                    matchScoreFill.style.width = matchScoreFill.style.width;
-                }, 100);
             }
         });
     </script>

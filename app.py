@@ -127,23 +127,22 @@ def home_page():
         return redirect(url_for('login'))
 
     try:
-        # Fetch user details with proper query syntax
-        response = supabase.table('users')\
-            .select('*')\
-            .eq('id', user_id)\
-            .execute()
-        
-        if not response.data:
+        # Fetch user details
+        response = supabase.table('users').select('*').eq('id', user_id).execute()
+        user = response.data[0] if response.data else None
+
+        if not user:
             return render_template('dashboard.html', error='User not found')
-            
-        user = response.data[0]
-        
+
+        print(f"User role: {user['role']}")  # Log the user's role
         if user['role'] == 'faculty':
             session['user_id'] = user['id']
             session['role'] = user['role']
             session['faculty_id'] = user['id']  # Set faculty_id in session
+            print("Redirecting to faculty dashboard")  # Log redirection to faculty dashboard
             return redirect(url_for('faculty_home'))
         else:
+            # Render the dashboard directly instead of redirecting
             return render_template('dashboard.html', user=user)
     except Exception as e:
         print(f"Error fetching user details: {e}")
@@ -157,16 +156,9 @@ def login():
         password = request.form.get('password')
 
         try:
-            # Fetch user by email with proper query syntax
-            response = supabase.table('users')\
-                .select('*')\
-                .eq('email', email.strip())\
-                .execute()
-            
-            if not response.data:
-                return render_template('login.html', error='Invalid credentials')
-                
-            user = response.data[0]
+            # Fetch user by email
+            response = supabase.table('users').select('*').eq('email', email).execute()
+            user = response.data[0] if response.data else None
 
             if user:
                 # Verify password
@@ -189,7 +181,7 @@ def login():
         except Exception as e:
             print(f"Error signing in: {e}")
             traceback.print_exc()
-            return render_template('login.html', error='An error occurred during login')
+            return render_template('login.html', error='An error occurred')
 
     return render_template('login.html')
 
@@ -2153,6 +2145,42 @@ def recommend_jobs():
         recommendation = f"Error: {str(e)}"
 
     return render_template('job_match_recomender.html', recommendation=recommendation)
+@app.route('/ai_code_assistant')
+def ai_code_assistant():
+    return render_template('ai_code_assistant.html')
+
+@app.route('/solve', methods=['POST'])
+def solve_code_problem():
+    question = request.form['question']
+
+    prompt = f"""
+    You are a helpful coding assistant.
+
+    A student has the following coding question:
+    "{question}"
+
+    Please:
+    1. Solve the problem with clean, well-commented code (in Python).
+    2. Explain the code step-by-step in simple terms.
+    3. Mention any alternatives or improvements if applicable.
+
+    Format:
+    - Code:
+    - Explanation:
+    """
+
+    try:
+        response = co.generate(
+            model='command-r-plus',
+            prompt=prompt,
+            max_tokens=500,
+            temperature=0.7
+        )
+        result = response.generations[0].text
+    except Exception as e:
+        result = f"Error: {str(e)}"
+
+    return render_template('ai_code_assistant.html', result=result)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
