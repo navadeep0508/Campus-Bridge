@@ -974,10 +974,11 @@
                                 <img src="{{ url_for('static', filename='images/student.jpg') }}" alt="Faculty Photo" class="profile-photo">
                             </div>
                             <div class="profile-info">
-                                <h1>Welcome Rohith</h1>
-                                <p class="faculty-details">Faculty ID: 967607</p>
-                                <p class="faculty-details">Department: CSE</p>
-                                <p class="faculty-details">Designation: Assistant Professor</p>
+                                <h1>Welcome, {{ faculty.name }}</h1>
+                                <p class="faculty-details">Faculty ID: {{ faculty.roll_number }}</p>
+                                <p class="faculty-details">Department: {{ faculty.branch }}</p>
+                                <p class="faculty-details">Subject: {{ faculty.subject }}</p>
+                                
                             </div>
                         </div>
                     </div>

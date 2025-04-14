@@ -352,7 +352,46 @@ def faculty_attendance():
 
 @app.route('/attendance')
 def attendance():
-    return render_template('student attendance.html')
+    try:
+        # Get student ID from session
+        student_id = session.get('user_id')
+        if not student_id:
+            return redirect(url_for('login'))
+
+        # Fetch student details
+        student_response = supabase.table('users')\
+            .select('id, name, roll_number, branch, section')\
+            .eq('id', student_id)\
+            .execute()
+        
+        student = student_response.data[0] if student_response.data else None
+        if not student:
+            return redirect(url_for('login'))
+
+        # Fetch attendance records for the student
+        attendance_response = supabase.table('attendance')\
+            .select('*')\
+            .eq('student_id', student_id)\
+            .execute()
+        
+        # Process attendance data
+        attendance_data = {}
+        for record in attendance_response.data:
+            section = record['section']
+            if section not in attendance_data:
+                attendance_data[section] = {
+                    'attended': record['attended_classes'],
+                    'total': record['total_classes'],
+                    'percentage': round((record['attended_classes'] / record['total_classes'] * 100) if record['total_classes'] > 0 else 0, 2)
+                }
+
+        return render_template('student attendance.html', 
+                            student=student,
+                            attendance=attendance_data)
+    except Exception as e:
+        print(f"Error fetching attendance: {e}")
+        traceback.print_exc()
+        return render_template('student attendance.html', error='Failed to load attendance data')
 
 @app.route('/coding_tracks')
 def coding_tracks():

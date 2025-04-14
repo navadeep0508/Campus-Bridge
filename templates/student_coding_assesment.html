@@ -284,8 +284,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .editor-content {
@@ -293,42 +294,102 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            height: 90%;
+            width: 95%;
+            height: 95%;
             background: var(--card-bg);
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .editor-header {
-            padding: 1rem;
-            background: var(--card-bg);
+            padding: 1.5rem;
+            background: var(--dark-gradient);
             border-bottom: 1px solid var(--card-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .editor-header h2 {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .editor-header button {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .editor-header button:hover {
+            transform: rotate(90deg);
+            color: var(--accent-color);
+        }
+
         .editor-body {
             flex: 1;
             display: flex;
             overflow: hidden;
+            background: #1e1e1e;
         }
 
         .problem-section {
             width: 40%;
-            padding: 1rem;
+            padding: 2rem;
             overflow-y: auto;
             background: var(--card-bg);
+            border-right: 1px solid var(--card-border);
+        }
+
+        .problem-section h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .problem-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
         }
 
         .code-section {
             width: 60%;
             display: flex;
             flex-direction: column;
-            background: #1e1e1e;
+        }
+
+        .code-controls {
+            padding: 1.5rem;
+            background: #252526;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .code-controls select {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            background: #3c3c3c;
+            color: var(--text-light);
+            border: 1px solid #555;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .code-controls select:hover {
+            border-color: var(--accent-color);
         }
 
         .code-editor {
@@ -336,28 +397,183 @@
             min-height: 0;
         }
 
-        .code-controls {
-            padding: 1rem;
-            background: var(--card-bg);
-            border-top: 1px solid var(--card-border);
+        .code-actions {
+            padding: 1.5rem;
+            background: #252526;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .code-actions button {
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-actions button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .code-actions button:hover::before {
+            transform: translateX(100%);
+        }
+
+        .run-button {
+            background: linear-gradient(135deg, #007acc 0%, #005999 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 122, 204, 0.3);
+        }
+
+        .run-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 122, 204, 0.4);
+        }
+
+        .run-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 122, 204, 0.3);
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .code-actions button i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .code-actions button:hover i {
+            transform: scale(1.1);
+        }
+
+        .code-actions button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .code-actions button:disabled::before {
+            display: none;
+        }
+
+        .code-actions button:disabled i {
+            transform: none !important;
+        }
+
+        .input-output {
+            padding: 1.5rem;
+            background: #252526;
+            border-top: 1px solid #333;
+        }
+
+        .input-output label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .input-output textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 5px;
+            background: #3c3c3c;
+            color: var(--text-light);
+            border: 1px solid #555;
+            resize: vertical;
+            min-height: 100px;
+            font-family: monospace;
+            margin-bottom: 1rem;
         }
 
         .output-container {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: var(--text-primary);
-        }
-
-        /* Button Styles */
-        #runButton, #submitButton {
-            background: var(--accent-color);
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 1rem;
             color: var(--text-light);
-            transition: all 0.3s ease;
+            font-family: monospace;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
         }
 
-        #runButton:hover, #submitButton:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        .test-case {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .test-case.passed {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .test-case.failed {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .test-case h4 {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-case p {
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .test-case .status {
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .test-case .status.passed {
+            color: #4CAF50;
+        }
+
+        .test-case .status.failed {
+            color: #F44336;
         }
     </style>
 </head>
@@ -478,7 +694,7 @@
         <div class="editor-content">
             <div class="editor-header">
                 <h2 id="problemTitle"></h2>
-                <button onclick="closeEditor()" class="text-text-secondary hover:text-accent-color">
+                <button onclick="closeEditor()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -487,22 +703,22 @@
                 <div class="problem-section">
                     <div id="problemDescription"></div>
                     <div class="mt-4">
-                        <h3 class="font-bold mb-2">Input Format:</h3>
-                        <p id="inputFormat" class="text-sm text-text-secondary"></p>
+                        <h3>Input Format</h3>
+                        <p id="inputFormat"></p>
                     </div>
                     <div class="mt-4">
-                        <h3 class="font-bold mb-2">Output Format:</h3>
-                        <p id="outputFormat" class="text-sm text-text-secondary"></p>
+                        <h3>Output Format</h3>
+                        <p id="outputFormat"></p>
                     </div>
                     <div class="mt-4">
-                        <h3 class="font-bold mb-2">Constraints:</h3>
-                        <p id="constraints" class="text-sm text-text-secondary"></p>
+                        <h3>Constraints</h3>
+                        <p id="constraints"></p>
                     </div>
                 </div>
                 
                 <div class="code-section">
                     <div class="code-controls">
-                        <select id="language" class="rounded p-2 bg-card-bg text-text-primary border border-bg-light">
+                        <select id="language">
                             <option value="71">Python</option>
                             <option value="63">JavaScript</option>
                             <option value="62">Java</option>
@@ -513,22 +729,23 @@
                     
                     <div id="editor" class="code-editor"></div>
                     
-                    <div class="code-controls">
-                        <div class="flex justify-between items-center mb-4">
-                            <button id="runButton" class="bg-accent-color text-primary-color py-2 px-4 rounded hover:bg-opacity-90 transition">
-                                Run Code
-                            </button>
-                            <button id="submitButton" class="bg-green-500 text-primary-color py-2 px-4 rounded hover:bg-opacity-90 transition">
-                                Submit Solution
-                            </button>
-                        </div>
+                    <div class="code-actions">
+                        <button id="runButton" class="run-button">
+                            <i class="fas fa-play"></i>
+                            Run Code
+                        </button>
+                        <button id="submitButton" class="submit-button">
+                            <i class="fas fa-check"></i>
+                            Submit Solution
+                        </button>
+                    </div>
+                    
+                    <div class="input-output">
+                        <label>Custom Input</label>
+                        <textarea id="customInput" placeholder="Enter your test input here..."></textarea>
                         
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-text-secondary mb-2">Custom Input:</label>
-                            <textarea id="customInput" class="w-full rounded p-2 bg-card-bg text-text-primary border border-bg-light" rows="4"></textarea>
-                        </div>
-                        
-                        <div id="output" class="output-container p-4 rounded h-32 overflow-y-auto"></div>
+                        <label>Output</label>
+                        <div id="output" class="output-container"></div>
                     </div>
                 </div>
             </div>
@@ -591,12 +808,22 @@
 
         // Run button click handler
         document.getElementById('runButton').addEventListener('click', async function() {
+            const runButton = this;
+            const submitButton = document.getElementById('submitButton');
+            
+            // Disable buttons during processing
+            runButton.disabled = true;
+            submitButton.disabled = true;
+            
+            // Add loading state
+            runButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            
             const code = editor.getValue();
             const language = document.getElementById('language').options[document.getElementById('language').selectedIndex].text.toLowerCase();
             const input = document.getElementById('customInput').value;
             const outputDiv = document.getElementById('output');
 
-            outputDiv.innerHTML = 'Processing...';
+            outputDiv.innerHTML = '<div class="text-gray-400">Processing...</div>';
 
             try {
                 const response = await fetch('/run', {
@@ -613,27 +840,52 @@
 
                 const data = await response.json();
                 if (data.error) {
-                    outputDiv.innerHTML = `Error: ${data.error}`;
+                    outputDiv.innerHTML = `<div class="text-red-400">Error: ${data.error}</div>`;
                 } else {
-                    outputDiv.innerHTML = `
-                        <div class="mb-2"><strong>Output:</strong> ${data.stdout || 'No output'}</div>
-                        ${data.stderr ? `<div class="text-red-500"><strong>Error:</strong> ${data.stderr}</div>` : ''}
-                        ${data.time ? `<div class="text-sm text-gray-400">Time: ${data.time}s</div>` : ''}
-                        ${data.memory ? `<div class="text-sm text-gray-400">Memory: ${data.memory}KB</div>` : ''}
-                    `;
+                    let outputHtml = '';
+                    if (data.stdout) {
+                        outputHtml += `<div class="text-green-400">${data.stdout}</div>`;
+                    }
+                    if (data.stderr) {
+                        outputHtml += `<div class="text-red-400">${data.stderr}</div>`;
+                    }
+                    if (data.time) {
+                        outputHtml += `<div class="text-gray-400">Time: ${data.time}s</div>`;
+                    }
+                    if (data.memory) {
+                        outputHtml += `<div class="text-gray-400">Memory: ${data.memory}KB</div>`;
+                    }
+                    outputDiv.innerHTML = outputHtml;
                 }
             } catch (error) {
-                outputDiv.innerHTML = `Error: ${error.message}`;
+                outputDiv.innerHTML = `<div class="text-red-400">Error: ${error.message}</div>`;
+            } finally {
+                // Re-enable buttons
+                runButton.disabled = false;
+                submitButton.disabled = false;
+                
+                // Restore original button content
+                runButton.innerHTML = '<i class="fas fa-play"></i> Run Code';
             }
         });
 
         // Submit button click handler
         document.getElementById('submitButton').addEventListener('click', async function() {
+            const submitButton = this;
+            const runButton = document.getElementById('runButton');
+            
+            // Disable buttons during processing
+            submitButton.disabled = true;
+            runButton.disabled = true;
+            
+            // Add loading state
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            
             const code = editor.getValue();
             const language = document.getElementById('language').options[document.getElementById('language').selectedIndex].text.toLowerCase();
             const outputDiv = document.getElementById('output');
 
-            outputDiv.innerHTML = 'Submitting...';
+            outputDiv.innerHTML = '<div class="text-gray-400">Submitting...</div>';
 
             try {
                 const response = await fetch('/submit_assessment', {
@@ -650,34 +902,44 @@
 
                 const data = await response.json();
                 if (data.error) {
-                    outputDiv.innerHTML = `Error: ${data.error}`;
+                    outputDiv.innerHTML = `<div class="text-red-400">Error: ${data.error}</div>`;
                 } else {
-                    let resultsHtml = '<div class="space-y-4">';
+                    let resultsHtml = '';
                     data.results.forEach((result, index) => {
                         resultsHtml += `
-                            <div class="p-4 rounded ${result.passed ? 'bg-green-900' : 'bg-red-900'}">
-                                <h4 class="font-bold mb-2">Test Case ${index + 1}</h4>
+                            <div class="test-case ${result.passed ? 'passed' : 'failed'}">
+                                <h4>Test Case ${index + 1}</h4>
                                 <p><strong>Input:</strong> ${result.input}</p>
                                 <p><strong>Expected:</strong> ${result.expected}</p>
                                 <p><strong>Actual:</strong> ${result.actual}</p>
-                                <p class="${result.passed ? 'text-green-400' : 'text-red-400'}">
+                                <p class="status ${result.passed ? 'passed' : 'failed'}">
                                     ${result.passed ? '✓ Passed' : '✗ Failed'}
                                 </p>
                             </div>
                         `;
                     });
-                    resultsHtml += '</div>';
                     
                     if (data.all_passed) {
-                        resultsHtml += `<div class="mt-4 p-4 bg-green-900 rounded">
-                            <p class="text-green-400">All test cases passed! You earned ${data.points_earned} points!</p>
-                        </div>`;
+                        resultsHtml += `
+                            <div class="test-case passed">
+                                <h4>Submission Results</h4>
+                                <p class="status passed">All test cases passed!</p>
+                                <p>You earned ${data.points_earned} points!</p>
+                            </div>
+                        `;
                     }
                     
                     outputDiv.innerHTML = resultsHtml;
                 }
             } catch (error) {
-                outputDiv.innerHTML = `Error: ${error.message}`;
+                outputDiv.innerHTML = `<div class="text-red-400">Error: ${error.message}</div>`;
+            } finally {
+                // Re-enable buttons
+                submitButton.disabled = false;
+                runButton.disabled = false;
+                
+                // Restore original button content
+                submitButton.innerHTML = '<i class="fas fa-check"></i> Submit Solution';
             }
         });
 
