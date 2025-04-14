@@ -127,23 +127,22 @@ def home_page():
         return redirect(url_for('login'))
 
     try:
-        # Fetch user details with proper query syntax
-        response = supabase.table('users')\
-            .select('*')\
-            .eq('id', user_id)\
-            .execute()
-        
-        if not response.data:
+        # Fetch user details
+        response = supabase.table('users').select('*').eq('id', user_id).execute()
+        user = response.data[0] if response.data else None
+
+        if not user:
             return render_template('dashboard.html', error='User not found')
-            
-        user = response.data[0]
-        
+
+        print(f"User role: {user['role']}")  # Log the user's role
         if user['role'] == 'faculty':
             session['user_id'] = user['id']
             session['role'] = user['role']
             session['faculty_id'] = user['id']  # Set faculty_id in session
+            print("Redirecting to faculty dashboard")  # Log redirection to faculty dashboard
             return redirect(url_for('faculty_home'))
         else:
+            # Render the dashboard directly instead of redirecting
             return render_template('dashboard.html', user=user)
     except Exception as e:
         print(f"Error fetching user details: {e}")
@@ -157,16 +156,9 @@ def login():
         password = request.form.get('password')
 
         try:
-            # Fetch user by email with proper query syntax
-            response = supabase.table('users')\
-                .select('*')\
-                .eq('email', email.strip())\
-                .execute()
-            
-            if not response.data:
-                return render_template('login.html', error='Invalid credentials')
-                
-            user = response.data[0]
+            # Fetch user by email
+            response = supabase.table('users').select('*').eq('email', email).execute()
+            user = response.data[0] if response.data else None
 
             if user:
                 # Verify password
@@ -189,7 +181,7 @@ def login():
         except Exception as e:
             print(f"Error signing in: {e}")
             traceback.print_exc()
-            return render_template('login.html', error='An error occurred during login')
+            return render_template('login.html', error='An error occurred')
 
     return render_template('login.html')
 
