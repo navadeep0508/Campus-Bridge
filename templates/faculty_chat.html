@@ -1,59 +1,128 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Student Search Section -->
-        <div class="col-md-4 student-search-section">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Search Students</h4>
-                </div>
-                <div class="card-body">
-                    <div class="input-group mb-3">
-                        <input type="text" id="student-search-input" class="form-control" 
-                               placeholder="Search students by name or section">
-                        <div class="input-group-append">
-                            <button id="search-student-btn" class="btn btn-primary">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="student-search-results" class="list-group">
-                        <!-- Student search results will be dynamically populated here -->
-                    </div>
-                </div>
-            </div>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="sidebar-header">
+            <h2>Campus Bridge</h2>
         </div>
         
-        <!-- Chat Messages Section -->
-        <div class="col-md-8 chat-section">
-            <div class="card">
-                <div class="card-header" id="chat-header">
-                    <h4>Faculty Chat</h4>
-                    <span id="selected-student-name" class="text-muted">Select a student to start chatting</span>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3>Main</h3>
+                <a href="{{ url_for('faculty_home') }}" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('faculty_chat') }}" class="nav-item active">
+                    <i class="fas fa-comments"></i>
+                    <span>Student interaction</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>Academic</h3>
+                <a href="{{ url_for('faculty_attendance') }}" class="nav-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="{{ url_for('timetable_faculty') }}" class="nav-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Timetable</span>
+                </a>
+                <div class="nav-subsection">
+                    <a href="{{ url_for('faculty_assignments') }}" class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>Academic Assignments</span>
+                    </a>
                 </div>
-                <div id="chat-messages" class="card-body chat-messages">
-                    <!-- Messages will be displayed here -->
+            </div>
+
+            <div class="nav-section">
+                <h3>Coding</h3>
+                <div class="nav-subsection">
+                    <a href="{{ url_for('faculty_coding_assessment') }}" class="nav-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Coding Assignments</span>
+                    </a>
                 </div>
-                <div class="card-footer message-input-area">
-                    <div class="input-group">
-                        <input type="text" id="message-input" class="form-control" 
-                               placeholder="Type a message..." enabled>
-                        <div class="input-group-append">
-                            <button id="send-message-btn" class="btn btn-success" enabled>
-                                Send
-                            </button>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Navigation -->
+        <header class="top-nav">
+            <div class="top-nav-actions">
+                <a href="{{ url_for('home') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Student Search Section -->
+                <div class="col-md-4 student-search-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Search Students</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group mb-3">
+                                <input type="text" id="student-search-input" class="form-control" 
+                                       placeholder="Search students by name or section">
+                                <div class="input-group-append">
+                                    <button id="search-student-btn" class="btn btn-primary">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="student-search-results" class="list-group">
+                                <!-- Student search results will be dynamically populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Messages Section -->
+                <div class="col-md-8 chat-section">
+                    <div class="card">
+                        <div class="card-header" id="chat-header">
+                            <h4>Faculty Chat</h4>
+                            <span id="selected-student-name" class="text-muted">Select a student to start chatting</span>
+                        </div>
+                        <div id="chat-messages" class="card-body chat-messages">
+                            <!-- Messages will be displayed here -->
+                        </div>
+                        <div class="card-footer message-input-area">
+                            <div class="input-group">
+                                <input type="text" id="message-input" class="form-control" 
+                                       placeholder="Type a message..." enabled>
+                                <div class="input-group-append">
+                                    <button id="send-message-btn" class="btn btn-success" enabled>
+                                        Send
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
 
 <style>
 :root {
+    --sidebar-width: 250px;
+    --header-height: 60px;
     --primary-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 70%, #4CAF50 100%);
     --secondary-gradient: linear-gradient(90deg, #4CAF50 0%, #81C784 100%);
     --dark-gradient: linear-gradient(90deg, #333333 0%, #555555 100%);
@@ -66,9 +135,197 @@
     --accent-color: #4CAF50;
 }
 
-.container-fluid {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: var(--primary-gradient);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--dark-gradient);
+    backdrop-filter: blur(10px);
+    color: var(--text-light);
+    position: fixed;
+    height: 100vh;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border-right: 1px solid var(--card-border);
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    width: 60px;
+}
+
+.sidebar.collapsed .sidebar-header h2,
+.sidebar.collapsed .nav-section h3,
+.sidebar.collapsed .nav-item span {
+    display: none;
+}
+
+.sidebar.collapsed .nav-item {
+    padding: 0.8rem;
+    justify-content: center;
+}
+
+.sidebar.collapsed .nav-item i {
+    margin-right: 0;
+}
+
+.sidebar-toggle {
+    position: absolute;
+    right: -12px;
+    top: 20px;
+    background: var(--accent-color);
+    color: var(--text-light);
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-toggle:hover {
+    transform: scale(1.1);
+}
+
+.sidebar-toggle i {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.nav-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.nav-section:last-child {
+    margin-bottom: 0;
+}
+
+.nav-section h3 {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    color: var(--text-light);
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s;
+    background: transparent;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: rgba(76, 175, 80, 0.2);
+    color: var(--text-light);
+}
+
+.nav-item i {
+    margin-right: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
     background: var(--primary-gradient);
     min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Top Navigation */
+.top-nav {
+    height: var(--header-height);
+    background: var(--dark-gradient);
+    backdrop-filter: blur(10px);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.logout-btn i {
+    font-size: 1.1rem;
+    color: var(--accent-color);
+}
+
+.logout-btn span {
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+.container-fluid {
     padding: 2rem;
 }
 
@@ -82,6 +339,7 @@
     border-radius: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--card-border);
+    height: 100%;
 }
 
 .card-header {
@@ -148,14 +406,7 @@
     padding: 0.8rem 1rem;
 }
 
-.btn-primary {
-    background: var(--accent-color);
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem 1.5rem;
-}
-
-.btn-success {
+.btn-primary, .btn-success {
     background: var(--accent-color);
     border: none;
     border-radius: 8px;
@@ -176,21 +427,84 @@
 }
 
 /* Scrollbar styling */
-.chat-messages::-webkit-scrollbar {
+::-webkit-scrollbar {
     width: 6px;
 }
 
-.chat-messages::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.chat-messages::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background: var(--accent-color);
     border-radius: 3px;
 }
 
-.chat-messages::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
     background: rgba(76, 175, 80, 0.8);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1001;
+        background: var(--accent-color);
+        color: var(--text-light);
+        border: none;
+        padding: 0.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .container-fluid {
+        padding: 1rem;
+    }
+
+    .student-search-section, .chat-section {
+        height: auto;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    position: fixed;
+    width: 100%;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 2px;
 }
 </style>
 
@@ -449,6 +763,94 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize page
     fetchCurrentUserId();
+
+    // Add sidebar toggle functionality
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+
+    // Function to handle navigation and active states
+    function handleNavigation() {
+        // Remove active class from all nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Get current path
+        const currentPath = window.location.pathname;
+        
+        // Add active class to current nav item
+        const currentNavItem = document.querySelector(`.nav-item[href="${currentPath}"]`);
+        if (currentNavItem) {
+            currentNavItem.classList.add('active');
+        }
+    }
+
+    // Function to toggle sidebar
+    function toggleSidebar() {
+        sidebar.classList.toggle('collapsed');
+        // Adjust main content margin when sidebar is collapsed
+        const mainContent = document.querySelector('.main-content');
+        if (sidebar.classList.contains('collapsed')) {
+            mainContent.style.marginLeft = '60px';
+            sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
+            sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
+        } else {
+            mainContent.style.marginLeft = '250px';
+            sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
+            sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
+        }
+    }
+
+    // Event listeners
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+        }
+    });
+
+    // Initialize sidebar state and navigation
+    const mainContent = document.querySelector('.main-content');
+    if (sidebar.classList.contains('collapsed')) {
+        mainContent.style.marginLeft = '60px';
+        sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
+        sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
+    } else {
+        mainContent.style.marginLeft = '250px';
+        sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
+        sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
+    }
+    
+    // Set initial active state
+    handleNavigation();
+
+    // Handle navigation clicks
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(navItem => {
+                navItem.classList.remove('active');
+            });
+            // Add active class to clicked item
+            e.currentTarget.classList.add('active');
+        });
+    });
 });
 </script>
 {% endblock %}
