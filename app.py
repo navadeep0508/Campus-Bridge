@@ -1251,7 +1251,7 @@ def join_code_room(room_id):
         messages_response = supabase.table('code_room_messages')\
             .select('*, user:users(name)')\
             .eq('room_id', room_id)\
-            .order('timestamp', desc=True)\
+            .order('created_at', desc=True)\
             .execute()
             
         messages = messages_response.data if messages_response.data else []
@@ -1344,16 +1344,15 @@ def get_room_messages(room_id):
         if not participant_response.data:
             return jsonify({'error': 'You are not a participant in this room'}), 403
         
-        # Fetch messages for the room, using the existing timestamp column
-        messages_response = supabase.table('code_room_messages').select('*').eq('room_id', room_id).order('timestamp', desc=True).execute()
+        # Fetch messages for the room
+        messages_response = supabase.table('code_room_messages').select('*').eq('room_id', room_id).order('created_at', desc=True).execute()
         
-        # Sort messages by timestamp if created_at is not available
-        if messages_response.data and 'created_at' not in messages_response.data[0]:
-            if 'timestamp' in messages_response.data[0]:
-                messages_response.data.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
-            elif 'id' in messages_response.data[0]:
-                # Fallback to sorting by ID if no timestamp
-                messages_response.data.sort(key=lambda x: x.get('id', 0), reverse=True)
+        # Sort messages by created_at
+        if messages_response.data and 'created_at' in messages_response.data[0]:
+            messages_response.data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        elif messages_response.data and 'id' in messages_response.data[0]:
+            # Fallback to sorting by ID if no created_at
+            messages_response.data.sort(key=lambda x: x.get('id', 0), reverse=True)
         
         # Enrich messages with sender details
         messages = messages_response.data or []
@@ -1415,7 +1414,7 @@ def send_code_room_message(room_id):
             'room_id': room_id,
             'sender_id': user_id,
             'message': data['message'],
-            'timestamp': dt.now(tz.tzutc()).isoformat()
+            'created_at': dt.now(tz.tzutc()).isoformat()
         }
         
         # Insert message
@@ -1429,7 +1428,7 @@ def send_code_room_message(room_id):
                     'user_id': user_id,
                     'user_name': user_name,
                     'message': data['message'],
-                    'timestamp': message_response.data[0]['timestamp']
+                    'created_at': message_response.data[0]['created_at']
                 }
             })
 
@@ -1471,20 +1470,19 @@ def code_room_page(room_id):
             
         participants = participants_response.data if participants_response.data else []
         
-        # Get messages
+        # Get messages for the room
         messages_response = supabase.table('code_room_messages')\
             .select('*, user:users(name)')\
             .eq('room_id', room_id)\
-            .order('timestamp', desc=True)\
+            .order('created_at', desc=True)\
             .execute()
             
-        # Sort messages by timestamp if created_at is not available
-        if messages_response.data and 'created_at' not in messages_response.data[0]:
-            if 'timestamp' in messages_response.data[0]:
-                messages_response.data.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
-            elif 'id' in messages_response.data[0]:
-                # Fallback to sorting by ID if no timestamp
-                messages_response.data.sort(key=lambda x: x.get('id', 0), reverse=True)
+        # Sort messages by created_at
+        if messages_response.data and 'created_at' in messages_response.data[0]:
+            messages_response.data.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        elif messages_response.data and 'id' in messages_response.data[0]:
+            # Fallback to sorting by ID if no created_at
+            messages_response.data.sort(key=lambda x: x.get('id', 0), reverse=True)
         
         messages = messages_response.data if messages_response.data else []
         
@@ -2318,7 +2316,7 @@ def send_chat_message():
             'room_id': room_id,
             'sender_id': user_id,
             'message': message_content,
-            'timestamp': dt.now(tz.tzutc()).isoformat()
+            'created_at': dt.now(tz.tzutc()).isoformat()
         }
         
         # Insert message
@@ -2528,7 +2526,7 @@ def get_chat_messages(room_id):
             return jsonify({'status': 'error', 'message': 'Unauthorized to access this chat room'}), 403
         
         # Fetch messages for the room, using the existing timestamp column
-        messages_response = supabase.table('chat_messages').select('*').eq('room_id', room_id).order('timestamp', desc=True).execute()
+        messages_response = supabase.table('chat_messages').select('*').eq('room_id', room_id).order('created_at', desc=True).execute()
         
         # Sort messages by timestamp if created_at is not available
         if messages_response.data and 'created_at' not in messages_response.data[0]:
