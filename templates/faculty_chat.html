@@ -151,6 +151,8 @@ body {
 .dashboard-container {
     display: flex;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
 }
 
 /* Sidebar Styles */
@@ -165,6 +167,8 @@ body {
     z-index: 1000;
     border-right: 1px solid var(--card-border);
     overflow: hidden;
+    top: 0;
+    left: 0;
 }
 
 .sidebar.collapsed {
@@ -186,10 +190,11 @@ body {
     margin-right: 0;
 }
 
+/* Sidebar Toggle Button Styles */
 .sidebar-toggle {
     position: absolute;
     right: -12px;
-    top: 20px;
+    top: 1.5rem;
     background: var(--accent-color);
     color: var(--text-light);
     border: none;
@@ -202,14 +207,17 @@ body {
     cursor: pointer;
     z-index: 1001;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
 .sidebar-toggle:hover {
     transform: scale(1.1);
+    background: #45a049;
 }
 
 .sidebar-toggle i {
     transition: transform 0.3s ease;
+    font-size: 12px;
 }
 
 .sidebar.collapsed .sidebar-toggle i {
@@ -219,12 +227,18 @@ body {
 .sidebar-header {
     padding: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .sidebar-header h2 {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-light);
+    margin: 0;
+    padding-right: 2rem;
 }
 
 .nav-section {
@@ -277,6 +291,8 @@ body {
     min-height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+    position: relative;
+    z-index: 1;
 }
 
 /* Top Navigation */
@@ -464,6 +480,7 @@ body {
         position: fixed;
         left: 0;
         transform: translateX(-100%);
+        z-index: 1000;
     }
 
     .sidebar.active {
@@ -764,10 +781,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize page
     fetchCurrentUserId();
 
-    // Add sidebar toggle functionality
-    const menuToggle = document.getElementById('menuToggle');
+    // Initialize sidebar elements
     const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
     const sidebarToggle = document.getElementById('sidebarToggle');
+    const menuToggle = document.getElementById('menuToggle');
+
+    // Function to toggle sidebar
+    function toggleSidebar() {
+        sidebar.classList.toggle('collapsed');
+        
+        if (sidebar.classList.contains('collapsed')) {
+            mainContent.style.marginLeft = '60px';
+            sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
+            sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
+        } else {
+            mainContent.style.marginLeft = '250px';
+            sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
+            sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
+        }
+    }
 
     // Function to handle navigation and active states
     function handleNavigation() {
@@ -786,47 +819,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to toggle sidebar
-    function toggleSidebar() {
-        sidebar.classList.toggle('collapsed');
-        // Adjust main content margin when sidebar is collapsed
-        const mainContent = document.querySelector('.main-content');
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '60px';
-            sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
-            sidebarToggle.querySelector('i').classList.add('fa-chevron-right');
-        } else {
-            mainContent.style.marginLeft = '250px';
-            sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
-            sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
-        }
-    }
-
-    // Event listeners
-    menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('active');
-    });
-
-    sidebarToggle.addEventListener('click', toggleSidebar);
-
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
-        }
-    });
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('active');
-        }
-    });
-
-    // Initialize sidebar state and navigation
-    const mainContent = document.querySelector('.main-content');
+    // Set initial state
     if (sidebar.classList.contains('collapsed')) {
         mainContent.style.marginLeft = '60px';
         sidebarToggle.querySelector('i').classList.remove('fa-chevron-left');
@@ -836,7 +829,25 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
         sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
     }
-    
+
+    // Add click event listener to toggle button
+    sidebarToggle.addEventListener('click', toggleSidebar);
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove('collapsed');
+            mainContent.style.marginLeft = '0';
+        } else {
+            // Restore previous state
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '60px';
+            } else {
+                mainContent.style.marginLeft = '250px';
+            }
+        }
+    });
+
     // Set initial active state
     handleNavigation();
 
