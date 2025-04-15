@@ -13,7 +13,27 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
-4. 🖥️ Access the application at `http://localhost:5000`
+4. 🖥️ Access the application at `http://10.11.11.62:5000/`
+ ## 🔑 Login Credentials
+
+
+### 🚀 Admin Access
+- **Email:** admin@gmail.com
+- **Password:** sunny
+
+### 👨‍🏫 Faculty Access
+- **Email:** faculty@gmail.com
+- **Password:** sunny
+- **Faculty name:** john
+
+### 👩‍🎓 Student Access 1
+- **Email:** 23102a040719@mbu.asia
+- **Password:** sunny
+- **Student Name:** sunny
+
+### 👩‍🎓 Student Access 2
+- **Email:** raghs@gmail.com
+- **Password:** sunny
 
 # 🎓 Campus Bridge - University Management System
 
@@ -146,26 +166,7 @@ Campus Bridge addresses the complex challenges of modern educational management 
   - 📈 Git (Version Control)
   - 📊 VS Code (Development Environment)
 
-## 🔑 Login Credentials
 
-
-### 🚀 Admin Access
-- **Email:** admin@gmail.com
-- **Password:** sunny
-
-### 👨‍🏫 Faculty Access
-- **Email:** faculty@gmail.com
-- **Password:** sunny
-- **Faculty name:** john
-
-### 👩‍🎓 Student Access 1
-- **Email:** 23102a040719@mbu.asia
-- **Password:** sunny
-- **Student Name:** sunny
-
-### 👩‍🎓 Student Access 2
-- **Email:** raghs@gmail.com
-- **Password:** sunny
 
 ## 📝 Important Notes
 1. **Account Creation Policy:**
