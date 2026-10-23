@@ -2160,7 +2160,7 @@ def delete_student(student_id):
 COHERE_API_KEY = os.environ.get('COHERE_API_KEY', '')
 COHERE_MODEL = os.environ.get('COHERE_MODEL', 'command-a-plus-05-2026')
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
-GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b')
 
 # Safely initialize Cohere client
 co = None
