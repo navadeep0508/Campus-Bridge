@@ -1,0 +1,24 @@
+{% extends "layouts/app.html" %}
+{% block title %}Administration — Campus Bridge{% endblock %}
+{% block topbar_title %}Administration{% endblock %}
+{% block topbar_subtitle %}<div class="topbar-subtitle">Campus account management</div>{% endblock %}
+{% block content %}
+<section class="page-header dashboard-welcome"><div><span class="page-kicker">Admin workspace</span><h1 class="page-title">Campus overview</h1><p class="page-desc">Manage campus accounts and review recent academic activity.</p></div></section>
+<section class="section"><div class="section-header"><div><h2 class="section-title">At a glance</h2><p class="section-desc">Current totals from your campus data.</p></div></div>
+  <div class="stat-row">
+    <article class="stat"><div class="stat-label">Students</div><div class="stat-value">{{ stats.total_students|default(0) }}</div><div class="stat-meta">Student accounts</div></article>
+    <article class="stat"><div class="stat-label">Faculty</div><div class="stat-value">{{ stats.total_faculty|default(0) }}</div><div class="stat-meta">Faculty accounts</div></article>
+    <article class="stat"><div class="stat-label">Courses</div><div class="stat-value">{{ stats.total_courses|default(0) }}</div><div class="stat-meta">Available in the system</div></article>
+    <article class="stat"><div class="stat-label">Average attendance</div><div class="stat-value">{{ stats.avg_attendance|default(0) }}%</div><div class="stat-meta">Across recorded classes</div></article>
+  </div>
+</section>
+<section class="section"><div class="section-header"><div><h2 class="section-title">People</h2><p class="section-desc">Create and maintain campus accounts.</p></div></div>
+  <div class="action-grid admin-actions"><a class="action-tile" href="{{ url_for('students_admin') }}"><i data-lucide="users"></i><span>Manage students</span><small>Review student accounts and details</small></a><a class="action-tile" href="{{ url_for('faculty_admin') }}"><i data-lucide="graduation-cap"></i><span>Manage faculty</span><small>Review faculty accounts and details</small></a></div>
+</section>
+<section class="section"><div class="section-header"><div><h2 class="section-title">Recent activity</h2><p class="section-desc">The latest assignments and coding assessments.</p></div></div>
+  <div class="panel">
+  {% if recent_activities %}<ul class="list-plain activity-list">{% for activity in recent_activities %}<li class="list-row"><div><div class="font-medium">{{ activity.title|default('Academic activity')|e }}</div><div class="text-sm text-muted">{{ activity.description|default('')|e }}</div></div><span class="badge {% if activity.type == 'coding_assessment' %}badge-primary{% else %}badge-success{% endif %}">{{ 'Coding assessment' if activity.type == 'coding_assessment' else 'Assignment' }}</span></li>{% endfor %}</ul>
+  {% else %}<div class="empty-state"><i data-lucide="inbox"></i><h3>No recent activity</h3><p>New assignments and coding assessments will appear here.</p></div>{% endif %}
+  </div>
+</section>
+{% endblock %}

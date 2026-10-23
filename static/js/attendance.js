@@ -25,11 +25,15 @@ document.addEventListener('DOMContentLoaded', function() {
             data.students.forEach(student => {
                 const studentCard = document.createElement('div');
                 studentCard.className = 'student-card';
-                studentCard.innerHTML = `
-                    <h3>${student.name}</h3>
-                    <p>Roll Number: ${student.roll_number}</p>
-                    <button class="mark-present" data-id="${student.id}">Mark as Present</button>
-                `;
+                const title = document.createElement('h3');
+                title.textContent = student.name || 'Student';
+                const roll = document.createElement('p');
+                roll.textContent = `Roll Number: ${student.roll_number || 'N/A'}`;
+                const action = document.createElement('button');
+                action.className = 'mark-present';
+                action.dataset.id = String(student.id);
+                action.textContent = 'Mark as Present';
+                studentCard.append(title, roll, action);
                 studentList.appendChild(studentCard);
             });
         })

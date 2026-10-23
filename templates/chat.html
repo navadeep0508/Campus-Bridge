@@ -3,7 +3,7 @@
 <div class="dashboard-container">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-        <button class="sidebar-toggle" id="sidebarToggle">
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
             <i class="fas fa-chevron-left"></i>
         </button>
         <div class="sidebar-header">
@@ -86,7 +86,7 @@
                     <span>Job Match Recommender</span>
                 </a>
             </div>
-            
+
             <div class="nav-section">
                 <h3><i class="fas fa-users"></i> Community</h3>
                 <a href="{{ url_for('code_room') }}" class="nav-item">
@@ -122,22 +122,23 @@
                         </div>
                         <div class="card-body">
                             <div class="input-group mb-3">
+                                <label class="sr-only" for="faculty-search-input">Search faculty</label>
                                 <input type="text" id="faculty-search-input" class="form-control" 
                                        placeholder="Search faculty by name or department">
                                 <div class="input-group-append">
-                                    <button id="search-faculty-btn" class="btn btn-primary">
+                                    <button id="search-faculty-btn" class="btn btn-primary" type="button" aria-label="Search faculty">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div id="faculty-search-results" class="list-group">
                                 <!-- Faculty search results will be dynamically populated here -->
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Chat Messages Section -->
                 <div class="col-md-8 chat-section">
                     <div class="card">
@@ -150,10 +151,11 @@
                         </div>
                         <div class="card-footer message-input-area">
                             <div class="input-group">
+                                <label class="sr-only" for="message-input">Message</label>
                                 <input type="text" id="message-input" class="form-control" 
-                                       placeholder="Type a message..." enabled>
+                                       placeholder="Type a message...">
                                 <div class="input-group-append">
-                                    <button id="send-message-btn" class="btn btn-success" enabled>
+                                    <button id="send-message-btn" class="btn btn-success" type="button">
                                         Send
                                     </button>
                                 </div>
@@ -572,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.getElementById('message-input');
     const sendMessageBtn = document.getElementById('send-message-btn');
     const selectedFacultyName = document.getElementById('selected-faculty-name');
-    
+
     let currentFacultyId = null;
     let currentRoomId = null;
     let currentUserId = null;
@@ -584,7 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Log full response for debugging
             console.log('Get User ID Response Status:', response.status);
             console.log('Get User ID Response Headers:', response.headers);
-            
+
             // Check if response is ok
             if (!response.ok) {
                 // Try to get error message from response
@@ -616,10 +618,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Search faculty
     searchFacultyBtn.addEventListener('click', function() {
         const searchTerm = facultySearchInput.value.trim();
-        
+
         // Clear previous results
         facultySearchResults.innerHTML = '';
-        
+
         if (!searchTerm) {
             facultySearchResults.innerHTML = `
                 <div class="list-group-item text-center text-danger">
@@ -629,7 +631,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             return;
         }
-        
+
         // Show loading indicator
         facultySearchResults.innerHTML = `
             <div class="list-group-item text-center text-muted">
@@ -639,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 Searching for faculty...
             </div>
         `;
-        
+
         fetch('/get_users', {
             method: 'POST',
             body: new URLSearchParams({
@@ -654,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Log full response for debugging
             console.log('Response status:', response.status);
             console.log('Response headers:', response.headers);
-            
+
             // Check if response is ok
             if (!response.ok) {
                 // Try to get error message from response
@@ -667,12 +669,12 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(users => {
             // Clear previous results
             facultySearchResults.innerHTML = '';
-            
+
             // Validate users is an array
             if (!Array.isArray(users)) {
                 throw new Error('Invalid response format');
             }
-            
+
             if (users.length === 0) {
                 facultySearchResults.innerHTML = `
                     <div class="list-group-item text-center text-muted">
@@ -682,32 +684,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 return;
             }
-            
+
             users.forEach(faculty => {
                 const facultyItem = document.createElement('div');
                 facultyItem.classList.add('list-group-item', 'list-group-item-action');
                 facultyItem.innerHTML = `
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">
-                            <i class="fas fa-user-tie mr-2"></i>${faculty.name || 'Unknown Name'}
+                            <i class="fas fa-user-tie mr-2"></i>${escapeHTML(faculty.name || 'Unknown Name')}
                         </h5>
                     </div>
                     <small class="text-muted">
-                        <i class="fas fa-id-badge mr-1"></i>Role: ${faculty.role || 'Unknown'}
+                        <i class="fas fa-id-badge mr-1"></i>Role: ${escapeHTML(faculty.role || 'Unknown')}
                     </small>
                 `;
-                
+
                 facultyItem.addEventListener('click', function() {
                     // Validate faculty ID before creating chat room
                     if (!faculty.id) {
                         alert('Invalid faculty selection. Please try again.');
                         return;
                     }
-                    
+
                     // Create or load chat room
                     createChatRoom(faculty.id);
                 });
-                
+
                 facultySearchResults.appendChild(facultyItem);
             });
         })
@@ -717,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="list-group-item text-center text-danger">
                     <i class="fas fa-exclamation-triangle"></i> 
                     Failed to search faculty. 
-                    <br><small>${error.message || 'Please check your connection and try again.'}</small>
+                    <br><small>${escapeHTML(error.message || 'Please check your connection and try again.')}</small>
                 </div>
             `;
         });
@@ -756,7 +758,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Log full response for debugging
             console.log('Create Chat Room Response Status:', response.status);
             console.log('Create Chat Room Response Headers:', response.headers);
-            
+
             // Check if response is ok
             if (!response.ok) {
                 // Try to get error message from response
@@ -781,7 +783,7 @@ document.addEventListener('DOMContentLoaded', function() {
             chatMessages.innerHTML = `
                 <div class="text-center text-success">
                     <i class="fas fa-check-circle mr-2"></i>
-                    ${result.message}
+                    ${escapeHTML(result.message)}
                 </div>
             `;
 
@@ -790,7 +792,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error creating chat room:', error);
-            
+
             // Reset UI
             currentRoomId = null;
             currentFacultyId = null;
@@ -801,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="list-group-item text-center text-danger">
                     <i class="fas fa-exclamation-triangle"></i> 
                     Failed to create chat room. 
-                    <br><small>${error.message || 'Please check your connection and try again.'}</small>
+                    <br><small>${escapeHTML(error.message || 'Please check your connection and try again.')}</small>
                 </div>
             `;
         });
@@ -837,7 +839,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Log full response for debugging
             console.log('Get Messages Response Status:', response.status);
             console.log('Get Messages Response Headers:', response.headers);
-            
+
             // Check if response is ok
             if (!response.ok) {
                 // Try to get error message from response
@@ -872,16 +874,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message');
                 messageElement.classList.add(message.sender_id === parseInt(currentUserId) ? 'sent' : 'received');
-                
+
                 messageElement.innerHTML = `
                     <div class="message-content">
-                        ${message.message}
+                        ${escapeHTML(message.message)}
                     </div>
                     <small class="message-timestamp">
-                        ${new Date(message.timestamp).toLocaleString()}
+                        ${escapeHTML(new Date(message.timestamp).toLocaleString())}
                     </small>
                 `;
-                
+
                 chatMessages.appendChild(messageElement);
             });
 
@@ -894,7 +896,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="text-center text-danger">
                     <i class="fas fa-exclamation-triangle"></i>
                     Failed to load messages. 
-                    <br><small>${error.message || 'Please try again.'}</small>
+                    <br><small>${escapeHTML(error.message || 'Please try again.')}</small>
                 </div>
             `;
         });
@@ -923,7 +925,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Enable sending message on Enter key
         messageInput.addEventListener('keypress', function(event) {
             console.log('Keypress event:', event.key);
-            
+
             // Check if Enter key is pressed (key code 13)
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault(); // Prevent default Enter key behavior
@@ -935,11 +937,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Send message functionality
         sendMessageBtn.addEventListener('click', function() {
             console.log('Send message button clicked');
-            
+
             // Validate inputs
             const messageText = messageInput.value.trim();
             console.log('Message text:', messageText);
-            
+
             if (!messageText) {
                 console.warn('Empty message attempt');
                 // Highlight input if empty
@@ -947,10 +949,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 messageInput.focus();
                 return;
             }
-            
+
             // Remove any previous error highlighting
             messageInput.classList.remove('is-invalid');
-            
+
             if (!currentRoomId) {
                 console.warn('No room selected');
                 // Show modal or alert about selecting a faculty first
@@ -980,7 +982,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => {
                 console.log('Send Message Response Status:', response.status);
                 console.log('Send Message Response Headers:', response.headers);
-                
+
                 // Check if response is ok
                 if (!response.ok) {
                     // Try to get error message from response
@@ -992,7 +994,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(result => {
                 console.log('Send message result:', result);
-                
+
                 // Validate response
                 if (!result || result.status !== 'success') {
                     throw new Error(result.message || 'Failed to send message');
@@ -1007,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error sending message:', error);
-                
+
                 // Show error to user
                 const errorToast = document.createElement('div');
                 errorToast.classList.add('toast', 'show', 'position-fixed', 'bottom-0', 'end-0', 'm-3', 'bg-danger', 'text-white');
@@ -1017,10 +1019,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
                     </div>
                     <div class="toast-body">
-                        ${error.message || 'Failed to send message'}
+                        ${escapeHTML(error.message || 'Failed to send message')}
                     </div>
                 `;
-                
+
                 // Append to body and auto-remove
                 document.body.appendChild(errorToast);
                 setTimeout(() => {
@@ -1051,7 +1053,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Get current path
         const currentPath = window.location.pathname;
-        
+
         // Add active class to current nav item
         const currentNavItem = document.querySelector(`.nav-item[href="${currentPath}"]`);
         if (currentNavItem) {
@@ -1109,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebarToggle.querySelector('i').classList.remove('fa-chevron-right');
         sidebarToggle.querySelector('i').classList.add('fa-chevron-left');
     }
-    
+
     // Set initial active state
     handleNavigation();
 

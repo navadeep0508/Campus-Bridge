@@ -1,0 +1,18 @@
+{% set active = active_nav|default('') %}
+<nav class="sidebar-nav" aria-label="Admin">
+  <div class="nav-section">
+    <span class="nav-section-label">Overview</span>
+    <a href="{{ url_for('dashboard_admin') }}" class="nav-item {% if active == 'dashboard' %}is-active{% endif %}"{% if active == 'dashboard' %} aria-current="page"{% endif %}>
+      <i data-lucide="layout-dashboard"></i><span class="nav-label">Dashboard</span>
+    </a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">People</span>
+    <a href="{{ url_for('faculty_admin') }}" class="nav-item {% if active == 'faculty' %}is-active{% endif %}"{% if active == 'faculty' %} aria-current="page"{% endif %}>
+      <i data-lucide="graduation-cap"></i><span class="nav-label">Faculty</span>
+    </a>
+    <a href="{{ url_for('students_admin') }}" class="nav-item {% if active == 'students' %}is-active{% endif %}"{% if active == 'students' %} aria-current="page"{% endif %}>
+      <i data-lucide="users"></i><span class="nav-label">Students</span>
+    </a>
+  </div>
+</nav>

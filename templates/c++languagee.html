@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Campus Bridge</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -828,22 +827,26 @@
             border: 1px solid var(--card-border);
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Myinfocam</h2>
             </div>
-            
+
             <div class="college-info-section">
                 <div class="college-name">College of Engineering</div>
                 <div class="department-name">Department of Computer Science</div>
@@ -925,7 +928,7 @@
                         <span>Job Match Recommender</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3><i class="fas fa-users"></i> Community</h3>
                     <a href="{{ url_for('code_room') }}" class="nav-item">
@@ -960,7 +963,7 @@
                 <!-- C++ Language Information -->
                 <div class="cpp-language-info" style="background: var(--card-bg); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
                     <h2 style="font-size: 2rem; margin-bottom: 1.5rem; color: var(--accent-color);">Introduction to C++ Programming</h2>
-                    
+
                     <div class="info-section" style="margin-bottom: 2rem;">
                         <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">What is C++?</h3>
                         <p style="line-height: 1.6; margin-bottom: 1rem;">
@@ -1064,11 +1067,11 @@ int main() {
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
-    
+
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
         });
-    
+
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
             // Adjust main content margin when sidebar is collapsed
@@ -1079,7 +1082,7 @@ int main() {
                 mainContent.style.marginLeft = '250px';
             }
         });
-    
+
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 768) {
@@ -1088,7 +1091,7 @@ int main() {
                 }
             }
         });
-    
+
         // Handle window resize
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
@@ -1096,5 +1099,7 @@ int main() {
             }
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

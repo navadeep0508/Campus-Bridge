@@ -1,0 +1,63 @@
+{% extends "layouts/base.html" %}
+
+{% block body %}
+<div class="app-shell" id="appShell">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark" aria-hidden="true">
+        <i data-lucide="graduation-cap"></i>
+      </div>
+      <span class="brand-text">Campus Bridge</span>
+    </div>
+
+    {% if session.get('role') == 'faculty' %}
+      {% include "partials/faculty_nav.html" %}
+    {% elif session.get('role') == 'admin' %}
+      {% include "partials/admin_nav.html" %}
+    {% else %}
+      {% include "partials/student_nav.html" %}
+    {% endif %}
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('change_password') }}" class="nav-item">
+        <i data-lucide="key-round"></i><span class="nav-label sidebar-footer-text">Password</span>
+      </a>
+      <a href="{{ url_for('logout') }}" class="nav-item">
+        <i data-lucide="log-out"></i><span class="nav-label sidebar-footer-text">Sign out</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button type="button" class="icon-btn menu-toggle" id="menuToggle" aria-label="Open menu">
+          <i data-lucide="menu"></i>
+        </button>
+        <button type="button" class="icon-btn sidebar-collapse-toggle" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true">
+          <i data-lucide="panel-left"></i>
+        </button>
+        <div>
+          <div class="topbar-title">{% block topbar_title %}Campus Bridge{% endblock %}</div>
+          {% block topbar_subtitle %}{% endblock %}
+        </div>
+      </div>
+      <div class="topbar-actions">
+        {% block topbar_actions %}{% endblock %}
+      </div>
+    </header>
+
+    <main class="app-content {% block content_class %}{% endblock %}">
+      {% if error %}
+      <div class="alert alert-error" role="alert">{{ error }}</div>
+      {% endif %}
+      {% if success %}
+      <div class="alert alert-success" role="status">{{ success }}</div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

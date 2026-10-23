@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Myinfocam</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -931,22 +930,26 @@
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -1003,7 +1006,7 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3>AI Code Assistant</h3>
                     <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
@@ -1037,7 +1040,7 @@
                     <div class="hero-content">
                         <h1 class="hero-title">Master Programming Languages</h1>
                         <p class="hero-subtitle">Choose your path to becoming a skilled developer</p>
-                        
+
                         <div class="language-grid">
                             <div class="language-card">
                                 <div class="language-header">
@@ -1127,11 +1130,11 @@
                     const menuToggle = document.getElementById('menuToggle');
                     const sidebar = document.getElementById('sidebar');
                     const sidebarToggle = document.getElementById('sidebarToggle');
-            
+
                     menuToggle.addEventListener('click', () => {
                         sidebar.classList.toggle('active');
                     });
-            
+
                     sidebarToggle.addEventListener('click', () => {
                         sidebar.classList.toggle('collapsed');
                         // Adjust main content margin when sidebar is collapsed
@@ -1142,7 +1145,7 @@
                             mainContent.style.marginLeft = '250px';
                         }
                     });
-            
+
                     // Close sidebar when clicking outside on mobile
                     document.addEventListener('click', (e) => {
                         if (window.innerWidth <= 768) {
@@ -1151,7 +1154,7 @@
                             }
                         }
                     });
-            
+
                     // Handle window resize
                     window.addEventListener('resize', () => {
                         if (window.innerWidth > 768) {
@@ -1162,5 +1165,7 @@
             </div>
         </main>
     </div>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

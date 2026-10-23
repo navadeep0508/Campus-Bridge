@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Campus Bridge</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -778,22 +777,26 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -854,7 +857,7 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3><i class="fas fa-robot"></i> AI Assistant</h3>
                     <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
@@ -885,30 +888,41 @@
         <main class="main-content">
             <!-- Course Content -->
             <div class="dashboard-content">
-                <div class="section-header">
-                    <h1 class="text-3xl font-bold mb-6">My Courses</h1>
+                <div class="page-header">
+                    <div>
+                        <span class="page-kicker">Your learning</span>
+                        <h1 class="page-title">My courses</h1>
+                        <p class="page-desc">Course materials assigned to your semester will appear here.</p>
+                    </div>
                 </div>
 
-                <div class="course-grid">
+                {% if courses %}
+                <div class="course-grid content-grid">
                     {% for course in courses %}
-                    <div class="course-card">
+                    <article class="course-card content-item">
                         <div class="course-header">
                             <h2>{{ course.subject }}</h2>
                         </div>
-                        <div class="course-stats">
-                            <div class="stat">
-                                <span>Modules: {{ course.modules }}</span>
-                            </div>
-                            <div class="stat">
-                                <span>Hours: {{ course.hours }}</span>
-                            </div>
+                        <div class="course-stats meta-row">
+                            <span>{{ course.modules }} modules</span>
+                            <span>{{ course.hours }} hours</span>
                         </div>
-                        <a href="{{ course.pdf_link }}" class="download-btn" target="_blank">
-                            Download PDF
+                        {% if course.pdf_link %}
+                        <a href="{{ course.pdf_link }}" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+                            Download course materials
                         </a>
-                    </div>
+                        {% endif %}
+                    </article>
                     {% endfor %}
                 </div>
+                {% else %}
+                <section class="empty-state panel" aria-labelledby="courses-empty-title">
+                    <span class="empty-state-icon" aria-hidden="true"><i data-lucide="book-open-check"></i></span>
+                    <h2 id="courses-empty-title">No courses available yet</h2>
+                    <p>When your semester’s course materials are published, you’ll find them here.</p>
+                    <a class="btn btn-secondary" href="{{ url_for('coding_tracks') }}">Explore coding tracks</a>
+                </section>
+                {% endif %}
             </div>
         </main>
     </div>
@@ -950,5 +964,7 @@
             }
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
-</html> 
+</html>

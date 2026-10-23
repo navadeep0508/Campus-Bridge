@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Assignments - Campus Bridge</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -782,18 +781,22 @@
             margin-right: 1rem;
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -843,7 +846,7 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const mainContent = document.querySelector('.main-content');
-        
+
         // Function to handle sidebar state
         function updateSidebarState(isCollapsed) {
             if (isCollapsed) {
@@ -928,7 +931,7 @@
         // Create Assignment
         function createAssignment(event) {
             event.preventDefault();
-            
+
             const subject = document.getElementById('subject').value;
             const year = document.getElementById('year').value;
             const branch = document.getElementById('branch').value;
@@ -939,22 +942,22 @@
             const card = document.createElement('div');
             card.className = 'assignment-card';
             card.innerHTML = `
-                <h3 class="assignment-subject">${subject}</h3>
-                <p class="assignment-description">${description}</p>
+                <h3 class="assignment-subject">${escapeHTML(subject)}</h3>
+                <p class="assignment-description">${escapeHTML(description)}</p>
                 <div class="assignment-meta">
                     <div class="deadline">
                         <i class="fas fa-clock"></i>
-                        <span>Due: ${formatDeadline(deadline)}</span>
+                        <span>Due: ${escapeHTML(formatDeadline(deadline))}</span>
                     </div>
                     <div class="assignment-info">
-                        <span class="badge">${year}${getYearSuffix(year)} Year</span>
-                        <span class="badge">${branch}</span>
+                        <span class="badge">${escapeHTML(year)}${getYearSuffix(year)} Year</span>
+                        <span class="badge">${escapeHTML(branch)}</span>
                     </div>
                     <div class="action-buttons">
-                        <button class="action-btn" onclick="editAssignment(this)">
+                        <button class="action-btn" onclick="editAssignment(this)" type="button">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="action-btn" onclick="deleteAssignment(this)">
+                        <button class="action-btn" onclick="deleteAssignment(this)" type="button">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -1017,7 +1020,7 @@
                 const deadline = new Date(card.querySelector('.deadline span').textContent.replace('Due: ', ''));
                 return deadline > new Date();
             }).length;
-            
+
             document.getElementById('totalAssignments').textContent = totalAssignments;
             document.getElementById('activeAssignments').textContent = activeAssignments;
             document.getElementById('submittedAssignments').textContent = document.querySelectorAll('.status-submitted').length;
@@ -1032,11 +1035,10 @@
 
             // Update modal content
             document.getElementById('submissionAssignmentTitle').textContent = title;
-            document.getElementById('submissionAssignmentDate').textContent = Due Date: ${deadline};
+            document.getElementById('submissionAssignmentDate').textContent = `Due Date: ${deadline}`;
             document.getElementById('submissionAssignmentDesc').textContent = description;
 
-            // Example: Generate random submissions for demonstration
-            generateExampleSubmissions();
+            document.getElementById('submissionsModalTableBody').innerHTML = '<tr><td colspan="4" class="text-center">Submission records are available from the Assignments workspace.</td></tr>';
 
             // Show modal
             document.getElementById('submissionsModal').classList.add('active');
@@ -1051,54 +1053,15 @@
         function filterModalSubmissions() {
             const filter = document.getElementById('submissionModalFilter').value;
             const rows = document.querySelectorAll('#submissionsModalTableBody tr');
-            
+
             rows.forEach(row => {
-                const status = row.querySelector('.status-badge').classList;
-                if (filter === 'all' || status.contains(status-${filter})) {
+                const status = row.querySelector('.status-badge')?.classList;
+                if (filter === 'all' || status?.contains(`status-${filter}`)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
                 }
             });
-        }
-
-        // Generate example submissions for demonstration
-        function generateExampleSubmissions() {
-            const tbody = document.getElementById('submissionsModalTableBody');
-            tbody.innerHTML = ''; // Clear existing submissions
-
-            const students = [
-                { name: 'John Doe', status: 'submitted', date: 'Mar 15, 2024' },
-                { name: 'Jane Smith', status: 'pending', date: '-' },
-                { name: 'Mike Johnson', status: 'late', date: 'Mar 14, 2024' },
-                { name: 'Sarah Wilson', status: 'submitted', date: 'Mar 13, 2024' },
-                { name: 'Tom Brown', status: 'pending', date: '-' }
-            ];
-
-            students.forEach((student, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${student.name}</td>
-                    <td>${student.date}</td>
-                    <td><span class="status-badge status-${student.status}">${student.status.charAt(0).toUpperCase() + student.status.slice(1)}</span></td>
-                    <td>
-                        <button class="action-btn review" ${student.status === 'pending' ? 'disabled' : onclick="reviewSubmission(${index + 1})"}>
-                            <i class="fas fa-eye"></i> Review
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            // Update submission stats
-            const submitted = students.filter(s => s.status === 'submitted').length;
-            const pending = students.filter(s => s.status === 'pending').length;
-            const late = students.filter(s => s.status === 'late').length;
-
-            document.getElementById('totalStudents').textContent = students.length;
-            document.getElementById('submittedCount').textContent = submitted;
-            document.getElementById('pendingCount').textContent = pending;
-            document.getElementById('lateCount').textContent = late;
         }
 
         // Close modal when clicking outside
@@ -1117,5 +1080,7 @@
             window.location.href = "{{ url_for('faculty_home') }}";
         }
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

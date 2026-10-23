@@ -1,0 +1,18 @@
+{% extends "layouts/app.html" %}
+{% block title %}Dashboard — Campus Bridge{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+{% block topbar_subtitle %}<div class="topbar-subtitle">Your campus day, at a glance</div>{% endblock %}
+{% block content %}
+<section class="page-header dashboard-welcome"><div><span class="page-kicker">Student workspace</span><h1 class="page-title">Welcome back{% if user and user.name %}, {{ user.name|e }}{% endif %}</h1><p class="page-desc">Pick up your coursework, check what’s next, or make time to practice.</p></div></section>
+<section class="section"><div class="section-header"><div><h2 class="section-title">Your campus tools</h2><p class="section-desc">Go straight to what you need.</p></div></div>
+  <div class="action-grid dashboard-actions">
+    <a class="action-tile" href="{{ url_for('mycourse') }}"><i data-lucide="book-open"></i><span>My courses</span><small>Course materials and learning resources</small></a>
+    <a class="action-tile" href="{{ url_for('student_assignments') }}"><i data-lucide="clipboard-list"></i><span>Assignments</span><small>Review work and submission details</small></a>
+    <a class="action-tile" href="{{ url_for('attendance') }}"><i data-lucide="calendar-check"></i><span>Attendance</span><small>See your attendance record</small></a>
+    <a class="action-tile" href="{{ url_for('timetable') }}"><i data-lucide="calendar-days"></i><span>Timetable</span><small>Check your class schedule</small></a>
+    <a class="action-tile" href="{{ url_for('compiler') }}"><i data-lucide="terminal"></i><span>Code playground</span><small>Write and run code</small></a>
+    <a class="action-tile" href="{{ url_for('chat_page') }}"><i data-lucide="messages-square"></i><span>Faculty chat</span><small>Connect with your instructors</small></a>
+  </div>
+</section>
+<section class="section dashboard-next"><div class="panel"><div class="panel-body flex items-center justify-between gap-4"><div><span class="page-kicker">Keep learning</span><h2 class="section-title">Build your coding rhythm</h2><p class="section-desc">Choose a track, work through a challenge, and ask for help when you need it.</p></div><a class="btn btn-primary" href="{{ url_for('coding_tracks') }}">Browse coding tracks <i data-lucide="arrow-right"></i></a></div></div></section>
+{% endblock %}

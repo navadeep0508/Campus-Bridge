@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Student - Admin Panel</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -847,22 +847,26 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="admin-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Admin Panel</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -898,7 +902,7 @@
                 <div class="hero-content">
                     <h2>Welcome to Student Management</h2>
                     <p>Manage your students efficiently with our comprehensive dashboard</p>
-                    <button class="hero-btn" id="addStudentHeroBtn">
+                    <button class="hero-btn" id="addStudentHeroBtn" type="button">
                         <i class="fas fa-user-plus"></i>
                         <span>Add New Student</span>
                     </button>
@@ -918,7 +922,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h2 class="modal-title">Add New Student</h2>
-                            <button class="modal-close" id="closeModalBtn">&times;</button>
+                            <button class="modal-close" id="closeModalBtn" type="button">&times;</button>
                         </div>
                         <div class="modal-body">
                         <form id="addStudentForm">
@@ -981,7 +985,7 @@
                         </form>
                     </div>
                         <div class="modal-footer">
-                            <button class="form-btn cancel" id="cancelModalBtn">
+                            <button class="form-btn cancel" id="cancelModalBtn" type="button">
                             <i class="fas fa-times"></i>
                             <span>Cancel</span>
                         </button>
@@ -1001,11 +1005,11 @@
                     <div class="table-header">
                         <h2 class="table-title">Student List</h2>
                         <div class="table-actions">
-                            <button class="table-btn" id="filterBtn">
+                            <button class="table-btn" id="filterBtn" type="button">
                                 <i class="fas fa-filter"></i>
                                 <span>Filter</span>
                             </button>
-                            <button class="table-btn" id="exportBtn">
+                            <button class="table-btn" id="exportBtn" type="button">
                                 <i class="fas fa-download"></i>
                                 <span>Export</span>
                             </button>
@@ -1041,9 +1045,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="action-btn edit-btn" data-id="{{ student.id }}"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn view-btn" data-id="{{ student.id }}"><i class="fas fa-eye"></i></button>
-                                    <button class="action-btn delete-btn" data-id="{{ student.id }}"><i class="fas fa-trash"></i></button>
+                                    <button class="action-btn edit-btn" data-id="{{ student.id }}" type="button"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn view-btn" data-id="{{ student.id }}" type="button"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn delete-btn" data-id="{{ student.id }}" type="button"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -1146,7 +1150,7 @@
                 // Remove active class from all tabs and contents
                 sectionTabs.forEach(t => t.classList.remove('active'));
                 sectionContents.forEach(c => c.classList.remove('active'));
-                
+
                 // Add active class to clicked tab and corresponding content
                 tab.classList.add('active');
                 const tabId = tab.getAttribute('data-tab');
@@ -1196,7 +1200,7 @@
         if (addStudentForm) {
             addStudentForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
+
                 const studentData = {
                     name: document.getElementById('studentName').value,
                     email: document.getElementById('email').value,
@@ -1207,7 +1211,7 @@
                     semester: document.getElementById('semester').value,
                     role: 'student'
                 };
-                
+
                 try {
                     const response = await fetch('/add_student', {
                         method: 'POST',
@@ -1218,7 +1222,7 @@
                     });
 
                     const data = await response.json();
-                    
+
                     if (response.ok) {
                         closeModal();
                         showToast('Student added successfully!', 'success');
@@ -1241,30 +1245,30 @@
             try {
                 const response = await fetch('/get_students');
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     const tbody = document.getElementById('studentTableBody');
                     tbody.innerHTML = '';
-                    
+
                     data.students.forEach(student => {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                <td>${student.id}</td>
-                <td>${student.name}</td>
-                            <td>${student.roll_number}</td>
-                <td>${student.semester}</td>
-                <td>${student.branch}</td>
-                <td>${student.section}</td>
-                <td>${student.email}</td>
+                <td>${escapeHTML(student.id)}</td>
+                <td>${escapeHTML(student.name)}</td>
+                            <td>${escapeHTML(student.roll_number)}</td>
+                <td>${escapeHTML(student.semester)}</td>
+                <td>${escapeHTML(student.branch)}</td>
+                <td>${escapeHTML(student.section)}</td>
+                <td>${escapeHTML(student.email)}</td>
                             <td>
                                 <span class="status-badge ${student.status === 'active' ? 'status-active' : 'status-inactive'}">
-                                    ${student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                                    ${escapeHTML((student.status || 'inactive').charAt(0).toUpperCase() + (student.status || 'inactive').slice(1))}
                                 </span>
                             </td>
                 <td>
-                    <button class="action-btn edit-btn" data-id="${student.id}"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn view-btn" data-id="${student.id}"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn delete-btn" data-id="${student.id}"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn edit-btn" data-id="${escapeHTML(student.id)}" type="button"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn view-btn" data-id="${escapeHTML(student.id)}" type="button"><i class="fas fa-eye"></i></button>
+                    <button class="action-btn delete-btn" data-id="${escapeHTML(student.id)}" type="button"><i class="fas fa-trash"></i></button>
                 </td>
             `;
                         tbody.appendChild(tr);
@@ -1290,7 +1294,7 @@
                 try {
                     const response = await fetch(`/get_student/${studentId}`);
                     const data = await response.json();
-                    
+
                     if (response.ok) {
                         // Populate form with student data
                         document.getElementById('studentName').value = data.name;
@@ -1299,7 +1303,7 @@
                         document.getElementById('branch').value = data.branch;
                         document.getElementById('section').value = data.section;
                         document.getElementById('semester').value = data.semester;
-                        
+
                         // Open modal
                         openModal();
                 } else {
@@ -1310,7 +1314,7 @@
                     console.error('Error:', error);
                 }
             }
-            
+
             if (deleteBtn) {
                 if (confirm('Are you sure you want to delete this student?')) {
                     const studentId = deleteBtn.dataset.id;
@@ -1318,7 +1322,7 @@
                         const response = await fetch(`/delete_student/${studentId}`, {
                             method: 'DELETE'
                         });
-                        
+
                         if (response.ok) {
                             showToast('Student deleted successfully!', 'success');
                             loadStudentList();
@@ -1338,7 +1342,7 @@
                 try {
                     const response = await fetch(`/get_student/${studentId}`);
                     const data = await response.json();
-                    
+
                     if (response.ok) {
                         // Show student details in a modal or dedicated view
                         showToast(`Viewing details for ${data.name}`, 'success');
@@ -1356,30 +1360,30 @@
         // Notification function
         function showToast(message, type = 'success') {
             const toastContainer = document.getElementById('toastContainer');
-            
+
             // Create toast element
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            
+
             // Set toast content
             toast.innerHTML = `
                 <div class="toast-icon">
                     <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
                 </div>
-                <div class="toast-message">${message}</div>
+                <div class="toast-message">${escapeHTML(message)}</div>
                 <div class="toast-close">
                     <i class="fas fa-times"></i>
                 </div>
             `;
-            
+
             // Add toast to container
             toastContainer.appendChild(toast);
-            
+
             // Show toast
             setTimeout(() => {
                 toast.classList.add('show');
             }, 10);
-            
+
             // Add event listener to close button
             const closeBtn = toast.querySelector('.toast-close');
             closeBtn.addEventListener('click', () => {
@@ -1388,7 +1392,7 @@
                     toastContainer.removeChild(toast);
                 }, 300);
             });
-            
+
             // Auto remove toast after 5 seconds
             setTimeout(() => {
                 if (toast.parentNode === toastContainer) {
@@ -1406,14 +1410,14 @@
         function updateStatistics() {
             const tableBody = document.getElementById('studentTableBody');
             const rows = tableBody.querySelectorAll('tr');
-            
+
             // Update total students
             document.getElementById('totalStudents').textContent = rows.length;
-            
+
             // Count active and inactive students
             let activeCount = 0;
             let inactiveCount = 0;
-            
+
             rows.forEach(row => {
                 const statusCell = row.querySelector('td:nth-child(8)');
                 if (statusCell.textContent.trim().toLowerCase() === 'active') {
@@ -1422,36 +1426,36 @@
                     inactiveCount++;
                 }
             });
-            
+
             document.getElementById('activeStudents').textContent = activeCount;
             document.getElementById('inactiveStudents').textContent = inactiveCount;
-            
+
             // Count students by branch
             const branchStats = {};
             rows.forEach(row => {
                 const branch = row.querySelector('td:nth-child(5)').textContent;
                 branchStats[branch] = (branchStats[branch] || 0) + 1;
             });
-            
+
             const branchStatsList = document.getElementById('branchStats');
             branchStatsList.innerHTML = '';
-            
+
             for (const branch in branchStats) {
                 const li = document.createElement('li');
                 li.textContent = `${branch}: ${branchStats[branch]}`;
                 branchStatsList.appendChild(li);
             }
-            
+
             // Count students by semester
             const semesterStats = {};
             rows.forEach(row => {
                 const semester = row.querySelector('td:nth-child(4)').textContent;
                 semesterStats[semester] = (semesterStats[semester] || 0) + 1;
             });
-            
+
             const semesterStatsList = document.getElementById('semesterStats');
             semesterStatsList.innerHTML = '';
-            
+
             for (const semester in semesterStats) {
                 const li = document.createElement('li');
                 li.textContent = `Semester ${semester}: ${semesterStats[semester]}`;
@@ -1465,5 +1469,7 @@
         updateStatistics();
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

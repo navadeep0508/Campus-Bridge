@@ -480,22 +480,27 @@
             border: 1px solid rgba(244, 67, 54, 0.2);
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -552,7 +557,7 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3>AI Code Assistant</h3>
                     <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
@@ -587,7 +592,7 @@
                 </div>
             </div>
             <div class="create-room-container">
-                <button class="create-room-btn" onclick="openCreateRoomModal()">
+                <button class="create-room-btn" onclick="openCreateRoomModal()" type="button">
                     <i class="fas fa-plus"></i>
                     Create Room
                 </button>
@@ -613,7 +618,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                    <button class="join-btn" onclick="joinRoom('{{ room.id }}')">
+                    <button class="join-btn" onclick="joinRoom('{{ room.id }}')" type="button">
                         Join Room
                     </button>
                 </div>
@@ -627,7 +632,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Create Code Room</h2>
-                <button class="close-btn" onclick="closeCreateRoomModal()">&times;</button>
+                <button class="close-btn" onclick="closeCreateRoomModal()" type="button">&times;</button>
             </div>
             <form id="createRoomForm">
                 <div class="form-group">
@@ -657,11 +662,12 @@
                 <span id="editorLanguage" class="room-language"></span>
             </div>
             <div class="editor-actions">
-                <button class="editor-btn" onclick="leaveRoom()">
+                <button class="editor-btn" aria-label="Leave code room" onclick="leaveRoom()" type="button">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
         </div>
+        <label for="editor" class="sr-only">Code editor</label>
         <textarea id="editor"></textarea>
     </div>
 
@@ -719,12 +725,12 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     const data = await response.json();
                     throw new Error(data.error || 'Failed to join room');
                 }
-                
+
                 // Redirect to the code room page
                 window.location.href = `/code_room_page/${roomId}`;
             } catch (error) {
@@ -847,5 +853,7 @@
             }
         }
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html> 

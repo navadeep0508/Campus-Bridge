@@ -1,0 +1,70 @@
+{% set active = active_nav|default('') %}
+<nav class="sidebar-nav" aria-label="Student">
+  <div class="nav-section">
+    <span class="nav-section-label">Overview</span>
+    <a href="{{ url_for('home_page') }}" class="nav-item {% if active == 'dashboard' %}is-active{% endif %}"{% if active == 'dashboard' %} aria-current="page"{% endif %}>
+      <i data-lucide="layout-dashboard"></i><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="{{ url_for('mycourse') }}" class="nav-item {% if active == 'courses' %}is-active{% endif %}"{% if active == 'courses' %} aria-current="page"{% endif %}>
+      <i data-lucide="book-open"></i><span class="nav-label">My courses</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-label">Campus</span>
+    <a href="{{ url_for('institution') }}" class="nav-item {% if active == 'institution' %}is-active{% endif %}"{% if active == 'institution' %} aria-current="page"{% endif %}>
+      <i data-lucide="building-2"></i><span class="nav-label">Institution</span>
+    </a>
+    <a href="{{ url_for('chat_page') }}" class="nav-item {% if active == 'chat' %}is-active{% endif %}"{% if active == 'chat' %} aria-current="page"{% endif %}>
+      <i data-lucide="messages-square"></i><span class="nav-label">Faculty chat</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-label">Academic</span>
+    <a href="{{ url_for('attendance') }}" class="nav-item {% if active == 'attendance' %}is-active{% endif %}"{% if active == 'attendance' %} aria-current="page"{% endif %}>
+      <i data-lucide="calendar-check"></i><span class="nav-label">Attendance</span>
+    </a>
+    <a href="{{ url_for('student_assignments') }}" class="nav-item {% if active == 'assignments' %}is-active{% endif %}"{% if active == 'assignments' %} aria-current="page"{% endif %}>
+      <i data-lucide="clipboard-list"></i><span class="nav-label">Assignments</span>
+    </a>
+    <a href="{{ url_for('timetable') }}" class="nav-item {% if active == 'timetable' %}is-active{% endif %}"{% if active == 'timetable' %} aria-current="page"{% endif %}>
+      <i data-lucide="calendar"></i><span class="nav-label">Timetable</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-label">Coding</span>
+    <a href="{{ url_for('coding_tracks') }}" class="nav-item {% if active == 'tracks' %}is-active{% endif %}"{% if active == 'tracks' %} aria-current="page"{% endif %}>
+      <i data-lucide="route"></i><span class="nav-label">Tracks</span>
+    </a>
+    <a href="{{ url_for('myverse') }}" class="nav-item {% if active == 'myverse' %}is-active{% endif %}"{% if active == 'myverse' %} aria-current="page"{% endif %}>
+      <i data-lucide="code-2"></i><span class="nav-label">Practice</span>
+    </a>
+    <a href="{{ url_for('compiler') }}" class="nav-item {% if active == 'compiler' %}is-active{% endif %}"{% if active == 'compiler' %} aria-current="page"{% endif %}>
+      <i data-lucide="terminal"></i><span class="nav-label">Compiler</span>
+    </a>
+    <a href="{{ url_for('student_coding_assesment') }}" class="nav-item {% if active == 'coding_assessments' %}is-active{% endif %}"{% if active == 'coding_assessments' %} aria-current="page"{% endif %}>
+      <i data-lucide="file-code"></i><span class="nav-label">Assessments</span>
+    </a>
+    <a href="{{ url_for('code_room') }}" class="nav-item {% if active == 'code_room' %}is-active{% endif %}"{% if active == 'code_room' %} aria-current="page"{% endif %}>
+      <i data-lucide="users"></i><span class="nav-label">Code rooms</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-label">Tools</span>
+    <a href="{{ url_for('ai_code_assistant') }}" class="nav-item {% if active == 'ai_assistant' %}is-active{% endif %}"{% if active == 'ai_assistant' %} aria-current="page"{% endif %}>
+      <i data-lucide="sparkles"></i><span class="nav-label">AI assistant</span>
+    </a>
+    <a href="{{ url_for('code_review') }}" class="nav-item {% if active == 'code_review' %}is-active{% endif %}"{% if active == 'code_review' %} aria-current="page"{% endif %}>
+      <i data-lucide="scan-search"></i><span class="nav-label">Code review</span>
+    </a>
+    <a href="{{ url_for('job_match_recomender1') }}" class="nav-item {% if active == 'jobs' %}is-active{% endif %}"{% if active == 'jobs' %} aria-current="page"{% endif %}>
+      <i data-lucide="briefcase"></i><span class="nav-label">Job match</span>
+    </a>
+    <a href="{{ url_for('student_leaderboard') }}" class="nav-item {% if active == 'leaderboard' %}is-active{% endif %}"{% if active == 'leaderboard' %} aria-current="page"{% endif %}>
+      <i data-lucide="trophy"></i><span class="nav-label">Leaderboard</span>
+    </a>
+  </div>
+</nav>

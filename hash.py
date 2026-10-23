@@ -1,13 +1,12 @@
+"""Hash a password entered interactively for manual account maintenance."""
+import getpass
 import bcrypt
 
-# Password to hash
-password = "sunny@2005"
+def main():
+    password = getpass.getpass("Password to hash: ")
+    if len(password) < 12:
+        raise SystemExit("Use at least 12 characters.")
+    print(bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8"))
 
-# Generate a salt
-salt = bcrypt.gensalt()
-
-# Hash the password
-hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-
-# Print the hashed password
-print(hashed_password.decode('utf-8'))
+if __name__ == "__main__":
+    main()

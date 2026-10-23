@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Campus Bridge</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -934,22 +933,26 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Myinfocam</h2>
             </div>
-            
+
             <div class="college-info-section">
                 <div class="college-name">College of Engineering</div>
                 <div class="department-name">Department of Computer Science</div>
@@ -1031,7 +1034,7 @@
                         <span>Job Match Recommender</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3><i class="fas fa-users"></i> Community</h3>
                     <a href="{{ url_for('code_room') }}" class="nav-item">
@@ -1054,11 +1057,11 @@
                     const menuToggle = document.getElementById('menuToggle');
                     const sidebar = document.getElementById('sidebar');
                     const sidebarToggle = document.getElementById('sidebarToggle');
-            
+
                     menuToggle.addEventListener('click', () => {
                         sidebar.classList.toggle('active');
                     });
-            
+
                     sidebarToggle.addEventListener('click', () => {
                         sidebar.classList.toggle('collapsed');
                         // Adjust main content margin when sidebar is collapsed
@@ -1069,7 +1072,7 @@
                             mainContent.style.marginLeft = '250px';
                         }
                     });
-            
+
                     // Close sidebar when clicking outside on mobile
                     document.addEventListener('click', (e) => {
                         if (window.innerWidth <= 768) {
@@ -1078,7 +1081,7 @@
                             }
                         }
                     });
-            
+
                     // Handle window resize
                     window.addEventListener('resize', () => {
                         if (window.innerWidth > 768) {
@@ -1086,7 +1089,7 @@
                         }
                     });
                 </script>
-    
+
                 <div class="java-nav">
                     <div class="java-logo">
                         <i class="fab fa-java"></i>
@@ -1190,12 +1193,12 @@ public class HelloWorld {
 class Car {
     String brand;
     String model;
-    
+
     public Car(String brand, String model) {
         this.brand = brand;
         this.model = model;
     }
-    
+
     public void displayInfo() {
         System.out.println("Brand: " + brand + ", Model: " + model);
     }
@@ -1235,5 +1238,7 @@ myCar.displayInfo();
             </div>
         </main>
     </div>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

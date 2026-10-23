@@ -275,6 +275,11 @@
             background: var(--text-secondary);
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 <body>
     <div class="header">
@@ -287,12 +292,13 @@
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Leave Room</span>
             </a>
-            <button class="leave-room" onclick="closeRoom()">Close Room</button>
+            <button class="leave-room" onclick="closeRoom()" type="button">Close Room</button>
         </div>
     </div>
 
     <div class="main-content">
         <div class="code-editor-container">
+            <label for="code-editor" class="sr-only">Shared code editor</label>
             <textarea id="code-editor">{{ room.code }}</textarea>
         </div>
 
@@ -320,6 +326,7 @@
 
             <div class="chat-input">
                 <form id="message-form">
+                    <label for="message-input" class="sr-only">Message</label>
                     <input type="text" id="message-input" placeholder="Type a message...">
                     <button type="submit">Send</button>
                 </form>
@@ -391,7 +398,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (!response.ok) {
                     throw new Error(data.error || 'Failed to send message');
                 }
@@ -411,10 +418,10 @@
             messageElement.className = 'message';
             messageElement.innerHTML = `
                 <div class="message-header">
-                    <span class="message-sender">${message.user_name}</span>
-                    <span class="message-time">${new Date(message.created_at).toLocaleTimeString()}</span>
+                    <span class="message-sender">${escapeHTML(message.user_name)}</span>
+                    <span class="message-time">${escapeHTML(new Date(message.created_at).toLocaleTimeString())}</span>
                 </div>
-                <div class="message-content">${message.message}</div>
+                <div class="message-content">${escapeHTML(message.message)}</div>
             `;
             chatMessages.appendChild(messageElement);
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -426,33 +433,33 @@
             try {
                 const response = await fetch(`/get_room_messages/{{ room.id }}`);
                 if (!response.ok) return;
-                
+
                 const data = await response.json();
                 if (data.messages && data.messages.length > 0) {
                     // Get the latest message ID
                     const latestMessageId = data.messages[0].id;
-                    
+
                     // Only update if there are new messages
                     if (latestMessageId > lastMessageId) {
                         lastMessageId = latestMessageId;
-                        
+
                         // Clear existing messages
                         chatMessages.innerHTML = '';
-                        
+
                         // Add all messages in chronological order
                         data.messages.reverse().forEach(message => {
                             const messageElement = document.createElement('div');
                             messageElement.className = 'message';
                             messageElement.innerHTML = `
                                 <div class="message-header">
-                                    <span class="message-sender">${message.user.name}</span>
-                                    <span class="message-time">${new Date(message.created_at).toLocaleTimeString()}</span>
+                                    <span class="message-sender">${escapeHTML(message.user.name)}</span>
+                                    <span class="message-time">${escapeHTML(new Date(message.created_at).toLocaleTimeString())}</span>
                                 </div>
-                                <div class="message-content">${message.message}</div>
+                                <div class="message-content">${escapeHTML(message.message)}</div>
                             `;
                             chatMessages.appendChild(messageElement);
                         });
-                        
+
                         // Scroll to bottom
                         chatMessages.scrollTop = chatMessages.scrollHeight;
                     }
@@ -479,5 +486,7 @@
             }
         }
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html> 

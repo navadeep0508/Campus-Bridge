@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Campus Bridge</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -1100,22 +1099,26 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Myinfocam</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -1151,7 +1154,7 @@
                         <i class="fas fa-clock"></i>
                         <span>Timetable</span>
                     </a>
-                    <a href="{{ url_for('faculty_interaction') }}" class="nav-item">
+                    <a href="{{ url_for('faculty_chat') }}" class="nav-item">
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span>Faculty Interaction</span>
                     </a>
@@ -1176,7 +1179,7 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3>Community</h3>
                     <a href="#" class="nav-item">
@@ -1200,30 +1203,7 @@
             <div class="faculty-section">
                 <h2 class="section-title">Faculty Directory</h2>
                 <div class="faculty-grid">
-                    <!-- Faculty Cards -->
-                    <div class="faculty-card" onclick="showMessageForm(1)">
-                        <div class="faculty-info">
-                            <h3>Prof. John Doe</h3>
-                            <p class="faculty-designation">Professor - Computer Science</p>
-                            <p class="faculty-email">john.doe@university.edu</p>
-                        </div>
-                    </div>
-
-                    <div class="faculty-card" onclick="showMessageForm(2)">
-                        <div class="faculty-info">
-                            <h3>Dr. Jane Smith</h3>
-                            <p class="faculty-designation">Associate Professor - Data Science</p>
-                            <p class="faculty-email">jane.smith@university.edu</p>
-                        </div>
-                    </div>
-
-                    <div class="faculty-card" onclick="showMessageForm(3)">
-                        <div class="faculty-info">
-                            <h3>Prof. Mike Johnson</h3>
-                            <p class="faculty-designation">Professor - Software Engineering</p>
-                            <p class="faculty-email">mike.johnson@university.edu</p>
-                        </div>
-                    </div>
+                    <p class="empty-state">Faculty profiles will appear here when they are available in your campus directory.</p>
                 </div>
             </div>
 
@@ -1299,7 +1279,7 @@
         function submitMessage(event) {
             event.preventDefault();
             const formData = new FormData(event.target);
-            
+
             // Here you would typically send the form data to your backend
             // For now, we'll just show a success message
             alert('Message sent successfully!');
@@ -1314,5 +1294,7 @@
             }
         }
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Coding Assessments</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -626,22 +625,26 @@
             color: #F44336;
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -702,7 +705,7 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3><i class="fas fa-robot"></i> AI Assistant</h3>
                     <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
@@ -728,7 +731,7 @@
                 </div>
             </nav>
         </aside>
-  
+
         <!-- Main Content -->
         <main class="main-content">
             <div class="content-header">
@@ -756,11 +759,11 @@
         <div class="editor-content">
             <div class="editor-header">
                 <h2 id="problemTitle"></h2>
-                <button onclick="closeEditor()">
+                <button aria-label="Close code editor" onclick="closeEditor()" type="button>
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
+
             <div class="editor-body">
                 <div class="problem-section">
                     <div id="problemDescription"></div>
@@ -777,9 +780,10 @@
                         <p id="constraints"></p>
                     </div>
                 </div>
-                
+
                 <div class="code-section">
                     <div class="code-controls">
+                        <label class="sr-only" for="language">Programming language</label>
                         <select id="language" class="language-selector">
                             <option value="71">Python</option>
                             <option value="63">JavaScript</option>
@@ -788,7 +792,7 @@
                             <option value="54">C++</option>
                         </select>
                     </div>
-                    
+
                     <div class="code-editor-container">
                         <div class="editor-toolbar">
                             <div class="editor-status">
@@ -802,11 +806,11 @@
                                 </div>
                             </div>
                             <div class="editor-actions">
-                                <button class="editor-action-button" onclick="formatCode()">
+                                <button class="editor-action-button" onclick="formatCode()" type="button">
                                     <i class="fas fa-align-left"></i>
                                     Format
                                 </button>
-                                <button class="editor-action-button" onclick="toggleFullscreen()">
+                                <button class="editor-action-button" onclick="toggleFullscreen()" type="button">
                                     <i class="fas fa-expand"></i>
                                     Fullscreen
                                 </button>
@@ -814,24 +818,24 @@
                         </div>
                     <div id="editor" class="code-editor"></div>
                     </div>
-                    
+
                     <div class="input-output-section">
                         <div class="custom-input">
-                            <label>Custom Input</label>
+                            <label for="customInput">Custom input</label>
                             <textarea id="customInput" placeholder="Enter your test input here..."></textarea>
                         </div>
-                        
+
                         <div class="action-buttons">
-                            <button id="runButton" class="action-button run-button">
+                            <button id="runButton" class="action-button run-button" type="button">
                                 <i class="fas fa-play"></i>
                                 Run Code
                             </button>
-                            <button id="submitButton" class="action-button submit-button">
+                            <button id="submitButton" class="action-button submit-button" type="button">
                                 <i class="fas fa-paper-plane"></i>
                                 Submit Solution
                             </button>
                         </div>
-                        
+
                         <div class="output-container">
                             <h3>Output</h3>
                             <div id="output"></div>
@@ -890,13 +894,13 @@
         function openEditor(assessmentId) {
             currentAssessment = assessmentId;
             const assessment = assessments.find(a => a.id === assessmentId);
-            
+
             // Update problem details
             document.getElementById('problemTitle').textContent = assessment.title;
-            document.getElementById('problemDescription').innerHTML = `<p class="text-text-secondary">${assessment.description}</p>`;
+            document.getElementById('problemDescription').textContent = assessment.description || '';
             document.getElementById('inputFormat').textContent = assessment.input_format;
             document.getElementById('outputFormat').textContent = assessment.output_format;
-            
+
             // Show editor
             document.getElementById('editorModal').style.display = 'block';
         }
@@ -943,17 +947,17 @@
 
                 const data = await response.json();
                 if (data.error) {
-                    outputDiv.innerHTML = `Error: ${data.error}`;
+                    outputDiv.innerHTML = `Error: ${escapeHTML(data.error)}`;
                 } else {
                     outputDiv.innerHTML = `
-                        <div class="mb-2"><strong>Output:</strong> ${data.stdout || 'No output'}</div>
-                        ${data.stderr ? `<div class="text-red-500"><strong>Error:</strong> ${data.stderr}</div>` : ''}
-                        ${data.time ? `<div class="text-sm text-gray-400">Time: ${data.time}s</div>` : ''}
-                        ${data.memory ? `<div class="text-sm text-gray-400">Memory: ${data.memory}KB</div>` : ''}
+                        <div class="mb-2"><strong>Output:</strong> ${escapeHTML(data.stdout || 'No output')}</div>
+                        ${data.stderr ? `<div class="text-red-500"><strong>Error:</strong> ${escapeHTML(data.stderr)}</div>` : ''}
+                        ${data.time ? `<div class="text-sm text-gray-400">Time: ${escapeHTML(data.time)}s</div>` : ''}
+                        ${data.memory ? `<div class="text-sm text-gray-400">Memory: ${escapeHTML(data.memory)}KB</div>` : ''}
                     `;
                 }
             } catch (error) {
-                outputDiv.innerHTML = `Error: ${error.message}`;
+                outputDiv.innerHTML = `Error: ${escapeHTML(error.message)}`;
             }
         });
 
@@ -980,16 +984,16 @@
 
                 const data = await response.json();
                 if (data.error) {
-                    outputDiv.innerHTML = `Error: ${data.error}`;
+                    outputDiv.innerHTML = `Error: ${escapeHTML(data.error)}`;
                 } else {
                     let resultsHtml = '<div class="space-y-4">';
                     data.results.forEach((result, index) => {
                         resultsHtml += `
                             <div class="p-4 rounded ${result.passed ? 'bg-green-900' : 'bg-red-900'}">
                                 <h4 class="font-bold mb-2">Test Case ${index + 1}</h4>
-                                <p><strong>Input:</strong> ${result.input}</p>
-                                <p><strong>Expected:</strong> ${result.expected}</p>
-                                <p><strong>Actual:</strong> ${result.actual}</p>
+                                <p><strong>Input:</strong> ${escapeHTML(result.input)}</p>
+                                <p><strong>Expected:</strong> ${escapeHTML(result.expected)}</p>
+                                <p><strong>Actual:</strong> ${escapeHTML(result.actual)}</p>
                                 <p class="${result.passed ? 'text-green-400' : 'text-red-400'}">
                                     ${result.passed ? '✓ Passed' : '✗ Failed'}
                                 </p>
@@ -997,17 +1001,17 @@
                         `;
                     });
                     resultsHtml += '</div>';
-                    
+
                     if (data.all_passed) {
                         resultsHtml += `<div class="mt-4 p-4 bg-green-900 rounded">
                             <p class="text-green-400">All test cases passed! You earned ${data.points_earned} points!</p>
                         </div>`;
                     }
-                    
+
                     outputDiv.innerHTML = resultsHtml;
                 }
             } catch (error) {
-                outputDiv.innerHTML = `Error: ${error.message}`;
+                outputDiv.innerHTML = `Error: ${escapeHTML(error.message)}`;
             }
         });
 
@@ -1042,5 +1046,7 @@
         window.addEventListener('resize', handleResize);
         handleResize();
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

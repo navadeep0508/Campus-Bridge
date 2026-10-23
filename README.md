@@ -1,213 +1,47 @@
-## 🚀 Getting Started
-1. 🌐 Follow this link: [Campus Bridge Online](https://campus-bridge.onrender.com)
-                 **OR**
-1. 📦 Clone the repository: 
-```bash
-git clone https://github.com/navadeep0508/Campus-Bridge.git
-```
-2. 📦 Install dependencies: 
-```bash
-pip install -r requirements.txt
-```
-3. 🏃 Run the application: 
-```bash
-python app.py
-```
-4. 🖥️ Access the application at `http://10.11.11.62:5000/`
- ## 🔑 Login Credentials
+# Campus Bridge
 
+Campus Bridge is a Flask and SQLite learning portal for students, faculty, and campus administrators. It combines course resources, assignments, attendance, coding practice, assessments, code rooms, and campus chat in one responsive interface.
 
-### 🚀 Admin Access
-- **Email:** admin@gmail.com
-- **Password:** sunny
+Faculty can publish timetable sessions for assigned sections; students see only the sessions matching their semester and section. The coding leaderboard uses points earned through coding challenges and assessments.
 
-### 👨‍🏫 Faculty Access
-- **Email:** faculty@gmail.com
-- **Password:** sunny
-- **Faculty name:** john
+## Run locally
 
-### 👩‍🎓 Student Access 1
-- **Email:** 23102a040719@mbu.asia
-- **Password:** sunny
-- **Student Name:** sunny
+1. Use Python 3.9 or newer. Create a virtual environment and install dependencies:
 
-### 👩‍🎓 Student Access 2
-- **Email:** raghs@gmail.com
-- **Password:** sunny
+   ```powershell
+   py -m venv .venv
+   .venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   ```
 
-# 🎓 Campus Bridge - University Management System
+2. Copy `.env.example` to `.env` and set a unique `SECRET_KEY`. Third-party API keys can stay blank to disable those integrations.
+3. Start the server with `py app.py` and open `http://127.0.0.1:5000/`.
 
-## 📝 Project Title
-Campus Bridge - A Comprehensive University Management System
+By default, the app creates a local database at `DATABASE_PATH` or `campus_bridge.db` and fills its eight semester catalogs with starter course content. New databases still have no user accounts; administrators create faculty and student accounts in the application. The catalog is sample curriculum content, not an official university syllabus. To use Supabase, set both `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then apply [`supabase_schema.sql`](supabase_schema.sql) in the Supabase SQL editor. That script creates the catalog tables if needed and inserts missing starter courses; it is safe to reapply. Applying it is required for the content to be present in a deployed Supabase database. The service-role key must stay on the server and must never be added to browser code. For a disposable local demo database, set `SEED_DEMO_DATA=true` and `DEMO_PASSWORD` (at least 12 characters) before first launch. Seeded demo accounts share that password. Do not use demo seeding in production.
 
-## 🌍 Selected Domain
-Education Technology (EdTech) / University Management System
+## Optional integrations
 
-## 🧩 Problem Statement / Use Case
-The modern university ecosystem requires a centralized platform that can effectively manage academic activities, student-faculty interactions, and administrative tasks. Traditional systems often lack integration, leading to inefficiencies in communication, resource management, and academic tracking. 
+- `JUDGE0_API_KEY` enables code execution and coding-assessment grading.
+- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` select the Supabase database instead of local SQLite.
+- `COHERE_API_KEY` enables the in-app AI assistant, career recommendations, and code-review endpoint.
+- `COHERE_MODEL` selects the Cohere Chat model; it defaults to `command-a-plus-05-2026`.
+- `GEMINI_API_KEY` configures the standalone `CodeReviewBot` helper.
+- `COOKIE_SECURE=true` enables secure session cookies when serving over HTTPS.
 
-🎯 Key Challenges:
-- 🔗 Lack of integrated communication
-- 📊 Inefficient resource management
-- 📝 Fragmented academic tracking
+## Architecture
 
-🌟 Solution:
-A secure, role-based system where university administrators can manage student and faculty accounts while providing specialized tools for their academic needs.
+- `app.py` contains Flask routes, role checks, and integration workflows.
+- `db.py` selects Supabase when configured, otherwise initializes SQLite; a compatibility adapter keeps the existing route queries consistent.
+- `templates/` contains Jinja screens, shared layouts, and role navigation.
+- `static/css/` and `static/js/` contain the light design system and browser behavior.
+- `campus_bridge.db` is runtime state and is excluded from version control.
 
-## 🔍 Abstract / Problem Description
-Campus Bridge addresses the complex challenges of modern educational management by providing a comprehensive, integrated platform that streamlines academic processes and enhances communication between all stakeholders.
+## Security and deployment
 
-### 🚀 Admin Features
-- 👥 User Management
-  - 📝 Create and manage student accounts
-  - 📝 Create and manage faculty accounts
-  - 👀 View and track user activities
-- 📊 Dashboard Analytics
-  - 📈 View total students and faculty count
-  - 📊 Monitor attendance statistics
-  - 📈 Track course enrollment
-  - 📝 View recent activities
-- 🔧 System Management
-  - 📚 Manage academic departments
-  - 🔧 Configure system settings
-  - 📊 Monitor system usage
+Passwords use bcrypt. Protected routes verify the role from SQLite, and account creation is restricted to administrators. Store secrets in the deployment environment, use HTTPS, set a stable random `SECRET_KEY`, and back up the SQLite database. Third-party execution and AI features require API credentials.
 
-### 👨‍🏫 Faculty Features
-- 📚 Course Management
-  - 📝 Create and manage courses
-  - 📁 Upload course materials
-  - 👥 Track student enrollment
-- 👥 Student Management
-  - 📊 Track attendance
-  - 📝 Manage assignments
-  - 🕒 Timetable Management
-- 📝 Assessment Tools
-  - 📝 Create and grade assignments
-  - 📊 Conduct coding assessments
+For deployment, run behind a production WSGI server such as Gunicorn. SQLite requires persistent storage and a single application instance; Supabase supports a shared database across application instances.
 
-### 👩‍🎓 Student Features
-- 📚 Academic Tools
-  - 📁 Access course materials
-  - 📝 Submit assignments
-  - 📊 View grades and feedback
-  - 📈 Track academic progress
-  - 📊 View attendance records
-  - 🕒 Access timetable
+## License
 
-- 🌐 MyVerse (Personal Learning Space)
-  - 📊 Personalized dashboard
-  - 📈 Track learning progress
-  - 📁 Access learning resources
-  - 📆 View academic calendar
-  - 📝 Manage personal notes
-
-- 💻 Coding Environment
-  - 📊 Online Compiler
-    - 📚 Support for multiple languages (C, C++, Java, Python)
-    - 🔄 Real-time code execution
-    - 📝 Syntax highlighting
-    - 🚫 Error detection and debugging
-  - 📚 Code Collaboration Rooms
-    - 📱 Real-time code sharing
-    - 👥 Collaborative coding sessions
-    - 👫 Peer programming support
-  - 🤖 Code Review Bot
-    - 🤖 AI-powered code analysis
-    - 📝 Automated code review
-    - 📈 Best practices suggestions
-    - 📊 Performance optimization tips
-
-- 📚 Course Management
-  - 📚 My Courses
-    - 📊 View enrolled courses
-    - 📁 Access course materials
-    - 📈 Track course progress
-    - 📝 Submit assignments
-    - 📆 View course announcements
-  - 📝 Coding Assignments
-    - 📝 Submit coding solutions
-    - 📊 View assignment feedback
-    - 📈 Track submission status
-    - 📁 Access coding templates
-    - 📊 View grading criteria
-
-- 📱 Communication & Collaboration
-  - 💬 Chat with faculty
-  - 👥 Collaborate with peers
-  - 📁 Access shared resources
-  - 💬 Participate in discussions
-  - 📝 Share code snippets
-
-- 📊 Personal Dashboard
-  - 📊 View attendance statistics
-  - 📈 Track academic performance
-  - 🕒 Access timetable
-  - 📆 View upcoming deadlines
-  - 📈 Monitor course progress
-
-## 📈 Tech Stack Used
-- **Frontend:**
-  - 📚 HTML5, CSS3, JavaScript
-  - 📈 Bootstrap 5
-  - 📝 CodeMirror (for code editor)
-  - 📈 Font Awesome (for icons)
-  - 📊 Google Fonts (Poppins)
-
-- **Backend:**
-  - 🐍 Python
-  - 📈 Flask (Web Framework)
-  - 📊 Supabase(Database)
-
-- **API's Used:**
-  - 🤖 Cohere used for Code Review Bot
-  - 📊 judge0 user for online compiler
-
-- **Additional Tools:**
-  - 📈 Git (Version Control)
-  - 📊 VS Code (Development Environment)
-
-
-
-## 📝 Important Notes
-1. **Account Creation Policy:**
-   - 👥 Only administrators can create new student and faculty accounts
-   - 👩‍🎓 Students and faculty members cannot register themselves
-   - 📝 This ensures proper verification and data integrity
-
-2. **Security Features:**
-   - 🔒 Role-based access control
-   - 🔒 Secure password storage
-   - 🔒 Session management
-   - 🔒 Input validation and sanitization
-
-3. **Key Features:**
-   - 📚 Code collaboration rooms
-   - 📝 Assignment management
-   - 🕒 Timetable scheduling
-   - 📊 Academic tracking
-   - 👨‍🏫 Faculty-student communication
-   - 📁 Resource sharing
-
-## 📁 Project Structure
-```
-Campus-Bridge/
-├── static/
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── templates/
-│   ├── admin/
-│   ├── faculty/
-│   └── student/
-├── models/
-├── routes/
-├── config.py
-├── app.py
-└── README.md
-```
-
-## 🤝 Contributing
-This project is maintained by the university administration team. For any issues or suggestions, please contact the system administrator.
-
-## 📜 License
-This project is proprietary and confidential. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
+See [LICENSE](LICENSE).

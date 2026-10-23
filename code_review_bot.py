@@ -14,7 +14,7 @@ class CodeReviewBot:
         Initialize the CodeReviewBot with Google Gemini API configuration.
         """
         # Get API key from environment or use default
-        self.api_key = os.getenv("GEMINI_API_KEY", "AIzaSyDzD4_gH5GhvNrWEuYppxMV18rvsYW6tVg")
+        self.api_key = os.getenv("GEMINI_API_KEY", "").strip()
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
         
     def _make_api_request(self, prompt: str) -> Dict:
@@ -27,8 +27,11 @@ class CodeReviewBot:
         Returns:
             Dict: The API response
         """
+        if not self.api_key:
+            raise ValueError('Code review is not configured. Set GEMINI_API_KEY on the server.')
         headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'x-goog-api-key': self.api_key,
         }
         
         data = {
@@ -39,9 +42,10 @@ class CodeReviewBot:
         
         try:
             response = requests.post(
-                f"{self.base_url}?key={self.api_key}",
+                self.base_url,
                 headers=headers,
-                json=data
+                json=data,
+                timeout=20
             )
             response.raise_for_status()
             return response.json()
@@ -332,4 +336,4 @@ if __name__ == "__main__":
         
     except Exception as e:
         print(f"Error: {str(e)}")
-        print("Please check your API configuration and try again.") 
+        print("Please check your API configuration and try again.")

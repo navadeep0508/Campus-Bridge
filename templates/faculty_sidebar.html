@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard - Myinfocam</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        
+
             :root {
                 --sidebar-width: 250px;
                 --header-height: 60px;
@@ -23,25 +22,25 @@
                 --card-bg: rgba(255, 255, 255, 0.05);
                 --gradient-bg: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 35%, var(--accent-color) 100%);
             }
-    
+
             * {
                 margin: 0;
                 padding: 0;
                 box-sizing: border-box;
                 font-family: 'Poppins', sans-serif;
             }
-    
+
             body {
                 background: var(--gradient-bg);
                 color: var(--text-primary);
                 min-height: 100vh;
             }
-    
+
             .dashboard-container {
                 display: flex;
                 min-height: 100vh;
             }
-    
+
             /* Sidebar Styles */
             .sidebar {
                 width: var(--sidebar-width);
@@ -54,26 +53,26 @@
                 z-index: 1000;
                 border-right: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .sidebar.collapsed {
                 width: 60px;
             }
-    
+
             .sidebar.collapsed .sidebar-header h2,
             .sidebar.collapsed .nav-section h3,
             .sidebar.collapsed .nav-item span {
                 display: none;
             }
-    
+
             .sidebar.collapsed .nav-item {
                 padding: 0.8rem;
                 justify-content: center;
             }
-    
+
             .sidebar.collapsed .nav-item i {
                 margin-right: 0;
             }
-    
+
             .sidebar-toggle {
                 position: absolute;
                 right: -12px;
@@ -91,29 +90,29 @@
                 z-index: 1001;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             }
-    
+
             .sidebar-toggle:hover {
                 transform: scale(1.1);
             }
-    
+
             .sidebar-toggle i {
                 transition: transform 0.3s ease;
             }
-    
+
             .sidebar.collapsed .sidebar-toggle i {
                 transform: rotate(180deg);
             }
-    
+
             .sidebar-header {
                 padding: 1.5rem;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .sidebar-header h2 {
                 font-size: 1.5rem;
                 font-weight: 600;
             }
-    
+
             .menu-toggle {
                 display: none;
                 position: fixed;
@@ -127,19 +126,19 @@
                 border-radius: 5px;
                 cursor: pointer;
             }
-    
+
             .nav-section {
                 padding: 1.5rem;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .nav-section h3 {
                 color: #A0AEC0;
                 font-size: 0.8rem;
                 text-transform: uppercase;
                 margin-bottom: 1rem;
             }
-    
+
             .nav-item {
                 display: flex;
                 align-items: center;
@@ -151,25 +150,25 @@
                 transition: all 0.3s;
                 background: transparent;
             }
-    
+
             .nav-item:hover, .nav-item.active {
                 background: rgba(0, 212, 255, 0.1);
                 color: var(--accent-color);
             }
-    
+
             .nav-item i {
                 margin-right: 1rem;
                 width: 20px;
                 text-align: center;
             }
-    
+
             /* Main Content Styles */
             .main-content {
                 flex: 1;
                 margin-left: var(--sidebar-width);
                 transition: margin-left 0.3s ease;
             }
-    
+
             /* Top Navigation */
             .top-nav {
                 height: var(--header-height);
@@ -185,7 +184,7 @@
                 z-index: 100;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .search-bar {
                 display: flex;
                 align-items: center;
@@ -194,12 +193,12 @@
                 border-radius: 5px;
                 width: 300px;
             }
-    
+
             .search-bar i {
                 color: var(--text-secondary);
                 margin-right: 0.5rem;
             }
-    
+
             .search-bar input {
                 border: none;
                 background: none;
@@ -207,17 +206,17 @@
                 width: 100%;
                 color: var(--text-primary);
             }
-    
+
             .search-bar input::placeholder {
                 color: var(--text-secondary);
             }
-    
+
             .top-nav-actions {
                 display: flex;
                 align-items: center;
                 gap: 1.5rem;
             }
-    
+
             .notification-btn {
                 position: relative;
                 background: none;
@@ -225,7 +224,7 @@
                 color: var(--text-secondary);
                 cursor: pointer;
             }
-    
+
             .notification-badge {
                 position: absolute;
                 top: -5px;
@@ -236,38 +235,38 @@
                 padding: 0.2rem 0.4rem;
                 border-radius: 50%;
             }
-    
+
             .user-profile {
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
                 cursor: pointer;
             }
-    
+
             .user-profile img {
                 width: 32px;
                 height: 32px;
                 border-radius: 50%;
             }
-    
+
             /* Dashboard Content */
             .dashboard-content {
                 padding: 2rem;
             }
-    
+
             /* Student Profile Styles */
             .student-profile {
                 display: flex;
                 flex-direction: column;
                 gap: 2rem;
             }
-    
+
             .profile-header {
                 display: flex;
                 align-items: center;
                 gap: 2rem;
             }
-    
+
             .profile-photo {
                 width: 180px;
                 height: 180px;
@@ -276,7 +275,7 @@
                 border: 3px solid var(--accent-color);
                 position: relative;
             }
-    
+
             .profile-photo-edit {
                 position: absolute;
                 bottom: 10px;
@@ -293,40 +292,40 @@
                 transition: all 0.3s ease;
                 border: 2px solid var(--primary-color);
             }
-    
+
             .profile-photo-edit:hover {
                 transform: scale(1.1);
                 background: var(--primary-color);
                 color: var(--accent-color);
             }
-    
+
             .profile-photo-container {
                 position: relative;
                 display: inline-block;
             }
-    
+
             .profile-info h1 {
                 font-size: 2.5rem;
                 margin-bottom: 0.5rem;
             }
-    
+
             .student-id {
                 color: var(--text-secondary);
                 font-size: 1.1rem;
             }
-    
+
             .student-details {
                 display: flex;
                 flex-direction: column;
                 gap: 2rem;
             }
-    
+
             .detail-group {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
                 gap: 2rem;
             }
-    
+
             .detail-item {
                 display: flex;
                 align-items: flex-start;
@@ -336,44 +335,44 @@
                 border-radius: 10px;
                 border: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .detail-item i {
                 font-size: 1.5rem;
                 color: var(--accent-color);
                 margin-top: 0.3rem;
             }
-    
+
             .detail-item h3 {
                 font-size: 0.9rem;
                 color: var(--text-secondary);
                 margin-bottom: 0.5rem;
             }
-    
+
             .detail-item p {
                 font-size: 1.1rem;
                 margin: 0;
             }
-    
+
             .detail-item.address {
                 grid-column: 1 / -1;
             }
-    
+
             @media (max-width: 768px) {
                 .profile-header {
                     flex-direction: column;
                     text-align: center;
                 }
-    
+
                 .profile-photo {
                     width: 100px;
                     height: 100px;
                 }
-    
+
                 .detail-group {
                     grid-template-columns: 1fr;
                 }
             }
-    
+
             /* Welcome Section Styles */
             .welcome-section {
                 margin-bottom: 2rem;
@@ -387,7 +386,7 @@
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 border: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .welcome-section::before {
                 content: '';
                 position: absolute;
@@ -399,30 +398,30 @@
                 opacity: 0.1;
                 animation: float 20s linear infinite;
             }
-    
+
             .welcome-content {
                 position: relative;
                 z-index: 1;
             }
-    
+
             .welcome-section h1 {
                 font-size: 2.5rem;
                 margin-bottom: 0.5rem;
                 font-weight: 600;
             }
-    
+
             .welcome-section p {
                 font-size: 1.1rem;
                 opacity: 0.9;
                 margin-bottom: 1.5rem;
             }
-    
+
             .welcome-actions {
                 display: flex;
                 gap: 1rem;
                 margin-top: 1.5rem;
             }
-    
+
             .welcome-btn {
                 padding: 0.8rem 1.5rem;
                 border-radius: 50px;
@@ -434,23 +433,23 @@
                 align-items: center;
                 gap: 0.5rem;
             }
-    
+
             .welcome-btn-primary {
                 background: var(--accent-color);
                 color: var(--primary-color);
             }
-    
+
             .welcome-btn-secondary {
                 background: rgba(0, 212, 255, 0.1);
                 color: var(--accent-color);
                 border: 1px solid var(--accent-color);
             }
-    
+
             .welcome-btn:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             }
-    
+
             .welcome-stats {
                 display: flex;
                 gap: 2rem;
@@ -458,13 +457,13 @@
                 padding-top: 2rem;
                 border-top: 1px solid rgba(255, 255, 255, 0.2);
             }
-    
+
             .welcome-stat {
                 display: flex;
                 align-items: center;
                 gap: 0.8rem;
             }
-    
+
             .welcome-stat-icon {
                 width: 40px;
                 height: 40px;
@@ -475,32 +474,32 @@
                 justify-content: center;
                 color: var(--accent-color);
             }
-    
+
             .welcome-stat-info h3 {
                 font-size: 1.2rem;
                 font-weight: 600;
                 margin-bottom: 0.2rem;
             }
-    
+
             .welcome-stat-info p {
                 font-size: 0.9rem;
                 opacity: 0.8;
                 margin: 0;
             }
-    
+
             @keyframes float {
                 0% { transform: translateY(0); }
                 50% { transform: translateY(-20px); }
                 100% { transform: translateY(0); }
             }
-    
+
             /* Quick Stats */
             .quick-stats {
                 display: flex;
                 gap: 1rem;
                 margin-bottom: 2rem;
             }
-    
+
             .stat-card {
                 flex: 1;
                 background: var(--card-bg);
@@ -510,7 +509,7 @@
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 border: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .stat-icon {
                 width: 40px;
                 height: 40px;
@@ -522,54 +521,54 @@
                 margin-bottom: 1rem;
                 color: var(--accent-color);
             }
-    
+
             .stat-info {
                 text-align: center;
             }
-    
+
             .stat-info h3 {
                 font-size: 1.2rem;
                 font-weight: 600;
                 margin-bottom: 0.5rem;
             }
-    
+
             .stat-info p {
                 font-size: 0.9rem;
                 opacity: 0.8;
             }
-    
+
             /* Today's Schedule */
             .schedule-section {
                 margin-bottom: 2rem;
             }
-    
+
             .section-header {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 margin-bottom: 1rem;
             }
-    
+
             .section-header h2 {
                 font-size: 1.5rem;
                 font-weight: 600;
             }
-    
+
             .view-all {
                 color: var(--accent-color);
                 text-decoration: none;
                 transition: color 0.3s;
             }
-    
+
             .view-all:hover {
                 color: var(--text-primary);
             }
-    
+
             .schedule-cards {
                 display: flex;
                 gap: 1rem;
             }
-    
+
             .schedule-card {
                 flex: 1;
                 background: var(--card-bg);
@@ -579,28 +578,28 @@
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 border: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .schedule-time {
                 font-size: 0.9rem;
                 opacity: 0.8;
                 margin-bottom: 0.5rem;
             }
-    
+
             .schedule-details {
                 text-align: center;
             }
-    
+
             .schedule-details h3 {
                 font-size: 1.2rem;
                 font-weight: 600;
                 margin-bottom: 0.5rem;
             }
-    
+
             .schedule-details p {
                 font-size: 0.9rem;
                 opacity: 0.8;
             }
-    
+
             .schedule-status {
                 font-size: 0.8rem;
                 font-weight: 500;
@@ -610,33 +609,33 @@
                 background: rgba(0, 212, 255, 0.1);
                 color: var(--accent-color);
             }
-    
+
             .schedule-status.upcoming {
                 background: var(--bg-light);
                 color: var(--text-secondary);
             }
-    
+
             .schedule-status.in-progress {
                 background: var(--bg-light);
                 color: var(--primary-color);
             }
-    
+
             .schedule-status.later {
                 background: var(--bg-light);
                 color: var(--text-secondary);
             }
-    
+
             /* Recent Activity */
             .activity-section {
                 margin-bottom: 2rem;
             }
-    
+
             .activity-feed {
                 display: flex;
                 flex-direction: column;
                 gap: 1rem;
             }
-    
+
             .activity-item {
                 display: flex;
                 align-items: center;
@@ -648,7 +647,7 @@
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 border: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .activity-icon {
                 width: 40px;
                 height: 40px;
@@ -659,100 +658,100 @@
                 justify-content: center;
                 color: var(--accent-color);
             }
-    
+
             .activity-content {
                 text-align: left;
             }
-    
+
             .activity-content p {
                 font-size: 0.9rem;
                 opacity: 0.8;
                 margin: 0;
             }
-    
+
             .activity-time {
                 font-size: 0.8rem;
                 opacity: 0.8;
             }
-    
+
             /* Responsive Design */
             @media (max-width: 768px) {
                 .menu-toggle {
                     display: block;
                 }
-    
+
                 .sidebar {
                     transform: translateX(-100%);
                 }
-    
+
                 .sidebar.active {
                     transform: translateX(0);
                 }
-    
+
                 .main-content {
                     margin-left: 0;
                 }
-    
+
                 .search-bar {
                     width: 200px;
                 }
-    
+
                 .welcome-section {
                     padding: 2rem 1.5rem;
                 }
-    
+
                 .welcome-section h1 {
                     font-size: 2rem;
                 }
-    
+
                 .welcome-actions {
                     flex-direction: column;
                 }
-    
+
                 .welcome-stats {
                     flex-wrap: wrap;
                     gap: 1rem;
                 }
             }
-    
+
             /* Footer */
             .footer {
                 background: rgba(2, 0, 36, 0.8);
                 backdrop-filter: blur(10px);
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
-    
+
             .footer-links a {
                 color: var(--text-secondary);
             }
-    
+
             .footer-links a:hover {
                 color: var(--accent-color);
             }
-    
+
             /* Scrollbar */
             ::-webkit-scrollbar {
                 width: 8px;
             }
-    
+
             ::-webkit-scrollbar-track {
                 background: rgba(2, 0, 36, 0.5);
             }
-    
+
             ::-webkit-scrollbar-thumb {
                 background: var(--accent-color);
                 border-radius: 4px;
             }
-    
+
             ::-webkit-scrollbar-thumb:hover {
                 background: rgba(0, 212, 255, 0.8);
             }
-    
+
             /* Sidebar Notification Badge */
             .nav-item {
                 position: relative;
             }
-    
+
             .nav-item .notification-badge {
                 position: absolute;
                 right: 1rem;
@@ -769,52 +768,56 @@
                 align-items: center;
                 justify-content: center;
             }
-    
+
             /* Sidebar Section Spacing */
             .nav-section {
                 margin-bottom: 1.5rem;
             }
-    
+
             .nav-section:last-child {
                 margin-bottom: 0;
             }
-    
+
             /* Sidebar Scroll */
             .sidebar-nav {
                 height: calc(100vh - 80px);
                 overflow-y: auto;
                 padding-right: 0.5rem;
             }
-    
+
             .sidebar-nav::-webkit-scrollbar {
                 width: 4px;
             }
-    
+
             .sidebar-nav::-webkit-scrollbar-track {
                 background: transparent;
             }
-    
+
             .sidebar-nav::-webkit-scrollbar-thumb {
                 background: var(--accent-color);
                 border-radius: 2px;
             }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Myinfocam</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -854,7 +857,7 @@
             </nav>
         </aside>
 
-        
+
     </div>
 
     <script>
@@ -894,5 +897,7 @@
             }
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html> 

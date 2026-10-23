@@ -338,22 +338,27 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 <body>
-    <button class="menu-toggle" id="menuToggle">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="sidebar">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -414,7 +419,7 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3><i class="fas fa-robot"></i> AI Assistant</h3>
                     <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
@@ -486,7 +491,7 @@
                         <textarea id="custom-input" class="mt-1 block w-full rounded p-2 bg-card-bg text-text-primary border border-bg-light" rows="4"></textarea>
                     </div>
                     {% endif %}
-                    <button id="submit" class="submit-btn font-bold py-2 px-4 rounded w-full">
+                    <button id="submit" class="submit-btn font-bold py-2 px-4 rounded w-full" type="button">
                         {{ 'Submit Solution' if problem else 'Run Code' }}
                     </button>
                     <div id="output" class="mt-4 output-container p-4 rounded h-32 overflow-y-auto bg-card-bg border border-bg-light"></div>
@@ -539,7 +544,7 @@
             const finalResultDiv = document.getElementById('final-result');
 
             outputDiv.innerHTML = 'Processing...';
-            
+
             {% if problem %}
             try {
                 const response = await fetch('/submit', {
@@ -555,9 +560,9 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.error) {
-                    outputDiv.innerHTML = `Error: ${data.error}`;
+                    outputDiv.innerHTML = `Error: ${escapeHTML(data.error)}`;
                     return;
                 }
 
@@ -572,10 +577,10 @@
                             </span>
                         </div>
                         <div class="space-y-1 text-sm">
-                            <div><span class="text-accent-color">Input:</span> ${result.input}</div>
-                            <div><span class="text-accent-color">Expected:</span> ${result.expected}</div>
-                            <div><span class="text-accent-color">Output:</span> ${result.actual || 'No output'}</div>
-                            ${result.error ? `<div class="text-red-500">Error: ${result.error}</div>` : ''}
+                            <div><span class="text-accent-color">Input:</span> ${escapeHTML(result.input)}</div>
+                            <div><span class="text-accent-color">Expected:</span> ${escapeHTML(result.expected)}</div>
+                            <div><span class="text-accent-color">Output:</span> ${escapeHTML(result.actual || 'No output')}</div>
+                            ${result.error ? `<div class="text-red-500">Error: ${escapeHTML(result.error)}</div>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -586,7 +591,7 @@
 
                 outputDiv.innerHTML = 'Submission processed. Check the test results below.';
             } catch (error) {
-                outputDiv.innerHTML = `Error: ${error.message}`;
+                outputDiv.innerHTML = `Error: ${escapeHTML(error.message)}`;
             }
             {% else %}
             try {
@@ -604,17 +609,17 @@
 
                 const data = await response.json();
                 if (data.error) {
-                    outputDiv.innerHTML = `Error: ${data.error}`;
+                    outputDiv.innerHTML = `Error: ${escapeHTML(data.error)}`;
                 } else {
                     outputDiv.innerHTML = `
-                        <div class="mb-2"><strong>Output:</strong> ${data.stdout || 'No output'}</div>
-                        ${data.stderr ? `<div class="text-red-500"><strong>Error:</strong> ${data.stderr}</div>` : ''}
-                        ${data.time ? `<div class="text-sm text-gray-400">Time: ${data.time}s</div>` : ''}
-                        ${data.memory ? `<div class="text-sm text-gray-400">Memory: ${data.memory}KB</div>` : ''}
+                        <div class="mb-2"><strong>Output:</strong> ${escapeHTML(data.stdout || 'No output')}</div>
+                        ${data.stderr ? `<div class="text-red-500"><strong>Error:</strong> ${escapeHTML(data.stderr)}</div>` : ''}
+                        ${data.time ? `<div class="text-sm text-gray-400">Time: ${escapeHTML(data.time)}s</div>` : ''}
+                        ${data.memory ? `<div class="text-sm text-gray-400">Memory: ${escapeHTML(data.memory)}KB</div>` : ''}
                     `;
                 }
             } catch (error) {
-                outputDiv.innerHTML = `Error: ${error.message}`;
+                outputDiv.innerHTML = `Error: ${escapeHTML(error.message)}`;
             }
             {% endif %}
         });
@@ -655,5 +660,7 @@
             }
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

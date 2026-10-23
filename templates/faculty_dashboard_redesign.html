@@ -1,0 +1,17 @@
+{% extends "layouts/app.html" %}
+{% block title %}Faculty dashboard — Campus Bridge{% endblock %}
+{% block topbar_title %}Faculty dashboard{% endblock %}
+{% block topbar_subtitle %}<div class="topbar-subtitle">Your teaching workspace</div>{% endblock %}
+{% block content %}
+<section class="page-header dashboard-welcome"><div><span class="page-kicker">Faculty workspace</span><h1 class="page-title">Welcome back{% if faculty and faculty.name %}, {{ faculty.name|e }}{% endif %}</h1><p class="page-desc">Your classes, student support, and assessment tools are ready when you are.</p></div></section>
+{% if faculty and (faculty.subject or faculty.branch or faculty.roll_number) %}<section class="panel faculty-profile"><div class="panel-body flex items-center gap-4"><span class="avatar avatar-lg avatar-initials"><i data-lucide="graduation-cap"></i></span><div><h2 class="section-title">Faculty profile</h2><p class="section-desc">{% if faculty.subject %}{{ faculty.subject|e }}{% endif %}{% if faculty.subject and faculty.branch %} · {% endif %}{% if faculty.branch %}{{ faculty.branch|e }}{% endif %}{% if faculty.roll_number %}<span class="text-muted"> · {{ faculty.roll_number|e }}</span>{% endif %}</p></div></div></section>{% endif %}
+<section class="section"><div class="section-header"><div><h2 class="section-title">Teaching tools</h2><p class="section-desc">Manage the everyday work of your classes.</p></div></div>
+  <div class="action-grid dashboard-actions">
+    <a class="action-tile" href="{{ url_for('faculty_assignments') }}"><i data-lucide="clipboard-list"></i><span>Assignments</span><small>Create and review course assignments</small></a>
+    <a class="action-tile" href="{{ url_for('faculty_coding_assessment') }}"><i data-lucide="file-code-2"></i><span>Coding assessments</span><small>Prepare programming assessments</small></a>
+    <a class="action-tile" href="{{ url_for('faculty_attendance') }}"><i data-lucide="calendar-check"></i><span>Attendance</span><small>Record and review class attendance</small></a>
+    <a class="action-tile" href="{{ url_for('timetable_faculty') }}"><i data-lucide="calendar-days"></i><span>Timetable</span><small>Review your teaching schedule</small></a>
+    <a class="action-tile" href="{{ url_for('faculty_chat') }}"><i data-lucide="messages-square"></i><span>Student chat</span><small>Stay in touch with students</small></a>
+  </div>
+</section>
+{% endblock %}

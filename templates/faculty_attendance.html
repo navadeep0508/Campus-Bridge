@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard - Attendance</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -305,6 +304,10 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <div class="dashboard-container">
@@ -313,7 +316,7 @@
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -363,7 +366,7 @@
             <header class="top-nav">
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search students...">
+                    <input type="text" aria-label="Search students" placeholder="Search students...">
                 </div>
             </header>
 
@@ -404,7 +407,7 @@
                     </table>
                 </div>
 
-                <button id="saveAttendance" class="save-button">
+                <button id="saveAttendance" class="save-button" type="button">
                     <i class="fas fa-save"></i>
                     Save Attendance
                 </button>
@@ -442,17 +445,14 @@
             // Function to create student row
             function createStudentRow(student) {
                 const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${student.roll_number || 'N/A'}</td>
-                    <td>${student.name}</td>
-                    <td>${student.attendance || '0/0'}</td>
-                    <td>
-                        <select class="status-select" data-student-id="${student.id}">
-                            <option value="present">Present</option>
-                            <option value="absent">Absent</option>
-                        </select>
-                    </td>
-                `;
+                const cells = [student.roll_number || 'N/A', student.name || '', student.attendance || '0/0'];
+                cells.forEach(value => { const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell); });
+                const actionCell = document.createElement('td');
+                const select = document.createElement('select');
+                select.className = 'status-select';
+                select.dataset.studentId = String(student.id);
+                select.innerHTML = '<option value="present">Present</option><option value="absent">Absent</option>';
+                actionCell.appendChild(select); row.appendChild(actionCell);
                 return row;
             }
 
@@ -569,5 +569,7 @@
             });
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html> 

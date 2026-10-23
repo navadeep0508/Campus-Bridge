@@ -486,12 +486,17 @@
             letter-spacing: 0.5px;
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 <body>
     <div class="admin-panel">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
@@ -554,7 +559,7 @@
                         <span>Coding Assignment</span>
                     </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <h3>AI Code Assistant</h3>
                     <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">
@@ -587,9 +592,9 @@
             <header class="top-nav">
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search courses, topics, or code problems...">
+                    <input type="text" aria-label="Search courses, topics, or code problems" placeholder="Search courses, topics, or code problems...">
                 </div>
-                
+
                 <div class="top-nav-actions">
                     <a href="{{ url_for('home') }}" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>
@@ -614,13 +619,13 @@
                             <option value="cpp">C++</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="codeInput">Enter Code:</label>
                         <textarea id="codeInput" class="code-editor" rows="15" placeholder="Paste your code here..."></textarea>
                     </div>
 
-                    <button id="analyzeBtn" class="btn-primary">Analyze Code</button>
+                    <button id="analyzeBtn" class="btn-primary" type="button">Analyze Code</button>
                 </div>
 
                 <!-- Results Section -->
@@ -666,7 +671,7 @@
             const analyzeBtn = document.getElementById('analyzeBtn');
             const loadingIndicator = document.querySelector('.loading-indicator');
             const analysisResults = document.getElementById('analysisResults');
-            
+
             // Initialize code highlighting
             hljs.highlightAll();
 
@@ -730,5 +735,7 @@
             }
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

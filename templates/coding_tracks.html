@@ -1,12 +1,12 @@
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
-    <button class="sidebar-toggle" id="sidebarToggle">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
         <i class="fas fa-chevron-left"></i>
     </button>
     <div class="sidebar-header">
         <h2>Campus Bridge</h2>
     </div>
-    
+
     <nav class="sidebar-nav">
         <div class="nav-section">
             <h3>Main</h3>
@@ -67,7 +67,7 @@
                 <span>Coding Assignment</span>
             </a>
         </div>
-        
+
         <div class="nav-section">
             <h3><i class="fas fa-robot"></i> AI Assistant</h3>
             <a href="{{ url_for('ai_code_assistant') }}" class="nav-item">

@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+{% block title %}Campus Bridge — Your campus, connected{% endblock %}
+{% block body_class %}marketing-page{% endblock %}
+{% block body %}
+<header class="public-nav">
+  <a class="sidebar-brand" href="{{ url_for('home') }}" aria-label="Campus Bridge home"><span class="brand-mark"><i data-lucide="graduation-cap"></i></span><span class="brand-text">Campus Bridge</span></a>
+  <nav class="public-nav-links" aria-label="Main navigation"><a class="hide-sm" href="#learning">Learning</a><a class="hide-sm" href="#community">Community</a><a href="{{ url_for('login') }}" class="btn btn-secondary">Sign in</a></nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="page-kicker">A clearer way through campus life</span>
+        <h1>Your learning and campus community, in one place.</h1>
+        <p>Campus Bridge brings courses, assignments, attendance, and coding practice together—so you can spend less time finding your next step.</p>
+        <div class="hero-actions"><a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Sign in to Campus Bridge <i data-lucide="arrow-right"></i></a><a href="#learning" class="btn btn-secondary btn-lg">Explore the platform</a></div>
+        <p class="text-sm text-muted mt-4">Access is provided by your institution.</p>
+      </div>
+      <div class="hero-preview" aria-label="Campus Bridge learning tools">
+        <div class="preview-chrome"><span class="preview-dot"></span><span class="preview-dot"></span><span class="preview-dot"></span><span class="text-sm text-muted" style="margin-left:.5rem">Your learning space</span></div>
+        <div class="preview-body">
+          <div class="flex items-center justify-between gap-3"><div><div class="text-sm text-muted">STUDENT WORKSPACE</div><h2 style="margin-top:.35rem">Everything in reach</h2></div><span class="brand-mark"><i data-lucide="panels-top-left"></i></span></div>
+          <ul class="list-plain" style="margin-top:1rem">
+            <li class="list-row"><span class="flex items-center gap-3"><i data-lucide="book-open"></i> Courses and resources</span><i data-lucide="arrow-up-right"></i></li>
+            <li class="list-row"><span class="flex items-center gap-3"><i data-lucide="clipboard-check"></i> Assignments and feedback</span><i data-lucide="arrow-up-right"></i></li>
+            <li class="list-row"><span class="flex items-center gap-3"><i data-lucide="code-2"></i> Coding practice</span><i data-lucide="arrow-up-right"></i></li>
+            <li class="list-row"><span class="flex items-center gap-3"><i data-lucide="messages-square"></i> Faculty and peer connection</span><i data-lucide="arrow-up-right"></i></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="feature-band" id="learning">
+    <div class="page-header"><span class="page-kicker">Built around everyday learning</span><h2 class="page-title">The tools you need, close at hand</h2><p class="page-desc">Move from classwork to practice to feedback without losing your place.</p></div>
+    <div class="feature-grid">
+      <article class="feature-item"><span class="feature-icon"><i data-lucide="book-open-check"></i></span><h3>Keep coursework moving</h3><p>Find courses, assignments, attendance, and your timetable in one consistent space.</p></article>
+      <article class="feature-item"><span class="feature-icon"><i data-lucide="code-xml"></i></span><h3>Practice with purpose</h3><p>Work through coding tracks, run code, and collaborate in shared code rooms.</p></article>
+      <article class="feature-item" id="community"><span class="feature-icon"><i data-lucide="messages-square"></i></span><h3>Stay connected</h3><p>Reach faculty, share progress, and get support from your campus community.</p></article>
+    </div>
+  </section>
+  <section class="feature-band" style="background:#fff"><div class="hero-actions" style="max-width:1120px;margin:0 auto;align-items:center;justify-content:space-between"><div><span class="page-kicker">Ready when you are</span><h2 class="page-title">Pick up where your campus day begins.</h2></div><a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Continue to sign in <i data-lucide="arrow-right"></i></a></div></section>
+</main>
+<footer class="public-footer">Campus Bridge <span aria-hidden="true">·</span> A connected learning space for your campus</footer>
+{% endblock %}

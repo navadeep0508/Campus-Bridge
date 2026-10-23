@@ -626,7 +626,7 @@
             .hero h1 {
                 font-size: 2.5rem;
             }
-            
+
             .hero p {
                 font-size: 1.2rem;
             }
@@ -650,7 +650,7 @@
                 color: var(--text-light);
                 font-weight: 600;
             }
-            
+
             .navbar-links a:hover {
                 color: var(--accent-color);
                 background: var(--highlight-bg);
@@ -741,6 +741,11 @@
             }
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 <body>
     <!-- Navbar -->
@@ -749,7 +754,7 @@
             <i class="fas fa-graduation-cap"></i>
             Campus Bridge
         </a>
-        <button class="mobile-menu-btn">
+        <button class="mobile-menu-btn" type="button">
             <i class="fas fa-bars"></i>
         </button>
         <div class="navbar-links">
@@ -991,16 +996,16 @@
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
                 if (targetId === '#') return; // Skip if it's just a hash
-                
+
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
                     // Close mobile menu if open
                     navbarLinks.classList.remove('active');
-                    
+
                     // Calculate the offset considering the fixed navbar
                     const navbarHeight = document.querySelector('.navbar').offsetHeight;
                     const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-                    
+
                     window.scrollTo({
                         top: targetPosition,
                         behavior: 'smooth'
@@ -1033,5 +1038,7 @@
             });
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

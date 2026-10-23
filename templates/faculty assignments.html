@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Assignments - Campus Bridge</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -789,18 +788,22 @@
             margin-right: 1rem;
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <div class="sidebar-header">
                 <h2>Campus Bridge</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -872,7 +875,7 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1 class="page-title">Faculty Assignments</h1>
-                <button class="create-btn" onclick="openModal()">
+                <button class="create-btn" onclick="openModal()" type="button">
                     <i class="fas fa-plus"></i>
                     Create Assignment
                 </button>
@@ -883,7 +886,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="modal-title">Create New Assignment</h2>
-                        <button class="close-btn" onclick="closeModal()">
+                        <button class="close-btn" aria-label="Close assignment dialog" onclick="closeModal()" type="button">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -946,7 +949,7 @@
                             <h2 id="submissionAssignmentTitle">Assignment Title</h2>
                             <p id="submissionAssignmentDate">Due Date: </p>
                         </div>
-                        <button class="close-btn" onclick="closeSubmissionsModal()">
+                        <button class="close-btn" aria-label="Close submissions dialog" onclick="closeSubmissionsModal()" type="button">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -975,7 +978,7 @@
                     </div>
 
                     <div class="filter-section">
-                        <div class="filter-label">Filter Submissions:</div>
+                        <label class="filter-label" for="submissionModalFilter">Filter submissions</label>
                         <div class="filter-dropdown">
                             <select id="submissionModalFilter" onchange="filterModalSubmissions()">
                                 <option value="all">All Submissions</option>
@@ -1009,7 +1012,7 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const mainContent = document.querySelector('.main-content');
-        
+
         // Function to handle sidebar state
         function updateSidebarState(isCollapsed) {
             if (isCollapsed) {
@@ -1094,7 +1097,7 @@
         // Create Assignment
         function createAssignment(event) {
             event.preventDefault();
-            
+
             const subject = document.getElementById('subject').value;
             const year = document.getElementById('year').value;
             const branch = document.getElementById('branch').value;
@@ -1125,22 +1128,22 @@
                 const card = document.createElement('div');
                 card.className = 'assignment-card';
                 card.innerHTML = `
-                    <h3 class="assignment-subject">${subject}</h3>
-                    <p class="assignment-description">${description}</p>
+                    <h3 class="assignment-subject">${escapeHTML(subject)}</h3>
+                    <p class="assignment-description">${escapeHTML(description)}</p>
                     <div class="assignment-meta">
                         <div class="deadline">
                             <i class="fas fa-clock"></i>
-                            <span>Due: ${formatDeadline(deadline)}</span>
+                            <span>Due: ${escapeHTML(formatDeadline(deadline))}</span>
                         </div>
                         <div class="assignment-info">
-                            <span class="badge">${year}${getYearSuffix(year)} Year</span>
-                            <span class="badge">${branch}</span>
+                            <span class="badge">${escapeHTML(year)}${getYearSuffix(year)} Year</span>
+                            <span class="badge">${escapeHTML(branch)}</span>
                         </div>
                         <div class="action-buttons">
-                            <button class="action-btn" onclick="editAssignment(this)">
+                            <button class="action-btn" onclick="editAssignment(this)" type="button">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="action-btn" onclick="deleteAssignment(this)">
+                            <button class="action-btn" onclick="deleteAssignment(this)" type="button">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1208,7 +1211,7 @@
                 const deadline = new Date(card.querySelector('.deadline span').textContent.replace('Due: ', ''));
                 return deadline > new Date();
             }).length;
-            
+
             document.getElementById('totalAssignments').textContent = totalAssignments;
             document.getElementById('activeAssignments').textContent = activeAssignments;
             document.getElementById('submittedAssignments').textContent = document.querySelectorAll('.status-submitted').length;
@@ -1224,7 +1227,7 @@
 
             // Update modal content
             document.getElementById('submissionAssignmentTitle').textContent = title;
-            document.getElementById('submissionAssignmentDate').textContent = `Due Date: ${deadline}`;
+            document.getElementById('submissionAssignmentDate').textContent = `Due Date: ${escapeHTML(deadline)}`;
             document.getElementById('submissionAssignmentDesc').textContent = description;
 
             // Fetch submissions from the server
@@ -1242,13 +1245,18 @@
                     data.submissions.forEach(submission => {
                         const row = document.createElement('tr');
                         const status = new Date(deadline) < new Date(submission.created_at) ? 'late' : 'submitted';
-                        
+                        let reviewUrl = '';
+                        try {
+                            const parsedUrl = new URL(submission.link, window.location.origin);
+                            if (['http:', 'https:'].includes(parsedUrl.protocol)) reviewUrl = parsedUrl.href;
+                        } catch (_) {}
+
                         row.innerHTML = `
-                            <td>${submission.name}</td>
-                            <td>${new Date(submission.created_at).toLocaleString()}</td>
-                            <td><span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></td>
+                            <td>${escapeHTML(submission.name)}</td>
+                            <td>${escapeHTML(new Date(submission.created_at).toLocaleString())}</td>
+                            <td><span class="status-badge status-${status}">${escapeHTML(status.charAt(0).toUpperCase() + status.slice(1))}</span></td>
                             <td>
-                                <a href="${submission.link}" target="_blank" class="action-btn review">
+                                <a href="${escapeHTML(reviewUrl)}" target="_blank" rel="noopener noreferrer" class="action-btn review" ${reviewUrl ? '' : 'aria-disabled="true"'}>
                                     <i class="fas fa-eye"></i> View Submission
                                 </a>
                             </td>
@@ -1284,7 +1292,7 @@
         function filterModalSubmissions() {
             const filter = document.getElementById('submissionModalFilter').value;
             const rows = document.querySelectorAll('#submissionsModalTableBody tr');
-            
+
             rows.forEach(row => {
                 const status = row.querySelector('.status-badge').classList;
                 if (filter === 'all' || status.contains(`status-${filter}`)) {
@@ -1328,7 +1336,7 @@
                         const card = document.createElement('div');
                         card.className = 'assignment-card';
                         card.dataset.assignmentId = assignment.id;
-                        
+
                         const deadline = new Date(assignment.deadline).toLocaleString('en-US', {
                             year: 'numeric',
                             month: 'short',
@@ -1338,22 +1346,22 @@
                         });
 
                         card.innerHTML = `
-                            <h3 class="assignment-subject">${assignment.subject}</h3>
-                            <p class="assignment-description">${assignment.description}</p>
+                            <h3 class="assignment-subject">${escapeHTML(assignment.subject)}</h3>
+                            <p class="assignment-description">${escapeHTML(assignment.description)}</p>
                             <div class="assignment-meta">
                                 <div class="deadline">
                                     <i class="fas fa-clock"></i>
-                                    <span>Due: ${deadline}</span>
+                                    <span>Due: ${escapeHTML(deadline)}</span>
                                 </div>
                                 <div class="assignment-info">
-                                    <span class="badge">${assignment.year}${getYearSuffix(assignment.year)} Year</span>
-                                    <span class="badge">${assignment.branch}</span>
+                                    <span class="badge">${escapeHTML(assignment.year)}${getYearSuffix(assignment.year)} Year</span>
+                                    <span class="badge">${escapeHTML(assignment.branch)}</span>
                                 </div>
                                 <div class="action-buttons">
-                                    <button class="action-btn" onclick="editAssignment(this)">
+                                    <button class="action-btn" onclick="editAssignment(this)" type="button">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-btn" onclick="deleteAssignment(this)">
+                                    <button class="action-btn" onclick="deleteAssignment(this)" type="button">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -1383,5 +1391,7 @@
             updateStats();
         });
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

@@ -2,14 +2,16 @@ from flask import Flask, request, jsonify, render_template, session, redirect, u
 import requests
 import os
 from dotenv import load_dotenv
+load_dotenv()
 import time
-from supabase import create_client, Client
 import bcrypt
-import traceback
 from functools import wraps
 import json
+import threading
+from collections import defaultdict
 from datetime import datetime as dt, timezone
-from dateutil import tz
+from urllib.parse import urlsplit
+from db import supabase, init_db, _get_connection, USING_SUPABASE
 
 # Explicitly import Cohere to handle potential import issues
 try:
@@ -18,61 +20,203 @@ except ImportError:
     cohere = None
 
 app = Flask(__name__)
-app.secret_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDM1MjYxNSwiZXhwIjoyMDU5OTI4NjE1fQ.qeufhcj6ypy97jOu0BHIRfqTnz9ZJNHoktibYy_p2NY'  # Ensure a proper secret key is set
+app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
+app.config.update(
+    MAX_CONTENT_LENGTH=1_000_000,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE', '').lower() in {'1', 'true', 'yes'},
+)
 
-# Initialize Supabase client
-SUPABASE_URL = 'https://vdvmgzqvqzuaegvqkaxd.supabase.co'
-SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkdm1nenF2cXp1YWVndnFrYXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzNTI2MTUsImV4cCI6MjA1OTkyODYxNX0.uN8oZhbR1ujwwNpUDULigx5wJQ8XVM5DNxYXDOTvlTU'
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+LANGUAGE_IDS = {'python': 71, 'javascript': 63, 'java': 62, 'c': 50, 'cpp': 54, 'c++': 54}
+EXECUTION_INTERVAL = 1.0
+_execution_lock = threading.Lock()
+_last_execution_by_client = defaultdict(float)
+_login_attempts = defaultdict(list)
+
+ROLE_ACCESS = {
+    'change_password': {'student', 'faculty', 'admin'},
+    'update_password': {'student', 'faculty', 'admin'},
+    'mycourse': {'student'}, 'compiler': {'student'}, 'run_code': {'student'},
+    'coding_tracks': {'student'}, 'c_plus_plus': {'student'}, 'python': {'student'},
+    'timetable': {'student'}, 'myverse': {'student'}, 'get_problem': {'student'},
+    'submit_solution': {'student'}, 'c': {'student'}, 'java': {'student'},
+    'assignment': {'student'}, 'institution': {'student'}, 'attendance': {'student'},
+    'student_coding_assesment': {'student'}, 'submit_assessment': {'student'},
+    'student_assignments': {'student'}, 'submit_assignment': {'student'},
+    'job_match_recommender': {'student'}, 'job_match_recomender1': {'student'},
+    'student_leaderboard': {'student'}, 'code_review': {'student'},
+    'review_code_api': {'student'}, 'ai_code_assistant': {'student'}, 'solve_code_problem': {'student'}, 'recommend_jobs': {'student'},
+    'faculty_home': {'faculty'}, 'faculty_attendance': {'faculty'},
+    'timetable_faculty': {'faculty'}, 'delete_timetable_entry': {'faculty'}, 'faculty_assignments': {'faculty'},
+    'faculty_coding_assessment': {'faculty'}, 'get_sections': {'faculty'},
+    'get_students': {'faculty'}, 'mark_attendance': {'faculty'}, 'get_courses': {'faculty'},
+    'get_faculty_assignments': {'faculty'}, 'faculty_chat': {'faculty'},
+    'create_faculty_chat_room': {'faculty'},
+    'test_db': {'admin'}, 'create_assessments_table': {'admin'},
+    'create_assignment_submissions_table': {'admin'},
+    'faculty_admin': {'admin'}, 'students_admin': {'admin'}, 'dashboard_admin': {'admin'},
+    'add_faculty': {'admin'}, 'add_student': {'admin'}, 'edit_student': {'admin'}, 'delete_student': {'admin'},
+    'get_assignment_submissions': {'faculty', 'admin'},
+    'get_assessment_links': {'student', 'faculty', 'admin'},
+    'add_assessment_link': {'faculty'},
+    'code_room': {'student', 'faculty'}, 'create_code_room': {'student', 'faculty'},
+    'join_code_room': {'student', 'faculty'}, 'update_code': {'student', 'faculty'},
+    'leave_code_room': {'student', 'faculty'}, 'get_room_messages': {'student', 'faculty'},
+    'send_code_room_message': {'student', 'faculty'}, 'code_room_page': {'student', 'faculty'},
+    'chat_page': {'student', 'faculty'}, 'create_chat_room': {'student', 'faculty'},
+    'send_chat_message': {'student', 'faculty'}, 'get_users': {'student', 'faculty'},
+    'get_current_user_id': {'student', 'faculty', 'admin'},
+    'get_chat_messages': {'student', 'faculty'},
+}
+
+# Initialize local SQLite database (replaces Supabase)
+init_db()
+
+
+@app.before_request
+def enforce_role_access():
+    """Use the persisted role for protected routes instead of trusting cookie fields."""
+    allowed_roles = ROLE_ACCESS.get(request.endpoint)
+    if not allowed_roles:
+        return None
+
+    user_id = session.get('user_id')
+    if not user_id:
+        if request.is_json or request.path.startswith(('/api/', '/get_', '/send_', '/create_', '/submit_', '/mark_', '/update_')):
+            return jsonify({'error': 'Authentication required'}), 401
+        return redirect(url_for('login'))
+
+    try:
+        result = supabase.table('users').select('id', 'role').eq('id', user_id).limit(1).execute()
+        user = result.data[0] if result.data else None
+    except Exception:
+        app.logger.exception('Could not verify the current account')
+        return jsonify({'error': 'Unable to verify your account'}), 503
+
+    if not user:
+        session.clear()
+        return jsonify({'error': 'Authentication required'}), 401
+
+    role = user.get('role')
+    if role not in allowed_roles:
+        if request.is_json or request.path.startswith(('/api/', '/get_', '/send_', '/create_', '/submit_', '/mark_', '/update_')):
+            return jsonify({'error': 'You do not have access to this action'}), 403
+        return redirect(url_for('home_page'))
+
+    session['role'] = role
+    if role == 'faculty':
+        session['faculty_id'] = user['id']
+    else:
+        session.pop('faculty_id', None)
+    return None
+
+
+@app.before_request
+def reject_cross_origin_writes():
+    if request.method not in {'POST', 'PUT', 'PATCH', 'DELETE'}:
+        return None
+    origin = request.headers.get('Origin') or request.headers.get('Referer')
+    if origin:
+        parsed = urlsplit(origin)
+        if parsed.netloc and parsed.netloc.casefold() != request.host.casefold():
+            return jsonify({'error': 'Cross-origin request rejected'}), 403
+    return None
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    if request.is_secure:
+        response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+    # Let the shared legacy-navigation adapter choose the correct role menu on
+    # older standalone templates that predate the common Jinja app layout.
+    if response.mimetype == 'text/html' and not response.direct_passthrough:
+        role = session.get('role')
+        if role in {'student', 'faculty', 'admin'}:
+            html = response.get_data(as_text=True)
+            body_start = html.find('<body')
+            body_end = html.find('>', body_start) if body_start >= 0 else -1
+            if body_end >= 0 and 'data-user-role=' not in html[body_start:body_end]:
+                html = html[:body_end] + f' data-user-role="{role}"' + html[body_end:]
+                response.set_data(html)
+    return response
+
+
+@app.context_processor
+def expose_active_navigation():
+    endpoint_groups = {
+        'dashboard': {'home_page', 'faculty_home', 'dashboard_admin'},
+        'courses': {'mycourse'},
+        'institution': {'institution'},
+        'chat': {'chat_page', 'faculty_chat'},
+        'attendance': {'attendance', 'faculty_attendance'},
+        'assignments': {'student_assignments', 'faculty_assignments'},
+        'timetable': {'timetable', 'timetable_faculty'},
+        'tracks': {'coding_tracks', 'c_plus_plus', 'python', 'c', 'java'},
+        'myverse': {'myverse', 'get_problem', 'submit_solution'},
+        'compiler': {'compiler', 'run_code'},
+        'coding_assessments': {'student_coding_assesment', 'submit_assessment'},
+        'coding': {'faculty_coding_assessment'},
+        'code_room': {'code_room', 'create_code_room', 'join_code_room', 'update_code', 'leave_code_room', 'get_room_messages', 'send_code_room_message', 'code_room_page'},
+        'ai_assistant': {'ai_code_assistant', 'solve_code_problem'},
+        'code_review': {'code_review', 'review_code_api'},
+        'jobs': {'job_match_recomender1', 'job_match_recommender', 'recommend_jobs'},
+        'leaderboard': {'student_leaderboard'},
+        'faculty': {'faculty_admin'},
+        'students': {'students_admin'},
+    }
+    endpoint = request.endpoint or ''
+    active_nav = next((key for key, endpoints in endpoint_groups.items() if endpoint in endpoints), '')
+    return {'active_nav': active_nav}
 
 JUDGE0_API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
 JUDGE0_API_HEADERS = {
     'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
-    'x-rapidapi-key': '2d4a7d825cmsh702550f2a4c30e2p138e11jsn467d292624aa',
+    'x-rapidapi-key': os.environ.get('JUDGE0_API_KEY', ''),
     'content-type': 'application/json',
     'accept': 'application/json'
 }
-
-# Simple rate limiting
-last_request_time = 0
-REQUEST_INTERVAL = 1  # Minimum interval between requests in seconds
 
 # Sample coding problems data (replace with database later)
 CODING_PROBLEMS = {
     1: {
         'id': 1,
         'title': 'Two Sum',
-        'description': 'Given an array of integers nums and an integer target, return indices of the two numbers that add up to target.',
+        'description': 'Read a JSON integer array on the first line and a target integer on the second. Print the two matching indices as a JSON array.',
         'difficulty': 'easy',
         'points': 100,
         'test_cases': [
-            {'input': '[2,7,11,15], 9', 'output': '[0,1]'},
-            {'input': '[3,2,4], 6', 'output': '[1,2]'},
-            {'input': '[3,3], 6', 'output': '[0,1]'}
+            {'input': '[2,7,11,15]\n9\n', 'output': '[0,1]'},
+            {'input': '[3,2,4]\n6\n', 'output': '[1,2]'},
+            {'input': '[3,3]\n6\n', 'output': '[0,1]'}
         ]
     },
     2: {
         'id': 2,
         'title': 'Merge Sort Implementation',
-        'description': 'Implement the merge sort algorithm to sort an array in ascending order.',
+        'description': 'Read a JSON integer array from standard input and print the sorted array as JSON.',
         'difficulty': 'medium',
         'points': 200,
         'test_cases': [
-            {'input': '[64,34,25,12,22,11,90]', 'output': '[11,12,22,25,34,64,90]'},
-            {'input': '[5,2,8,1,9]', 'output': '[1,2,5,8,9]'},
-            {'input': '[38,27,43,3,9,82,10]', 'output': '[3,9,10,27,38,43,82]'}
+            {'input': '[64,34,25,12,22,11,90]\n', 'output': '[11,12,22,25,34,64,90]'},
+            {'input': '[5,2,8,1,9]\n', 'output': '[1,2,5,8,9]'},
+            {'input': '[38,27,43,3,9,82,10]\n', 'output': '[3,9,10,27,38,43,82]'}
         ]
     },
     3: {
         'id': 3,
         'title': 'Longest Common Subsequence',
-        'description': 'Find the length of the longest common subsequence between two strings.',
+        'description': 'Read two strings, one per line, and print the length of their longest common subsequence.',
         'difficulty': 'hard',
         'points': 300,
         'test_cases': [
-            {'input': '"abcde", "ace"', 'output': '3'},
-            {'input': '"abc", "abc"', 'output': '3'},
-            {'input': '"abc", "def"', 'output': '0'}
+            {'input': 'abcde\nace\n', 'output': '3'},
+            {'input': 'abc\nabc\n', 'output': '3'},
+            {'input': 'abc\ndef\n', 'output': '0'}
         ]
     }
 }
@@ -85,14 +229,22 @@ CODING_PROBLEMS = {
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get('role') != 'admin':
+        user_id = session.get('user_id')
+        if not user_id:
             return redirect(url_for('login'))
+        try:
+            user = supabase.table('users').select('role').eq('id', user_id).limit(1).execute().data
+        except Exception:
+            app.logger.exception('Admin authorization check failed')
+            return jsonify({'error': 'Unable to verify your account'}), 503
+        if not user or user[0].get('role') != 'admin':
+            return redirect(url_for('home_page'))
         return f(*args, **kwargs)
     return decorated_function
 
 @app.route('/')
 def home():
-    return render_template('landingpage.html')
+    return render_template('landing_redesign.html')
 
 @app.route('/mycourse')
 def mycourse():
@@ -108,7 +260,9 @@ def mycourse():
         if not user_data:
             return render_template('mycourse.html', error='User not found')
 
-        semester = user_data['semester']
+        semester = str(user_data.get('semester') or '')
+        if semester not in {str(number) for number in range(1, 9)}:
+            return render_template('mycourse.html', courses=[], error='Your semester is not configured yet')
         table_name = f'semester{semester}'
 
         # Fetch courses for the user's semester
@@ -117,8 +271,7 @@ def mycourse():
 
         return render_template('mycourse.html', courses=courses)
     except Exception as e:
-        print(f"Error fetching courses: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return render_template('mycourse.html', error='An error occurred')
 
 @app.route('/home')
@@ -129,32 +282,41 @@ def home_page():
 
     try:
         # Fetch user details
-        response = supabase.table('users').select('*').eq('id', user_id).execute()
+        response = supabase.table('users').select('id', 'name', 'role', 'points', 'semester', 'branch', 'section').eq('id', user_id).limit(1).execute()
         user = response.data[0] if response.data else None
 
         if not user:
-            return render_template('dashboard.html', error='User not found')
+            return render_template('dashboard_redesign.html', error='User not found')
 
-        print(f"User role: {user['role']}")  # Log the user's role
         if user['role'] == 'faculty':
             session['user_id'] = user['id']
             session['role'] = user['role']
             session['faculty_id'] = user['id']  # Set faculty_id in session
-            print("Redirecting to faculty dashboard")  # Log redirection to faculty dashboard
             return redirect(url_for('faculty_home'))
+        elif user['role'] == 'admin':
+            session['role'] = 'admin'
+            return redirect(url_for('dashboard_admin'))
         else:
             # Render the dashboard directly instead of redirecting
-            return render_template('dashboard.html', user=user)
+            return render_template('dashboard_redesign.html', user=user)
     except Exception as e:
-        print(f"Error fetching user details: {e}")
-        traceback.print_exc()
-        return render_template('dashboard.html', error='An error occurred')
+        app.logger.exception('Request processing failed')
+        return render_template('dashboard_redesign.html', error='An error occurred')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        now = time.monotonic()
+        address = request.remote_addr or 'unknown'
+        with _execution_lock:
+            attempts = [stamp for stamp in _login_attempts[address] if now - stamp < 300]
+            _login_attempts[address] = attempts
+            if len(attempts) >= 10:
+                return render_template('login_redesign.html', error='Too many sign-in attempts. Wait a few minutes and try again.'), 429
+        email = request.form.get('email', '').strip().casefold()
+        password = request.form.get('password', '')
+        if not email or len(email) > 254 or not password or len(password.encode('utf-8')) > 72:
+            return render_template('login_redesign.html', error='Invalid credentials')
 
         try:
             # Fetch user by email
@@ -164,6 +326,9 @@ def login():
             if user:
                 # Verify password
                 if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+                    session.clear()
+                    with _execution_lock:
+                        _login_attempts.pop(address, None)
                     session['user_id'] = user['id']
                     session['role'] = user['role']  # Store the user's role in the session
                     
@@ -176,15 +341,23 @@ def login():
                     else:
                         return redirect(url_for('home_page'))
                 else:
-                    return render_template('login.html', error='Invalid credentials')
+                    with _execution_lock:
+                        _login_attempts[address].append(now)
+                    return render_template('login_redesign.html', error='Invalid credentials')
             else:
-                return render_template('login.html', error='Invalid credentials')
+                with _execution_lock:
+                    _login_attempts[address].append(now)
+                return render_template('login_redesign.html', error='Invalid credentials')
         except Exception as e:
-            print(f"Error signing in: {e}")
-            traceback.print_exc()
-            return render_template('login.html', error='An error occurred')
+            app.logger.exception('Request processing failed')
+            return render_template('login_redesign.html', error='An error occurred')
 
-    return render_template('login.html')
+    return render_template('login_redesign.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
 
 @app.route('/compiler')
 def compiler():
@@ -192,130 +365,146 @@ def compiler():
     problem = CODING_PROBLEMS.get(problem_id) if problem_id else None
     return render_template('compiler.html', problem=problem)
 
+def _execution_rate_limit():
+    now = time.monotonic()
+    client_key = str(session.get('user_id') or request.remote_addr or 'anonymous')
+    with _execution_lock:
+        previous = _last_execution_by_client[client_key]
+        if now - previous < EXECUTION_INTERVAL:
+            return jsonify({'error': 'Please wait a moment before another code submission.'}), 429
+        _last_execution_by_client[client_key] = now
+        if len(_last_execution_by_client) > 10000:
+            cutoff = now - 60
+            for key, timestamp in list(_last_execution_by_client.items()):
+                if timestamp < cutoff:
+                    _last_execution_by_client.pop(key, None)
+    return None
+
+
+def _award_points_once(table_name, id_column, source_id, user_id, points):
+    """Atomically record a unique solve before awarding its points."""
+    now = dt.now(timezone.utc).isoformat()
+    points = max(0, int(points or 0))
+    if USING_SUPABASE:
+        if table_name == 'problem_solutions':
+            rpc = supabase.rpc('award_problem_points', {'p_user_id': user_id, 'p_problem_id': source_id, 'p_points': points}).execute()
+        else:
+            rpc = supabase.rpc('award_assessment_points', {'p_user_id': user_id, 'p_assessment_id': source_id, 'p_points': points}).execute()
+        awarded = bool(rpc.data)
+        return (points, False) if awarded else (0, True)
+
+    conn = _get_connection()
+    try:
+        cursor = conn.execute(f'INSERT OR IGNORE INTO {table_name} (user_id, {id_column}, solved_at) VALUES (?, ?, ?)', (user_id, source_id, now))
+        if not cursor.rowcount:
+            return 0, True
+        conn.execute('UPDATE users SET points = COALESCE(points, 0) + ? WHERE id = ?', (points, user_id))
+        conn.commit()
+        return points, False
+    finally:
+        conn.close()
+
 @app.route('/run', methods=['POST'])
 def run_code():
-    global last_request_time
-    current_time = time.time()
-    if current_time - last_request_time < REQUEST_INTERVAL:
-        return jsonify({'error': 'Rate limit exceeded. Please wait before trying again.'}), 429
+    throttled = _execution_rate_limit()
+    if throttled:
+        return throttled
 
-    last_request_time = current_time
+    if not JUDGE0_API_HEADERS['x-rapidapi-key']:
+        return jsonify({'error': 'Code execution is not configured. Set JUDGE0_API_KEY on the server.'}), 503
 
-    data = request.json
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Expected a JSON object.'}), 400
+
     code = data.get('code')
     language = data.get('language')
-    input_data = data.get('input')
+    input_data = data.get('input', '')
+    if not isinstance(code, str) or not isinstance(language, str):
+        return jsonify({'error': 'Code and language are required.'}), 400
+    if len(code) > 50000 or not isinstance(input_data, str) or len(input_data) > 10000:
+        return jsonify({'error': 'Code or input exceeds the allowed size.'}), 413
 
-    if not code or not language:
-        return jsonify({'error': 'Missing required fields: code and language'}), 400
-
-    # Map language to Judge0 language_id
-    language_map = {
-        'python': 71,
-        'javascript': 63,
-        'java': 62,
-        'c': 50,
-        'cpp': 54
-    }
-    language_id = language_map.get(language.lower())
-
+    language_id = LANGUAGE_IDS.get(language.strip().lower())
     if not language_id:
-        return jsonify({'error': 'Unsupported language'}), 400
+        return jsonify({'error': 'Unsupported language.'}), 400
 
-    # Prepare the payload for Judge0 API
     payload = {
         'source_code': code,
         'language_id': language_id,
-        'stdin': input_data or '',
+        'stdin': input_data,
         'base64_encoded': False
     }
 
     try:
-        # Send the request to Judge0 API
-        response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload)
+        response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload, timeout=12)
         response.raise_for_status()
         token = response.json().get('token')
-        
         if not token:
-            return jsonify({'error': 'Failed to get submission token'}), 500
+            return jsonify({'error': 'The execution service did not return a submission token.'}), 502
 
-        # Poll for the result
         result_url = f"{JUDGE0_API_URL}/{token}"
-        max_attempts = 10
-        attempts = 0
-        
-        while attempts < max_attempts:
-            result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS)
+        deadline = time.monotonic() + 18
+        result = {}
+        while time.monotonic() < deadline:
+            result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS, timeout=8)
             result_response.raise_for_status()
             result = result_response.json()
-            
-            status_id = result.get('status', {}).get('id')
-            if status_id in [1, 2]:  # In Queue or Processing
-                time.sleep(1)
-                attempts += 1
-            else:
+            if result.get('status', {}).get('id') not in (1, 2):
                 break
+            time.sleep(0.5)
+        else:
+            return jsonify({'error': 'Execution timed out. Try a smaller program.'}), 504
 
-        if attempts >= max_attempts:
-            return jsonify({'error': 'Execution timed out'}), 504
-
-        # Return the result
         return jsonify({
-            'stdout': result.get('stdout', ''),
-            'stderr': result.get('stderr', ''),
+            'stdout': result.get('stdout') or '',
+            'stderr': result.get('stderr') or '',
             'status': result.get('status', {}).get('description', 'Unknown'),
-            'time': result.get('time', ''),
-            'memory': result.get('memory', '')
+            'time': result.get('time') or '',
+            'memory': result.get('memory') or ''
         })
-    except requests.exceptions.RequestException as e:
-        print("Error during API request:", e)
-        return jsonify({'error': 'Failed to execute code. Please try again.'}), 500
-    except Exception as e:
-        print("Unexpected error:", e)
-        return jsonify({'error': 'An unexpected error occurred'}), 500
+    except requests.exceptions.Timeout:
+        return jsonify({'error': 'The execution service timed out. Please try again.'}), 504
+    except requests.exceptions.RequestException:
+        app.logger.exception('Judge0 request failed')
+        return jsonify({'error': 'Could not reach the code execution service.'}), 502
+    except (ValueError, TypeError):
+        app.logger.exception('Invalid response from Judge0')
+        return jsonify({'error': 'The execution service returned an invalid response.'}), 502
 
-@app.route('/test-supabase')
-def test_supabase():
+@app.route('/test-db')
+def test_db():
     try:
-        # Query a known table in Supabase
-        response = supabase.table('users').select('*').limit(1).execute()
-        print("Supabase test response:", response.data)  # Log the response data
-        return jsonify({"success": "Supabase connection is working!", "data": response.data}), 200
-    except Exception as e:
-        print("Error testing Supabase connection:", e)
-        return jsonify({"error": "Failed to connect to Supabase."}), 500
+        response = supabase.table('users').select('id').limit(1).execute()
+        return jsonify({"success": "SQLite connection is working", "user_count": supabase.table('users').select('count').execute().data[0]['count']}), 200
+    except Exception:
+        app.logger.exception("Database health check failed")
+        return jsonify({"error": "Database health check failed"}), 500
 
 @app.route('/update_password', methods=['POST'])
 def update_password():
-    email = request.form.get('email')
-    old_password = request.form.get('old-password')
-    new_password = request.form.get('new-password')
-    confirm_password = request.form.get('confirm-password')
-
+    user_id = session.get('user_id')
+    old_password = request.form.get('old-password', '')
+    new_password = request.form.get('new-password', '')
+    confirm_password = request.form.get('confirm-password', '')
+    if not user_id:
+        return redirect(url_for('login'))
+    if not 12 <= len(new_password.encode('utf-8')) <= 72:
+        return render_template('confirm_password.html', error='Use a password between 12 and 72 bytes')
     if new_password != confirm_password:
         return render_template('confirm_password.html', error='New passwords do not match')
-
     try:
-        # Fetch user by email
-        response = supabase.table('users').select('*').eq('email', email).execute()
+        response = supabase.table('users').select('password').eq('id', user_id).limit(1).execute()
         user = response.data[0] if response.data else None
-
-        if user:
-            # Verify current password
-            if bcrypt.checkpw(old_password.encode('utf-8'), user['password'].encode('utf-8')):
-                # Hash the new password
-                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
-                # Update the password in Supabase
-                supabase.table('users').update({'password': hashed_new_password.decode('utf-8')}).eq('email', email).execute()
-                return redirect(url_for('home_page'))
-            else:
-                return render_template('confirm_password.html', error='Current password is incorrect')
-        else:
-            return render_template('confirm_password.html', error='User not found')
-    except Exception as e:
-        print(f"Error updating password: {e}")
-        traceback.print_exc()
-        return render_template('confirm_password.html', error='An error occurred')
+        if not user or not bcrypt.checkpw(old_password.encode('utf-8'), user['password'].encode('utf-8')):
+            return render_template('confirm_password.html', error='Current password is incorrect')
+        hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        supabase.table('users').update({'password': hashed}).eq('id', user_id).execute()
+        session.clear()
+        return redirect(url_for('login'))
+    except Exception:
+        app.logger.exception('Password update failed')
+        return render_template('confirm_password.html', error='Unable to update password right now')
 
 @app.route('/change_password')
 def change_password():
@@ -327,21 +516,16 @@ def faculty_home():
     if not faculty_id:
         return redirect(url_for('login'))
 
-    print(f"Session faculty_id: {faculty_id}")  # Log the session faculty_id
     try:
-        print("Executing query to fetch faculty details...")  # Log query execution
         response = supabase.table('users').select('name', 'roll_number', 'branch', 'subject').eq('id', faculty_id).eq('role', 'faculty').execute()
         faculty = response.data[0] if response.data else None
-        print(f"Query response: {response.data}")  # Log the query response
         if faculty:
-            return render_template('faculty_dashboard.html', faculty=faculty)
+            return render_template('faculty_dashboard_redesign.html', faculty=faculty)
         else:
-            print("Faculty not found, rendering error")  # Log faculty not found
-            return render_template('faculty_dashboard.html', error='Faculty not found')
+            return render_template('faculty_dashboard_redesign.html', error='Faculty not found')
     except Exception as e:
-        print(f"Error fetching faculty details: {e}")
-        traceback.print_exc()
-        return render_template('faculty_dashboard.html', error='An error occurred')
+        app.logger.exception('Request processing failed')
+        return render_template('faculty_dashboard_redesign.html', error='An error occurred')
 
 @app.route('/faculty/attendance')
 def faculty_attendance():
@@ -390,8 +574,7 @@ def attendance():
                             student=student,
                             attendance=attendance_data)
     except Exception as e:
-        print(f"Error fetching attendance: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return render_template('student attendance.html', error='Failed to load attendance data')
 
 @app.route('/coding_tracks')
@@ -406,9 +589,112 @@ def c_plus_plus():
 def python():
     return render_template('python.html')
 
-@app.route('/timetable/faculty')
+@app.route('/timetable/faculty', methods=['GET', 'POST'])
 def timetable_faculty():
-    return render_template('timetable for tac.html')
+    faculty_id = session.get('faculty_id')
+    if not faculty_id:
+        return redirect(url_for('login'))
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+    def view_data():
+        sections_response = supabase.table('faculty_sections').select('section').eq('faculty_id', faculty_id).execute()
+        sections = list(dict.fromkeys(row.get('section', '').strip() for row in (sections_response.data or []) if row.get('section')))
+        entries_response = supabase.table('timetable_entries').select('*').eq('faculty_id', faculty_id).execute()
+        day_order = {day: index for index, day in enumerate(days)}
+        entries = sorted(entries_response.data or [], key=lambda item: (day_order.get(item.get('day_of_week'), 7), item.get('starts_at', '')))
+        return entries, sections
+
+    if request.method == 'POST':
+        subject = request.form.get('subject', '').strip()
+        section = request.form.get('section', '').strip()
+        day = request.form.get('day_of_week', '')
+        room = request.form.get('room', '').strip()
+        try:
+            semester = int(request.form.get('semester', ''))
+            start_time = request.form.get('starts_at', '')
+            end_time = request.form.get('ends_at', '')
+            start_value = dt.strptime(start_time, '%H:%M')
+            end_value = dt.strptime(end_time, '%H:%M')
+            if not subject or len(subject) > 120 or not section or len(section) > 40:
+                raise ValueError
+            if semester < 1 or semester > 8 or day not in days or (room and len(room) > 80):
+                raise ValueError
+            if end_value <= start_value:
+                raise ValueError
+        except (TypeError, ValueError):
+            entries, sections = view_data()
+            return render_template(
+                'timetable_faculty.html',
+                entries=entries,
+                sections=sections,
+                days=days,
+                error='Check the class name, section, semester, day, and time range.',
+            ), 400
+
+        try:
+            entries, sections = view_data()
+            if sections and section not in sections:
+                return render_template(
+                    'timetable_faculty.html', entries=entries, sections=sections, days=days,
+                    error='Choose a section assigned to your faculty account.',
+                ), 403
+
+            scheduled = supabase.table('timetable_entries').select('*')\
+                .eq('semester', semester).eq('section', section).eq('day_of_week', day).execute()
+            for entry in scheduled.data or []:
+                overlaps = start_time < entry['ends_at'] and end_time > entry['starts_at']
+                if overlaps:
+                    return render_template(
+                        'timetable_faculty.html', entries=entries, sections=sections, days=days,
+                        error=f'This overlaps with {entry["subject"]} ({entry["starts_at"]}–{entry["ends_at"]}).',
+                    ), 409
+
+            supabase.table('timetable_entries').insert({
+                'faculty_id': faculty_id,
+                'subject': subject,
+                'semester': semester,
+                'section': section,
+                'day_of_week': day,
+                'starts_at': start_time,
+                'ends_at': end_time,
+                'room': room or None,
+                'created_at': dt.now(timezone.utc).isoformat(),
+            }).execute()
+            return redirect(url_for('timetable_faculty'))
+        except Exception:
+            app.logger.exception('Faculty timetable entry could not be saved')
+            try:
+                entries, sections = view_data()
+            except Exception:
+                entries, sections = [], []
+            return render_template(
+                'timetable_faculty.html', entries=entries, sections=sections, days=days,
+                error='The timetable could not be saved. Check that the latest database schema is installed.',
+            ), 503
+
+    try:
+        entries, sections = view_data()
+        return render_template('timetable_faculty.html', entries=entries, sections=sections, days=days)
+    except Exception:
+        app.logger.exception('Faculty timetable could not be loaded')
+        return render_template(
+            'timetable_faculty.html', entries=[], sections=[], days=days,
+            error='The timetable could not be loaded. Check that the latest database schema is installed.',
+        ), 503
+
+
+@app.route('/timetable/faculty/<int:entry_id>/delete', methods=['POST'])
+def delete_timetable_entry(entry_id):
+    faculty_id = session.get('faculty_id')
+    if not faculty_id:
+        return redirect(url_for('login'))
+    try:
+        supabase.table('timetable_entries').delete().eq('id', entry_id).eq('faculty_id', faculty_id).execute()
+        return redirect(url_for('timetable_faculty'))
+    except Exception:
+        app.logger.exception('Faculty timetable entry could not be deleted')
+        return redirect(url_for('timetable_faculty'))
 
 @app.route('/faculty/assignments', methods=['GET', 'POST'])
 def faculty_assignments():
@@ -422,8 +708,6 @@ def faculty_assignments():
             deadline = request.form.get('deadline')
             faculty_id = session.get('faculty_id')
 
-            print(f"Received form data: subject={subject}, year={year}, branch={branch}, deadline={deadline}, faculty_id={faculty_id}")
-
             if not all([subject, year, branch, description, deadline, faculty_id]):
                 missing_fields = []
                 if not subject: missing_fields.append('subject')
@@ -432,8 +716,13 @@ def faculty_assignments():
                 if not description: missing_fields.append('description')
                 if not deadline: missing_fields.append('deadline')
                 if not faculty_id: missing_fields.append('faculty_id')
-                print(f"Missing required fields: {', '.join(missing_fields)}")
                 return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+
+            if len(subject) > 120 or len(description) > 5000 or len(branch) > 80 or len(year) > 16:
+                return jsonify({'error': 'One or more assignment fields are too long'}), 400
+            faculty_profile = supabase.table('users').select('branch').eq('id', faculty_id).limit(1).execute()
+            if faculty_profile.data and faculty_profile.data[0].get('branch') and faculty_profile.data[0]['branch'].casefold() != branch.casefold():
+                return jsonify({'error': 'Assignments can only be created for your department'}), 403
 
             # Insert into assessments table
             assessment_data = {
@@ -446,26 +735,20 @@ def faculty_assignments():
                 'created_at': 'now()'
             }
             
-            print(f"Attempting to insert assessment data: {assessment_data}")
             
             response = supabase.table('assessments').insert(assessment_data).execute()
             
-            print(f"Supabase response: {response}")
             
             if response.data:
-                print(f"Successfully created assessment with ID: {response.data[0]['id']}")
                 return jsonify({
                     'message': 'Assignment created successfully',
                     'assessment_id': response.data[0]['id']
                 })
             
-            print("Failed to create assessment - no data returned from Supabase")
             return jsonify({'error': 'Failed to create assignment - no data returned from database'}), 500
 
         except Exception as e:
-            print(f"Error creating assignment: {e}")
-            print(f"Error type: {type(e)}")
-            traceback.print_exc()
+            app.logger.exception('Request processing failed')
             return jsonify({'error': f'Failed to create assignment: {str(e)}'}), 500
 
     return render_template('faculty assignments.html')
@@ -483,85 +766,61 @@ def get_problem(problem_id):
 
 @app.route('/submit', methods=['POST'])
 def submit_solution():
-    data = request.get_json()
+    throttled = _execution_rate_limit()
+    if throttled:
+        return throttled
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Expected a JSON object'}), 400
     problem_id = data.get('problem_id')
     code = data.get('code')
     language_id = data.get('language_id')
-
-    if not all([problem_id, code, language_id]):
-        return jsonify({'error': 'Missing required fields'}), 400
-
+    if not isinstance(code, str) or len(code) > 50000 or not isinstance(language_id, int) or language_id not in LANGUAGE_IDS.values():
+        return jsonify({'error': 'Invalid code or language'}), 400
+    try:
+        problem_id = int(problem_id)
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Invalid problem'}), 400
     problem = CODING_PROBLEMS.get(problem_id)
     if not problem:
         return jsonify({'error': 'Problem not found'}), 404
-
+    if not JUDGE0_API_HEADERS['x-rapidapi-key']:
+        return jsonify({'error': 'Code execution is not configured'}), 503
     results = []
-    for test_case in problem['test_cases']:
-        # Prepare the code with test case input
-        full_code = f"{code}\n\n# Test case\nprint({test_case['input']})"
-        
-        # Run the code using Judge0
-        submission = {
-            'source_code': full_code,
-            'language_id': language_id,
-            'stdin': '',
-            'expected_output': test_case['output']
-        }
-
-        try:
-            response = requests.post(
-                f'{JUDGE0_API_URL}?base64_encoded=false',
-                headers=JUDGE0_API_HEADERS,
-                json=submission
-            )
-            
-            submission_token = response.json().get('token')
-            if not submission_token:
-                return jsonify({'error': 'Failed to create submission'}), 500
-
-            # Get the result
-            time.sleep(2)  # Wait for processing
-            result = requests.get(
-                f'{JUDGE0_API_URL}/{submission_token}?base64_encoded=false',
-                headers=JUDGE0_API_HEADERS
-            ).json()
-
-            results.append({
-                'input': test_case['input'],
-                'expected': test_case['output'],
-                'actual': result.get('stdout', '').strip(),
-                'status': result.get('status', {}).get('description', 'Unknown'),
-                'passed': result.get('stdout', '').strip() == test_case['output']
-            })
-
-        except Exception as e:
-            print(f"Error running test case: {e}")
-            results.append({
-                'input': test_case['input'],
-                'error': str(e),
-                'passed': False
-            })
-
-    # Calculate overall result
-    all_passed = all(result.get('passed', False) for result in results)
-    
+    try:
+        for test_case in problem['test_cases']:
+            payload = {'source_code': code, 'language_id': language_id, 'stdin': test_case['input'], 'base64_encoded': False}
+            created = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload, timeout=12)
+            created.raise_for_status()
+            token = created.json().get('token')
+            if not token:
+                return jsonify({'error': 'Execution service did not return a token'}), 502
+            result = {}
+            deadline = time.monotonic() + 18
+            while time.monotonic() < deadline:
+                response = requests.get(f'{JUDGE0_API_URL}/{token}', headers=JUDGE0_API_HEADERS, timeout=8)
+                response.raise_for_status()
+                result = response.json()
+                if result.get('status', {}).get('id') not in (1, 2):
+                    break
+                time.sleep(.5)
+            else:
+                return jsonify({'error': 'Execution timed out'}), 504
+            actual = (result.get('stdout') or '').strip()
+            expected = test_case['output'].strip()
+            results.append({'input': test_case['input'], 'expected': expected, 'actual': actual,
+                            'status': result.get('status', {}).get('description', 'Unknown'), 'passed': result.get('status', {}).get('id') == 3 and actual == expected})
+    except requests.exceptions.Timeout:
+        return jsonify({'error': 'Execution service timed out'}), 504
+    except requests.exceptions.RequestException:
+        app.logger.exception('Challenge execution request failed')
+        return jsonify({'error': 'Could not reach the execution service'}), 502
+    all_passed = bool(results) and all(item['passed'] for item in results)
+    points_earned = 0
+    already_solved = False
     if all_passed:
-        # Update user's points in the database
-        try:
-            user_id = session.get('user_id')
-            if user_id:
-                response = supabase.table('users').select('points').eq('id', user_id).execute()
-                current_points = response.data[0].get('points', 0) if response.data else 0
-                new_points = current_points + problem['points']
-                supabase.table('users').update({'points': new_points}).eq('id', user_id).execute()
-        except Exception as e:
-            print(f"Error updating points: {e}")
-
-    return jsonify({
-        'results': results,
-        'all_passed': all_passed,
-        'points_earned': problem['points'] if all_passed else 0
-    })
+        points_earned, already_solved = _award_points_once('problem_solutions', 'problem_id', problem_id, session['user_id'], problem['points'])
+    return jsonify({'results': results, 'all_passed': all_passed, 'points_earned': points_earned, 'already_solved': already_solved})
 
 @app.route('/c')
 def c():
@@ -573,7 +832,7 @@ def java():
 
 @app.route('/assignment')
 def assignment():
-    return render_template('assignment.html')
+    return redirect(url_for('student_assignments'))
 
 @app.route('/institution')
 def institution():
@@ -609,8 +868,7 @@ def faculty_admin():
         
         return render_template('admin_faculty.html', faculty=faculty)
     except Exception as e:
-        print(f"Error fetching faculty data: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return render_template('admin_faculty.html', error='Failed to load faculty data')
 
 @app.route('/students/admin')
@@ -649,8 +907,7 @@ def students_admin():
         
         return render_template('admin_students.html', students=students)
     except Exception as e:
-        print(f"Error fetching student data: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return render_template('admin_students.html', error='Failed to load student data')
 
 @app.route('/dashboard/admin')
@@ -669,8 +926,8 @@ def dashboard_admin():
         avg_attendance = round((total_attended / total_classes * 100) if total_classes > 0 else 0, 2)
         
         # Fetch recent activities
-        assignments_response = supabase.table('assessments').select('*').order('created_at', desc=True).limit(5).execute()
-        coding_assessments_response = supabase.table('coding_assessments').select('*').order('created_at', desc=True).limit(5).execute()
+        assignments_response = supabase.table('assessments').select('subject', 'description', 'created_at').order('created_at', desc=True).limit(5).execute()
+        coding_assessments_response = supabase.table('coding_assessments').select('title', 'description', 'created_at').order('created_at', desc=True).limit(5).execute()
         
         recent_activities = []
         for assignment in assignments_response.data:
@@ -692,7 +949,7 @@ def dashboard_admin():
         # Sort activities by date
         recent_activities.sort(key=lambda x: x['date'], reverse=True)
         
-        return render_template('admin.html', 
+        return render_template('admin_dashboard_redesign.html',
             stats={
                 'total_students': students_response.data[0]['count'],
                 'total_faculty': faculty_response.data[0]['count'],
@@ -702,9 +959,8 @@ def dashboard_admin():
             recent_activities=recent_activities
         )
     except Exception as e:
-        print(f"Error fetching dashboard data: {e}")
-        traceback.print_exc()
-        return render_template('admin.html', 
+        app.logger.exception('Request processing failed')
+        return render_template('admin_dashboard_redesign.html',
             error='Failed to load dashboard data',
             stats={
                 'total_students': 0,
@@ -724,18 +980,25 @@ def timetable():
      
 
     try:
-        # Fetch the user's semester
-        response = supabase.table('users').select('semester').eq('id', user_id).execute()
+        # Fetch the user's semester and section for schedule filtering.
+        response = supabase.table('users').select('semester', 'section').eq('id', user_id).execute()
         user_data = response.data[0] if response.data else None
 
         if not user_data:
             return render_template('timetable.html', error='User not found')
 
-        semester = user_data['semester']
-        return render_template('timetable.html', user_semester=semester)
-    except Exception as e:
-        print(f"Error fetching user semester: {e}")
-        return render_template('timetable.html', error='An error occurred')
+        semester = user_data.get('semester')
+        section = user_data.get('section')
+        entries = []
+        if semester and section:
+            response = supabase.table('timetable_entries').select('*')\
+                .eq('semester', int(semester)).eq('section', section).execute()
+            day_order = {day: index for index, day in enumerate(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])}
+            entries = sorted(response.data or [], key=lambda item: (day_order.get(item.get('day_of_week'), 7), item.get('starts_at', '')))
+        return render_template('timetable.html', user_semester=semester, user_section=section, entries=entries)
+    except Exception:
+        app.logger.exception('Request processing failed')
+        return render_template('timetable.html', error='The timetable could not be loaded. Please try again later.', entries=[])
 @app.route('/faculty/coding_assessment', methods=['GET', 'POST'])
 def faculty_coding_assessment():
     faculty_id = session.get('faculty_id')
@@ -754,13 +1017,23 @@ def faculty_coding_assessment():
             time_limit = int(request.form.get('time_limit', 60))
             memory_limit = int(request.form.get('memory_limit', 512))
             languages = request.form.getlist('languages[]') or ['python', 'java', 'cpp', 'c']
-
-            print("Creating assessment with data:", {
-                'title': title,
-                'faculty_id': faculty_id,
-                'difficulty': difficulty,
-                'points': points
-            })
+            allowed = {'python', 'javascript', 'java', 'cpp', 'c'}
+            test_inputs = request.form.getlist('test_inputs[]')
+            test_outputs = request.form.getlist('test_outputs[]')
+            if not isinstance(title, str) or not title.strip() or len(title) > 160:
+                raise ValueError('Enter an assessment title of 160 characters or fewer')
+            if not isinstance(description, str) or not description.strip() or len(description) > 5000:
+                raise ValueError('Enter a description of 5,000 characters or fewer')
+            if difficulty not in {'easy', 'medium', 'hard'} or not (1 <= points <= 1000):
+                raise ValueError('Choose a valid difficulty and points value')
+            if not (1 <= time_limit <= 300 and 32 <= memory_limit <= 2048):
+                raise ValueError('Choose valid time and memory limits')
+            if not languages or len(languages) > 5 or any(item not in allowed for item in languages):
+                raise ValueError('Choose one or more supported languages')
+            if not (1 <= len(test_inputs) == len(test_outputs) <= 10):
+                raise ValueError('Add between 1 and 10 complete test cases')
+            if any(len(value) > 10000 for value in test_inputs + test_outputs):
+                raise ValueError('Each test case must be 10,000 characters or fewer')
 
             # Insert into coding_assessments table
             assessment_data = {
@@ -773,20 +1046,16 @@ def faculty_coding_assessment():
                 'points': points,
                 'time_limit': time_limit,
                 'memory_limit': memory_limit,
-                'allowed_languages': languages,
+                'allowed_languages': json.dumps(languages),
                 'created_at': 'now()'  # Add creation timestamp
             }
             
             response = supabase.table('coding_assessments').insert(assessment_data).execute()
-            print("Assessment creation response:", response.data)
             
             if response.data:
                 assessment_id = response.data[0]['id']
 
-                # Get test cases
-                test_inputs = request.form.getlist('test_inputs[]')
-                test_outputs = request.form.getlist('test_outputs[]')
-
+                # Save the validated test cases
                 # Insert test cases
                 for input_data, expected_output in zip(test_inputs, test_outputs):
                     if input_data and expected_output:
@@ -802,8 +1071,7 @@ def faculty_coding_assessment():
             return render_template('faculty_coding_assesment.html', error='Failed to create assessment')
 
         except Exception as e:
-            print(f"Error creating assessment: {e}")
-            traceback.print_exc()
+            app.logger.exception('Request processing failed')
             return render_template('faculty_coding_assesment.html', error='Please fill all required fields correctly')
 
     return render_template('faculty_coding_assesment.html')
@@ -814,7 +1082,6 @@ def student_coding_assesment():
         return redirect(url_for('login'))
 
     try:
-        print("Fetching assessments...")
         
         # Fetch assessments with faculty information
         assessments_response = supabase.table('coding_assessments')\
@@ -828,11 +1095,7 @@ def student_coding_assesment():
             .execute()
             
         assessments = assessments_response.data if assessments_response.data else []
-        print(f"Found {len(assessments)} assessments:", assessments)
 
-        if not assessments:
-            print("No assessments found in the database")
-        
         return render_template('student_coding_assesment.html', 
                             assessments=assessments,
                             stats={
@@ -843,8 +1106,7 @@ def student_coding_assesment():
                             })
                             
     except Exception as e:
-        print(f"Error fetching assessments: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return render_template('student_coding_assesment.html', 
                             error='Failed to load assessments',
                             assessments=[],
@@ -857,27 +1119,49 @@ def student_coding_assesment():
     
 @app.route('/submit_assessment', methods=['POST'])
 def submit_assessment():
-    data = request.json
+    throttled = _execution_rate_limit()
+    if throttled:
+        return throttled
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Expected a JSON object'}), 400
     assessment_id = data.get('assessment_id')
     code = data.get('code')
     language = data.get('language')
 
-    if not all([assessment_id, code, language]):
+    if not isinstance(code, str) or not code or len(code) > 50000:
+        return jsonify({'error': 'Code is required and must be under 50,000 characters'}), 400
+    if assessment_id is None or not isinstance(language, str):
         return jsonify({'error': 'Missing required fields'}), 400
 
     try:
+        if not JUDGE0_API_HEADERS['x-rapidapi-key']:
+            return jsonify({'error': 'Code execution is not configured'}), 503
+        language_key = language.strip().lower() if isinstance(language, str) else ''
+        canonical_language = {'c++': 'cpp'}.get(language_key, language_key)
+        language_id = LANGUAGE_IDS.get(language_key)
+        if not language_id:
+            return jsonify({'error': 'Unsupported language'}), 400
         # Fetch assessment and its test cases
         assessment_response = supabase.table('coding_assessments').select('*').eq('id', assessment_id).execute()
         assessment = assessment_response.data[0] if assessment_response.data else None
 
         if not assessment:
             return jsonify({'error': 'Assessment not found'}), 404
+        try:
+            allowed_languages = json.loads(assessment.get('allowed_languages') or '[]')
+        except (TypeError, json.JSONDecodeError):
+            allowed_languages = []
+        if allowed_languages and canonical_language not in allowed_languages:
+            return jsonify({'error': 'This language is not enabled for the assessment'}), 400
 
         test_cases_response = supabase.table('assessment_test_cases').select('*').eq('assessment_id', assessment_id).execute()
         test_cases = test_cases_response.data if test_cases_response.data else []
 
         if not test_cases:
             return jsonify({'error': 'No test cases found for this assessment'}), 404
+        if len(test_cases) > 50 or any(len(str(tc.get('input_data') or '')) > 10000 for tc in test_cases):
+            return jsonify({'error': 'Assessment test data exceeds execution limits'}), 400
 
         results = []
         all_passed = True
@@ -886,14 +1170,14 @@ def submit_assessment():
             # Prepare the payload for Judge0 API
             payload = {
                 'source_code': code,
-                'language_id': language_map.get(language.lower()),
+                'language_id': language_id,
                 'stdin': test_case['input_data'],
                 'expected_output': test_case['expected_output'],
                 'base64_encoded': False
             }
 
             # Send the request to Judge0 API
-            response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload)
+            response = requests.post(JUDGE0_API_URL, headers=JUDGE0_API_HEADERS, json=payload, timeout=12)
             response.raise_for_status()
             token = response.json().get('token')
 
@@ -906,7 +1190,7 @@ def submit_assessment():
             attempts = 0
 
             while attempts < max_attempts:
-                result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS)
+                result_response = requests.get(result_url, headers=JUDGE0_API_HEADERS, timeout=8)
                 result_response.raise_for_status()
                 result = result_response.json()
 
@@ -921,7 +1205,7 @@ def submit_assessment():
                 return jsonify({'error': 'Execution timed out'}), 504
 
             # Check if the test case passed
-            passed = result.get('stdout', '').strip() == test_case['expected_output'].strip()
+            passed = result.get('status', {}).get('id') == 3 and result.get('stdout', '').strip() == test_case['expected_output'].strip()
             all_passed = all_passed and passed
 
             results.append({
@@ -932,29 +1216,22 @@ def submit_assessment():
                 'passed': passed
             })
 
-        # If all test cases passed, update the user's points
+        points_earned = 0
+        already_solved = False
         if all_passed:
-            try:
-                user_id = session.get('user_id')
-                if user_id:
-                    response = supabase.table('users').select('points').eq('id', user_id).execute()
-                    current_points = response.data[0].get('points', 0) if response.data else 0
-                    new_points = current_points + assessment['points']
-                    supabase.table('users').update({'points': new_points}).eq('id', user_id).execute()
-            except Exception as e:
-                print(f"Error updating points: {e}")
+            points_earned, already_solved = _award_points_once('assessment_solutions', 'assessment_id', int(assessment_id), session['user_id'], assessment.get('points'))
 
         return jsonify({
             'results': results,
             'all_passed': all_passed,
-            'points_earned': assessment['points'] if all_passed else 0
+            'points_earned': points_earned,
+            'already_solved': already_solved
         })
 
     except requests.exceptions.RequestException as e:
-        print("Error during API request:", e)
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to execute code. Please try again.'}), 500
     except Exception as e:
-        print("Unexpected error:", e)
         return jsonify({'error': 'An unexpected error occurred'}), 500
 
 @app.route('/get_sections')
@@ -974,158 +1251,107 @@ def get_sections():
         sections = list(set(record['section'] for record in response.data))
         return jsonify(sections)
     except Exception as e:
-        print(f"Error fetching sections: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to fetch sections'}), 500
 
 @app.route('/get_students')
 def get_students():
+    faculty_id = session.get('faculty_id')
+    section = request.args.get('section', '').strip()
+    if not section:
+        return jsonify({'error': 'Section is required'}), 400
+    assigned = supabase.table('faculty_sections').select('id').eq('faculty_id', faculty_id).eq('section', section).limit(1).execute()
+    if not assigned.data:
+        return jsonify({'error': 'You are not assigned to this section'}), 403
     try:
-        faculty_id = session.get('faculty_id')
-        if not faculty_id:
-            return jsonify({'error': 'Unauthorized'}), 401
-
-        section = request.args.get('section')
-        if not section:
-            return jsonify({'error': 'Section is required'}), 400
-
-        print(f"Fetching students for section: {section}")  # Debug log
-
-        # First, let's check if there are any students in the users table
-        check_users = supabase.table('users')\
-            .select('count')\
-            .eq('role', 'student')\
-            .execute()
-        print(f"Total students in users table: {check_users.data}")  # Debug log
-
-        # Fetch students in the selected section
-        response = supabase.table('users')\
-            .select('id, name, roll_number, section')\
-            .eq('role', 'student')\
-            .eq('section', section)\
-            .execute()
-        
-        print(f"Raw response from database: {response.data}")  # Debug log
-
-        if not response.data:
-            print(f"No students found for section {section}")  # Debug log
-            return jsonify([])
-
+        response = supabase.table('users').select('id', 'name', 'roll_number', 'section').eq('role', 'student').eq('section', section).order('name').limit(500).execute()
         students = []
         for student in response.data:
-            print(f"Processing student: {student}")  # Debug log
-            
-            # Get attendance for each student
-            attendance_response = supabase.table('attendance')\
-                .select('total_classes, attended_classes')\
-                .eq('student_id', student['id'])\
-                .eq('section', section)\
-                .execute()
-            
-            attendance = attendance_response.data[0] if attendance_response.data else None
-            attendance_str = f"{attendance['attended_classes']}/{attendance['total_classes']}" if attendance else '0/0'
-
-            students.append({
-                'id': student['id'],
-                'name': student['name'],
-                'roll_number': student['roll_number'],
-                'attendance': attendance_str
-            })
-
-        print(f"Final students list: {students}")  # Debug log
+            record = supabase.table('attendance').select('total_classes', 'attended_classes').eq('student_id', student['id']).eq('section', section).limit(1).execute()
+            attendance = record.data[0] if record.data else {'attended_classes': 0, 'total_classes': 0}
+            students.append({'id': student['id'], 'name': student['name'], 'roll_number': student['roll_number'], 'attendance': f"{attendance['attended_classes']}/{attendance['total_classes']}"})
         return jsonify(students)
-    except Exception as e:
-        print(f"Error fetching students: {e}")
-        traceback.print_exc()
+    except Exception:
+        app.logger.exception('Could not fetch section roster')
         return jsonify({'error': 'Failed to fetch students'}), 500
 
 @app.route('/mark_attendance', methods=['POST'])
 def mark_attendance():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Expected a JSON object'}), 400
+    section = data.get('section')
+    attendance_data = data.get('attendance')
     try:
-        data = request.json
-        print("Received data:", data)
-        
-        section = data.get('section')
-        date = data.get('date')
-        attendance_data = data.get('attendance', [])
-
-        if not all([section, date, attendance_data]):
-            return jsonify({'error': 'Missing required fields'}), 400
-
-        results = []
-        for student_attendance in attendance_data:
-            student_id = student_attendance.get('student_id')
-            status = student_attendance.get('status')
-
-            if not all([student_id, status]):
-                continue
-
+        attendance_date = dt.strptime(data.get('date', ''), '%Y-%m-%d').date().isoformat()
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Date must use YYYY-MM-DD format'}), 400
+    if not isinstance(section, str) or not section.strip() or not isinstance(attendance_data, list) or not 1 <= len(attendance_data) <= 500:
+        return jsonify({'error': 'A section and a valid attendance list are required'}), 400
+    faculty_id = session['faculty_id']
+    assigned = supabase.table('faculty_sections').select('id').eq('faculty_id', faculty_id).eq('section', section).limit(1).execute()
+    if not assigned.data:
+        return jsonify({'error': 'You are not assigned to this section'}), 403
+    conn = None if USING_SUPABASE else _get_connection()
+    results = []
+    try:
+        # Validate the complete roster before changing any records.
+        for item in attendance_data:
+            if not isinstance(item, dict) or item.get('status') not in {'present', 'absent'}:
+                return jsonify({'error': 'Each student must have a valid attendance status'}), 400
             try:
-                # Check if attendance record exists
-                response = supabase.table('attendance')\
-                    .select('*')\
-                    .eq('student_id', student_id)\
-                    .eq('section', section)\
-                    .execute()
-                
-                attendance_record = response.data[0] if response.data else None
+                student_id = int(item.get('student_id'))
+            except (ValueError, TypeError):
+                return jsonify({'error': 'Invalid student ID'}), 400
+            if USING_SUPABASE:
+                valid = supabase.table('users').select('id').eq('id', student_id).eq('role', 'student').eq('section', section).limit(1).execute().data
+            else:
+                valid = conn.execute("SELECT id FROM users WHERE id = ? AND role = 'student' AND section = ?", (student_id, section)).fetchone()
+            if not valid:
+                return jsonify({'error': 'The list contains a student outside this section'}), 403
 
-                if attendance_record:
-                    # Update existing record
-                    total_classes = attendance_record['total_classes'] + 1
-                    attended_classes = attendance_record['attended_classes'] + (1 if status == 'present' else 0)
-                    
-                    update_data = {
-                        'total_classes': total_classes,
-                        'attended_classes': attended_classes,
-                        'status': status,
-                        'date': date
-                    }
-                    
-                    # Update the record
-                    supabase.table('attendance')\
-                        .update(update_data)\
-                        .eq('student_id', student_id)\
-                        .eq('section', section)\
-                        .execute()
-                    
-                    results.append({
-                        'student_id': student_id,
-                        'attendance': f"{attended_classes}/{total_classes}"
-                    })
+        for item in attendance_data:
+            student_id = int(item['student_id'])
+            status = item['status']
+            if USING_SUPABASE:
+                dated_response = supabase.table('attendance_records').select('id', 'status').eq('student_id', student_id).eq('section', section).eq('attendance_date', attendance_date).limit(1).execute()
+                rollup_response = supabase.table('attendance').select('id', 'attended_classes', 'total_classes').eq('student_id', student_id).eq('section', section).limit(1).execute()
+                dated_record = dated_response.data[0] if dated_response.data else None
+                rollup = rollup_response.data[0] if rollup_response.data else None
+                total = (rollup['total_classes'] if rollup else 0) + (0 if dated_record else 1)
+                attended = (rollup['attended_classes'] if rollup else 0) + (1 if status == 'present' else 0) - (1 if dated_record and dated_record['status'] == 'present' else 0)
+                attendance_record = {'student_id': student_id, 'section': section, 'faculty_id': faculty_id, 'attendance_date': attendance_date, 'status': status}
+                if dated_record:
+                    supabase.table('attendance_records').update({'faculty_id': faculty_id, 'status': status}).eq('id', dated_record['id']).execute()
                 else:
-                    # Create new record if none exists
-                    new_attendance = {
-                        'student_id': student_id,
-                        'section': section,
-                        'date': date,
-                        'status': status,
-                        'total_classes': 1,
-                        'attended_classes': 1 if status == 'present' else 0
-                    }
-                    
-                    supabase.table('attendance').insert(new_attendance).execute()
-                    
-                    results.append({
-                        'student_id': student_id,
-                        'attendance': f"{1 if status == 'present' else 0}/1"
-                    })
-
-            except Exception as e:
-                print(f"Error processing attendance for student {student_id}: {e}")
-                continue
-
-        if not results:
-            return jsonify({'error': 'No attendance records were processed'}), 400
-
-        return jsonify({
-            'message': 'Attendance marked successfully',
-            'results': results
-        })
-
-    except Exception as e:
-        print(f"Error in mark_attendance route: {e}")
-        traceback.print_exc()
-        return jsonify({'error': f'Failed to mark attendance: {str(e)}'}), 500
+                    supabase.table('attendance_records').insert(attendance_record).execute()
+                rollup_data = {'total_classes': total, 'attended_classes': attended}
+                if rollup:
+                    supabase.table('attendance').update(rollup_data).eq('id', rollup['id']).execute()
+                else:
+                    supabase.table('attendance').insert({'student_id': student_id, 'section': section, **rollup_data}).execute()
+            else:
+                dated_record = conn.execute('SELECT status FROM attendance_records WHERE student_id = ? AND section = ? AND attendance_date = ?', (student_id, section, attendance_date)).fetchone()
+                rollup = conn.execute('SELECT id, attended_classes, total_classes FROM attendance WHERE student_id = ? AND section = ?', (student_id, section)).fetchone()
+                total = (rollup['total_classes'] if rollup else 0) + (0 if dated_record else 1)
+                attended = (rollup['attended_classes'] if rollup else 0) + (1 if status == 'present' else 0) - (1 if dated_record and dated_record['status'] == 'present' else 0)
+                conn.execute("INSERT INTO attendance_records (student_id, section, faculty_id, attendance_date, status) VALUES (?, ?, ?, ?, ?) ON CONFLICT(student_id, section, attendance_date) DO UPDATE SET faculty_id = excluded.faculty_id, status = excluded.status", (student_id, section, faculty_id, attendance_date, status))
+                if rollup:
+                    conn.execute('UPDATE attendance SET total_classes = ?, attended_classes = ? WHERE id = ?', (total, attended, rollup['id']))
+                else:
+                    conn.execute('INSERT INTO attendance (student_id, section, total_classes, attended_classes) VALUES (?, ?, ?, ?)', (student_id, section, total, attended))
+            results.append({'student_id': student_id, 'attendance': f"{attended}/{total}"})
+        if conn:
+            conn.commit()
+        return jsonify({'message': 'Attendance saved', 'results': results})
+    except Exception:
+        if conn:
+            conn.rollback()
+        app.logger.exception('Could not save attendance')
+        return jsonify({'error': 'Failed to save attendance'}), 500
+    finally:
+        if conn:
+            conn.close()
 
 @app.route('/get_courses')
 def get_courses():
@@ -1142,7 +1368,7 @@ def get_courses():
         
         return jsonify(response.data)
     except Exception as e:
-        print(f"Error fetching courses: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to fetch courses'}), 500
 
 @app.route('/code_room')
@@ -1162,25 +1388,32 @@ def code_room():
         
         return render_template('code_room.html', rooms=rooms)
     except Exception as e:
-        print(f"Error fetching code rooms: {e}")
+        app.logger.exception('Request processing failed')
         return render_template('code_room.html', error='Failed to load code rooms')
 
 @app.route('/create_code_room', methods=['POST'])
 def create_code_room():
     try:
-        data = request.json
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'error': 'A valid JSON object is required'}), 400
         name = data.get('name')
         language = data.get('language')
         user_id = session.get('user_id')
         
-        if not all([name, language, user_id]):
-            return jsonify({'error': 'Missing required fields'}), 400
+        if not user_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+        supported_languages = {'python', 'javascript', 'java', 'c', 'cpp', 'c++'}
+        if not isinstance(name, str) or not name.strip() or len(name.strip()) > 100:
+            return jsonify({'error': 'Room names must be 1 to 100 characters'}), 400
+        if not isinstance(language, str) or language.strip().lower() not in supported_languages:
+            return jsonify({'error': 'Choose a supported programming language'}), 400
             
         # Create new code room
         room_data = {
-            'name': name,
+            'name': name.strip(),
             'created_by': user_id,
-            'language': language,
+            'language': language.strip().lower(),
             'code': '',
             'is_active': True
         }
@@ -1204,7 +1437,7 @@ def create_code_room():
             
         return jsonify({'error': 'Failed to create code room'}), 500
     except Exception as e:
-        print(f"Error creating code room: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to create code room'}), 500
 
 @app.route('/join_code_room/<room_id>', methods=['POST'])
@@ -1261,19 +1494,22 @@ def join_code_room(room_id):
                              participants=participants,
                              messages=messages)
     except Exception as e:
-        print(f"Error joining code room: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return jsonify({'error': f'Failed to join code room: {str(e)}'}), 500
 
 @app.route('/update_code/<room_id>', methods=['POST'])
 def update_code(room_id):
     try:
-        data = request.json
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'error': 'A valid JSON object is required'}), 400
         code = data.get('code')
         user_id = session.get('user_id')
         
-        if not all([code, user_id]):
-            return jsonify({'error': 'Missing required fields'}), 400
+        if not user_id:
+            return jsonify({'error': 'Unauthorized'}), 401
+        if not isinstance(code, str) or len(code) > 100_000:
+            return jsonify({'error': 'Code must be text and 100,000 characters or fewer'}), 413
             
         # Convert room_id to integer
         try:
@@ -1299,7 +1535,7 @@ def update_code(room_id):
             
         return jsonify({'message': 'Code updated successfully'})
     except Exception as e:
-        print(f"Error updating code: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to update code'}), 500
 
 @app.route('/leave_code_room/<room_id>', methods=['POST'])
@@ -1330,7 +1566,7 @@ def leave_code_room(room_id):
                 
         return jsonify({'message': 'Left code room successfully'})
     except Exception as e:
-        print(f"Error leaving code room: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to leave code room'}), 500
 
 @app.route('/get_room_messages/<int:room_id>')
@@ -1380,7 +1616,7 @@ def get_room_messages(room_id):
         })
 
     except Exception as e:
-        print(f"Error fetching messages: {str(e)}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to fetch messages'}), 500
 
 @app.route('/send_code_room_message/<room_id>', methods=['POST'])
@@ -1389,9 +1625,11 @@ def send_code_room_message(room_id):
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        data = request.get_json()
-        if not data or 'message' not in data:
-            return jsonify({'error': 'Message is required'}), 400
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or not isinstance(data.get('message'), str) or not data['message'].strip():
+            return jsonify({'error': 'A non-empty message is required'}), 400
+        if len(data['message']) > 2000:
+            return jsonify({'error': 'Messages must be 2,000 characters or fewer'}), 413
 
         user_id = int(session['user_id'])
 
@@ -1413,8 +1651,8 @@ def send_code_room_message(room_id):
         message_data = {
             'room_id': room_id,
             'sender_id': user_id,
-            'message': data['message'],
-            'created_at': dt.now(tz.tzutc()).isoformat()
+            'message': data['message'].strip(),
+            'created_at': dt.now(timezone.utc).isoformat()
         }
         
         # Insert message
@@ -1427,15 +1665,14 @@ def send_code_room_message(room_id):
                     'room_id': room_id,
                     'user_id': user_id,
                     'user_name': user_name,
-                    'message': data['message'],
+                    'message': data['message'].strip(),
                     'created_at': message_response.data[0]['created_at']
                 }
             })
 
     except Exception as e:
-        print(f"Error sending message: {str(e)}")
-        traceback.print_exc()
-        return jsonify({'error': f'Failed to send message: {str(e)}'}), 500
+        app.logger.exception('Request processing failed')
+        return jsonify({'error': 'Failed to send message'}), 500
 
 @app.route('/code_room_page/<room_id>')
 def code_room_page(room_id):
@@ -1491,159 +1728,43 @@ def code_room_page(room_id):
                              participants=participants,
                              messages=messages)
     except Exception as e:
-        print(f"Error loading code room page: {e}")
+        app.logger.exception('Request processing failed')
         return redirect(url_for('code_room'))
 
 @app.route('/create_assessments_table')
 def create_assessments_table():
     try:
-        # Create table if it doesn't exist
-        create_table_query = """
-        -- Drop existing tables if they exist
-        DROP TABLE IF EXISTS public.assignment_submissions CASCADE;
-        DROP TABLE IF EXISTS public.assessment_links CASCADE;
-        DROP TABLE IF EXISTS public.assessments CASCADE;
-
-        -- Create assessments table
-        CREATE TABLE public.assessments (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            faculty_id UUID REFERENCES auth.users(id),
-            subject TEXT NOT NULL,
-            year TEXT NOT NULL,
-            branch TEXT NOT NULL,
-            description TEXT NOT NULL,
-            deadline TIMESTAMP WITH TIME ZONE NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-
-        -- Create assessment_links table
-        CREATE TABLE public.assessment_links (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            assessment_id UUID REFERENCES public.assessments(id),
-            link_type TEXT NOT NULL,
-            link_url TEXT NOT NULL,
-            description TEXT,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-
-        -- Create assignment_submissions table
-        CREATE TABLE public.assignment_submissions (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            assignment_id UUID REFERENCES public.assessments(id),
-            student_id UUID REFERENCES auth.users(id),
-            drive_link TEXT NOT NULL,
-            comments TEXT,
-            submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-
-        -- Add RLS policies for assessments
-        ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
-
-        CREATE POLICY "Faculty can view their own assignments"
-            ON public.assessments
-            FOR SELECT
-            USING (faculty_id = auth.uid());
-
-        CREATE POLICY "Faculty can insert their own assignments"
-            ON public.assessments
-            FOR INSERT
-            WITH CHECK (faculty_id = auth.uid());
-
-        CREATE POLICY "Faculty can update their own assignments"
-            ON public.assessments
-            FOR UPDATE
-            USING (faculty_id = auth.uid());
-
-        CREATE POLICY "Faculty can delete their own assignments"
-            ON public.assessments
-            FOR DELETE
-            USING (faculty_id = auth.uid());
-
-        -- Add RLS policies for assessment_links
-        ALTER TABLE public.assessment_links ENABLE ROW LEVEL SECURITY;
-
-        CREATE POLICY "Faculty can view links for their assignments"
-            ON public.assessment_links
-            FOR SELECT
-            USING (
-                EXISTS (
-                    SELECT 1 FROM public.assessments
-                    WHERE assessments.id = assessment_links.assessment_id
-                    AND assessments.faculty_id = auth.uid()
-                )
-            );
-
-        CREATE POLICY "Faculty can insert links for their assignments"
-            ON public.assessment_links
-            FOR INSERT
-            WITH CHECK (
-                EXISTS (
-                    SELECT 1 FROM public.assessments
-                    WHERE assessments.id = assessment_links.assessment_id
-                    AND assessments.faculty_id = auth.uid()
-                )
-            );
-
-        -- Add RLS policies for assignment_submissions
-        ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
-
-        CREATE POLICY "Students can view their own submissions"
-            ON public.assignment_submissions
-            FOR SELECT
-            USING (student_id = auth.uid());
-
-        CREATE POLICY "Students can insert their own submissions"
-            ON public.assignment_submissions
-            FOR INSERT
-            WITH CHECK (student_id = auth.uid());
-
-        CREATE POLICY "Faculty can view submissions for their assignments"
-            ON public.assignment_submissions
-            FOR SELECT
-            USING (
-                EXISTS (
-                    SELECT 1 FROM public.assessments
-                    WHERE assessments.id = assignment_submissions.assignment_id
-                    AND assessments.faculty_id = auth.uid()
-                )
-            );
-        """
-        
-        # Execute the query
-        response = supabase.rpc('exec_sql', {'query': create_table_query}).execute()
-        print("Tables created successfully")
-        return jsonify({"message": "Tables created successfully"})
+        init_db()
+        return jsonify({"message": "Tables already ensured in SQLite"})
     except Exception as e:
-        print(f"Error creating tables: {str(e)}")
+        app.logger.exception('Request processing failed')
         return jsonify({"error": f"Failed to create tables: {str(e)}"}), 500
 
 @app.route('/student/assignments')
 def student_assignments():
     try:
-        # Fetch all assignments from the assessments table
-        response = supabase.table('assessments').select('*').execute()
+        student = supabase.table('users').select('branch', 'semester').eq('id', session['user_id']).limit(1).execute().data
+        if not student:
+            return render_template('student assignment.html', assignments=[], error='Student account not found')
+        cohort = student[0]
+        response = supabase.table('assessments').select('*').eq('branch', cohort.get('branch')).eq('year', cohort.get('semester')).order('deadline').limit(200).execute()
         assignments = response.data if response.data else []
         
         return render_template('student assignment.html', assignments=assignments)
     except Exception as e:
-        print(f"Error fetching assignments: {str(e)}")
+        app.logger.exception('Request processing failed')
         return render_template('student assignment.html', error='Failed to load assignments')
 
 @app.route('/submit_assignment', methods=['POST'])
 def submit_assignment():
     try:
-        data = request.json
-        print("Received data:", data)  # Debug log
-        
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'error': 'Expected a JSON object'}), 400
         assignment_id = data.get('assignment_id')
         link = data.get('drive_link')  # Changed from 'link' to 'drive_link'
         user_id = session.get('user_id')
 
-        print(f"Validating fields - assignment_id: {assignment_id}, drive_link: {link}, user_id: {user_id}")  # Debug log
 
         # Check if any required field is missing
         missing_fields = []
@@ -1660,6 +1781,12 @@ def submit_assignment():
                 'missing_fields': missing_fields
             }), 400
 
+        assignment = supabase.table('assessments').select('id').eq('id', assignment_id).limit(1).execute()
+        if not assignment.data:
+            return jsonify({'error': 'Assignment not found'}), 404
+        if not isinstance(link, str) or len(link) > 2000 or not link.startswith(('https://', 'http://')):
+            return jsonify({'error': 'Enter a valid http(s) submission link'}), 400
+
         # Get user details from users table
         user_response = supabase.table('users').select('name, roll_number').eq('id', user_id).execute()
         if not user_response.data:
@@ -1675,8 +1802,6 @@ def submit_assignment():
             'link': link
         }
 
-        print("Submitting data:", submission_data)  # Debug log
-
         response = supabase.table('assignment_submissions').insert(submission_data).execute()
         
         if response.data:
@@ -1688,9 +1813,8 @@ def submit_assignment():
         return jsonify({'error': 'Failed to submit assignment - no data returned from database'}), 500
 
     except Exception as e:
-        print(f"Error submitting assignment: {str(e)}")
-        traceback.print_exc()
-        return jsonify({'error': f'Failed to submit assignment: {str(e)}'}), 500
+        app.logger.exception('Assignment submission failed')
+        return jsonify({'error': 'Failed to submit assignment'}), 500
 
 @app.route('/add_assessment_link', methods=['POST'])
 def add_assessment_link():
@@ -1703,6 +1827,12 @@ def add_assessment_link():
 
         if not all([assessment_id, link_type, link_url]):
             return jsonify({'error': 'Missing required fields'}), 400
+
+        owner = supabase.table('assessments').select('id').eq('id', assessment_id).eq('faculty_id', session.get('faculty_id')).limit(1).execute()
+        if not owner.data:
+            return jsonify({'error': 'Assignment not found or not owned by you'}), 404
+        if not isinstance(link_url, str) or len(link_url) > 2000 or not link_url.startswith(('https://', 'http://')):
+            return jsonify({'error': 'Enter a valid http(s) link'}), 400
 
         # Insert link into database
         link_data = {
@@ -1720,7 +1850,7 @@ def add_assessment_link():
         return jsonify({'error': 'Failed to add link'}), 500
 
     except Exception as e:
-        print(f"Error adding assessment link: {str(e)}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'An error occurred while adding the link'}), 500
 
 @app.route('/get_assessment_links/<assessment_id>')
@@ -1734,58 +1864,26 @@ def get_assessment_links(assessment_id):
         links = response.data if response.data else []
         return jsonify(links)
     except Exception as e:
-        print(f"Error fetching assessment links: {str(e)}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to fetch links'}), 500
 
 @app.route('/create_assignment_submissions_table')
 def create_assignment_submissions_table():
     try:
-        # Create table if it doesn't exist
-        create_table_query = """
-        -- Drop existing table if it exists
-        DROP TABLE IF EXISTS public.assignment_submissions CASCADE;
-
-        -- Create assignment_submissions table
-        CREATE TABLE public.assignment_submissions (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            assessment_id UUID REFERENCES public.assessments(id),
-            name TEXT NOT NULL,
-            roll_number TEXT NOT NULL,
-            link TEXT NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-
-        -- Add RLS policies
-        ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
-
-        CREATE POLICY "Students can view their own submissions"
-            ON public.assignment_submissions
-            FOR SELECT
-            USING (roll_number = auth.jwt()->>'roll_number');
-
-        CREATE POLICY "Students can insert their own submissions"
-            ON public.assignment_submissions
-            FOR INSERT
-            WITH CHECK (roll_number = auth.jwt()->>'roll_number');
-
-        CREATE POLICY "Faculty can view all submissions"
-            ON public.assignment_submissions
-            FOR SELECT
-            USING (auth.role() = 'faculty');
-        """
-        
-        # Execute the query
-        response = supabase.rpc('exec_sql', {'query': create_table_query}).execute()
-        print("Assignment submissions table created successfully")
-        return jsonify({"message": "Assignment submissions table created successfully"})
+        init_db()
+        return jsonify({"message": "Assignment submissions table already ensured in SQLite"})
     except Exception as e:
-        print(f"Error creating table: {str(e)}")
+        app.logger.exception('Request processing failed')
         return jsonify({"error": f"Failed to create table: {str(e)}"}), 500
 
 @app.route('/get_assignment_submissions/<assignment_id>')
 def get_assignment_submissions(assignment_id):
     try:
+        assignment = supabase.table('assessments').select('id').eq('id', assignment_id).limit(1).execute()
+        if not assignment.data:
+            return jsonify({'error': 'Assignment not found'}), 404
+        if session.get('role') == 'faculty' and not supabase.table('assessments').select('id').eq('id', assignment_id).eq('faculty_id', session.get('faculty_id')).limit(1).execute().data:
+            return jsonify({'error': 'You do not own this assignment'}), 403
         # Fetch submissions for the given assignment
         response = supabase.table('assignment_submissions')\
             .select('*')\
@@ -1798,7 +1896,7 @@ def get_assignment_submissions(assignment_id):
             'submissions': submissions
         })
     except Exception as e:
-        print(f"Error fetching submissions: {str(e)}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to fetch submissions'}), 500
 
 @app.route('/get_faculty_assignments')
@@ -1821,32 +1919,43 @@ def get_faculty_assignments():
             'assignments': assignments
         })
     except Exception as e:
-        print(f"Error fetching assignments: {str(e)}")
+        app.logger.exception('Request processing failed')
         return jsonify({'error': 'Failed to fetch assignments'}), 500
 
 @app.route('/add_faculty', methods=['POST'])
 @admin_required
 def add_faculty():
     try:
-        data = request.get_json()
-        print("Received data:", data)  # Debug log
-        
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'success': False, 'message': 'Expected a JSON object'}), 400
+        data['email'] = data.get('email', '').strip().casefold() if isinstance(data.get('email'), str) else ''
+        if not isinstance(data.get('password'), str) or not (12 <= len(data['password'].encode('utf-8')) <= 72):
+            return jsonify({'success': False, 'message': 'Password must be 12 to 72 bytes long'}), 400
+        if not isinstance(data.get('sections'), str):
+            return jsonify({'success': False, 'message': 'Sections must be a comma-separated list'}), 400
         # Validate required fields
         required_fields = ['name', 'email', 'password', 'roll_number', 'branch', 'subject', 'sections']
         for field in required_fields:
-            if not data.get(field):
-                print(f"Missing required field: {field}")  # Debug log
-                return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+            value = data.get(field)
+            if not isinstance(value, str) or not value.strip():
+                return jsonify({'success': False, 'message': f'Missing or invalid field: {field}'}), 400
+            if len(value) > 500:
+                return jsonify({'success': False, 'message': f'Field is too long: {field}'}), 400
+        if '@' not in data['email'] or '.' not in data['email'].rsplit('@', 1)[-1] or len(data['email']) > 254:
+            return jsonify({'success': False, 'message': 'Enter a valid email address'}), 400
+
+        sections = list(dict.fromkeys(part.strip() for part in data['sections'].split(',') if part.strip()))
+        if not sections or len(sections) > 20 or any(len(section) > 40 for section in sections):
+            return jsonify({'success': False, 'message': 'Enter between 1 and 20 valid sections'}), 400
 
         # Check if email already exists
         existing_user = supabase.table('users').select('id').eq('email', data['email']).execute()
-        print("Existing user check:", existing_user.data)  # Debug log
         if existing_user.data:
             return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
         # Hash the password
         hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        print("Password hashed successfully")  # Debug log
 
         # Prepare faculty data
         faculty_data = {
@@ -1858,20 +1967,15 @@ def add_faculty():
             'subject': data['subject'],
             'role': 'faculty'
         }
-        print("Prepared faculty data:", faculty_data)  # Debug log
 
         # Insert faculty into users table
         response = supabase.table('users').insert(faculty_data).execute()
-        print("Database response:", response.data)  # Debug log
         
         if not response.data:
-            print("Failed to insert faculty data")  # Debug log
             return jsonify({'success': False, 'message': 'Failed to add faculty'}), 500
 
         # Add faculty sections
         faculty_id = response.data[0]['id']
-        sections = [section.strip() for section in data['sections'].split(',')]
-        
         for section in sections:
             section_data = {
                 'faculty_id': faculty_id,
@@ -1881,33 +1985,40 @@ def add_faculty():
 
         return jsonify({'success': True, 'message': 'Faculty added successfully'})
     except Exception as e:
-        print(f"Error adding faculty: {e}")  # Debug log
-        traceback.print_exc()
+        app.logger.exception('Unable to add faculty')
         return jsonify({'success': False, 'message': 'Failed to add faculty'}), 500
 
 @app.route('/add_student', methods=['POST'])
 @admin_required
 def add_student():
     try:
-        data = request.get_json()
-        print("Received data:", data)  # Debug log
-        
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'success': False, 'message': 'Expected a JSON object'}), 400
+        data['email'] = data.get('email', '').strip().casefold() if isinstance(data.get('email'), str) else ''
+        if not isinstance(data.get('password'), str) or not (12 <= len(data['password'].encode('utf-8')) <= 72):
+            return jsonify({'success': False, 'message': 'Password must be 12 to 72 bytes long'}), 400
         # Validate required fields
         required_fields = ['name', 'email', 'password', 'roll_number', 'branch', 'section', 'semester']
         for field in required_fields:
-            if not data.get(field):
-                print(f"Missing required field: {field}")  # Debug log
-                return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+            value = data.get(field)
+            if not isinstance(value, str) or not value.strip():
+                return jsonify({'success': False, 'message': f'Missing or invalid field: {field}'}), 400
+            if len(value) > 500:
+                return jsonify({'success': False, 'message': f'Field is too long: {field}'}), 400
+        if '@' not in data['email'] or '.' not in data['email'].rsplit('@', 1)[-1] or len(data['email']) > 254:
+            return jsonify({'success': False, 'message': 'Enter a valid email address'}), 400
+
+        if data['semester'] not in {str(number) for number in range(1, 9)}:
+            return jsonify({'success': False, 'message': 'Semester must be between 1 and 8'}), 400
 
         # Check if email already exists
         existing_user = supabase.table('users').select('id').eq('email', data['email']).execute()
-        print("Existing user check:", existing_user.data)  # Debug log
         if existing_user.data:
             return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
         # Hash the password
         hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        print("Password hashed successfully")  # Debug log
 
         # Prepare student data
         student_data = {
@@ -1920,14 +2031,11 @@ def add_student():
             'semester': data['semester'],
             'role': 'student'
         }
-        print("Prepared student data:", student_data)  # Debug log
 
         # Insert student into users table
         response = supabase.table('users').insert(student_data).execute()
-        print("Database response:", response.data)  # Debug log
         
         if not response.data:
-            print("Failed to insert student data")  # Debug log
             return jsonify({'success': False, 'message': 'Failed to add student'}), 500
 
         # Initialize attendance record
@@ -1937,21 +2045,20 @@ def add_student():
             'attended_classes': 0,
             'total_classes': 0
         }
-        print("Initializing attendance record:", attendance_data)  # Debug log
         supabase.table('attendance').insert(attendance_data).execute()
 
         return jsonify({'success': True, 'message': 'Student added successfully'})
     except Exception as e:
-        print(f"Error adding student: {e}")  # Debug log
-        traceback.print_exc()
+        app.logger.exception('Unable to add student')
         return jsonify({'success': False, 'message': 'Failed to add student'}), 500
 
 @app.route('/edit_student/<int:student_id>', methods=['PUT'])
 @admin_required
 def edit_student(student_id):
     try:
-        data = request.get_json()
-        
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'success': False, 'message': 'Expected a JSON object'}), 400
         # Validate required fields
         required_fields = ['name', 'email', 'roll_number', 'branch', 'section', 'semester']
         for field in required_fields:
@@ -1959,6 +2066,7 @@ def edit_student(student_id):
                 return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
 
         # Check if email already exists for another student
+        data['email'] = data['email'].strip().casefold()
         existing_user = supabase.table('users')\
             .select('id')\
             .eq('email', data['email'])\
@@ -1966,6 +2074,9 @@ def edit_student(student_id):
             .execute()
         if existing_user.data:
             return jsonify({'success': False, 'message': 'Email already exists'}), 400
+        target = supabase.table('users').select('id').eq('id', student_id).eq('role', 'student').limit(1).execute()
+        if not target.data:
+            return jsonify({'success': False, 'message': 'Student not found'}), 404
 
         # Prepare student data
         student_data = {
@@ -1981,6 +2092,7 @@ def edit_student(student_id):
         response = supabase.table('users')\
             .update(student_data)\
             .eq('id', student_id)\
+            .eq('role', 'student')\
             .execute()
         
         if not response.data:
@@ -1988,53 +2100,88 @@ def edit_student(student_id):
 
         return jsonify({'success': True, 'message': 'Student updated successfully'})
     except Exception as e:
-        print(f"Error updating student: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return jsonify({'success': False, 'message': 'Failed to update student'}), 500
 
 @app.route('/delete_student/<int:student_id>', methods=['DELETE'])
 @admin_required
 def delete_student(student_id):
     try:
-        # Delete student's attendance records
-        supabase.table('attendance')\
-            .delete()\
-            .eq('student_id', student_id)\
-            .execute()
-
-        # Delete student from users table
-        response = supabase.table('users')\
-            .delete()\
-            .eq('id', student_id)\
-            .execute()
-        
-        if not response.data:
-            return jsonify({'success': False, 'message': 'Failed to delete student'}), 500
+        if USING_SUPABASE:
+            result = supabase.table('users').select('id', 'roll_number').eq('id', student_id).eq('role', 'student').limit(1).execute()
+            student = result.data[0] if result.data else None
+            if not student:
+                return jsonify({'success': False, 'message': 'Student not found'}), 404
+            supabase.table('chat_rooms').delete().or_(f"user1_id = {student_id}", f"user2_id = {student_id}").execute()
+            supabase.table('code_rooms').delete().eq('created_by', student_id).execute()
+            supabase.table('code_room_messages').delete().eq('user_id', student_id).execute()
+            supabase.table('code_room_messages').delete().eq('sender_id', student_id).execute()
+            supabase.table('attendance_records').delete().eq('student_id', student_id).execute()
+            supabase.table('attendance').delete().eq('student_id', student_id).execute()
+            supabase.table('problem_solutions').delete().eq('user_id', student_id).execute()
+            supabase.table('assessment_solutions').delete().eq('user_id', student_id).execute()
+            supabase.table('assignment_submissions').delete().eq('roll_number', student['roll_number']).execute()
+            supabase.table('users').delete().eq('id', student_id).eq('role', 'student').execute()
+        else:
+            conn = _get_connection()
+            try:
+                student = conn.execute("SELECT id, roll_number FROM users WHERE id = ? AND role = 'student'", (student_id,)).fetchone()
+                if not student:
+                    return jsonify({'success': False, 'message': 'Student not found'}), 404
+                # Remove dependent rows explicitly for older local databases too.
+                conn.execute('DELETE FROM chat_rooms WHERE user1_id = ? OR user2_id = ?', (student_id, student_id))
+                conn.execute('DELETE FROM code_rooms WHERE created_by = ?', (student_id,))
+                conn.execute('DELETE FROM code_room_messages WHERE user_id = ? OR sender_id = ?', (student_id, student_id))
+                conn.execute('DELETE FROM attendance_records WHERE student_id = ?', (student_id,))
+                conn.execute('DELETE FROM attendance WHERE student_id = ?', (student_id,))
+                conn.execute('DELETE FROM problem_solutions WHERE user_id = ?', (student_id,))
+                conn.execute('DELETE FROM assessment_solutions WHERE user_id = ?', (student_id,))
+                conn.execute('DELETE FROM assignment_submissions WHERE roll_number = ?', (student['roll_number'],))
+                conn.execute("DELETE FROM users WHERE id = ? AND role = 'student'", (student_id,))
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                conn.close()
 
         return jsonify({'success': True, 'message': 'Student deleted successfully'})
     except Exception as e:
-        print(f"Error deleting student: {e}")
-        traceback.print_exc()
+        app.logger.exception('Request processing failed')
         return jsonify({'success': False, 'message': 'Failed to delete student'}), 500
 
 
 
 # Instead of directly hardcoding the key, use a more secure method
-COHERE_API_KEY = os.environ.get('COHERE_API_KEY', 'tF4ybICjnFpt29D5IiFOIoDlLnRxj3M0VxdbY755')
+COHERE_API_KEY = os.environ.get('COHERE_API_KEY', '')
+COHERE_MODEL = os.environ.get('COHERE_MODEL', 'command-a-plus-05-2026')
 
 # Safely initialize Cohere client
 co = None
 try:
     if cohere and COHERE_API_KEY:
-        co = cohere.Client(COHERE_API_KEY)
+        co = cohere.ClientV2(api_key=COHERE_API_KEY)
 except Exception as e:
-    print(f"Failed to initialize Cohere client: {e}")
+    app.logger.exception('Request processing failed')
+
+def generate_with_cohere(prompt, max_tokens=500, temperature=0.7):
+    if not co:
+        raise RuntimeError('Cohere is not configured')
+    response = co.chat(
+        model=COHERE_MODEL,
+        messages=[{'role': 'user', 'content': prompt}],
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
+    content = getattr(response.message, 'content', [])
+    for item in content:
+        text = getattr(item, 'text', None)
+        if text:
+            return text
+    raise RuntimeError('The AI provider returned an empty response')
 @app.route('/job_match_recommender')
 def job_match_recommender():
-    user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-    return render_template('job match recommender.html')
+    return redirect(url_for('job_match_recomender1'))
 @app.route('/code-review')
 def code_review():
     return render_template('code_review.html')
@@ -2042,8 +2189,12 @@ def code_review():
 
 @app.route('/api/review', methods=['POST'])
 def review_code_api():
-    code = request.form['code']
-    language = request.form['language']
+    code = request.form.get('code', '')
+    language = request.form.get('language', 'python')
+    if not code or len(code) > 30000:
+        return jsonify({'error': 'Code is required and must be under 30,000 characters'}), 400
+    if not co:
+        return jsonify({'error': 'Code review is not configured on this server'}), 503
 
     prompt = f"""
 You are an expert code reviewer.
@@ -2078,28 +2229,53 @@ Here is the code to review:
 """
 
     try:
-        response = co.generate(
-            model='command-r-plus',
-            prompt=prompt,
-            max_tokens=300,
-            temperature=0.7
-        )
-
-        feedback = response.generations[0].text
+        feedback = generate_with_cohere(prompt, max_tokens=300, temperature=0.7)
         return jsonify({'feedback': feedback})
 
-    except Exception as e:
-        return jsonify({'error': str(e)})
+    except Exception:
+        app.logger.exception('AI code review failed')
+        return jsonify({'error': 'Code review is temporarily unavailable'}), 502
 @app.route('/job_match_recomender', methods=['GET'])
 def job_match_recomender1():
     return render_template('job_match_recomender.html')
 @app.route('/student leaderboard', methods=['GET'])
 def student_leaderboard():
-    return render_template('student leaderboard.html')   
+    user_id = session.get('user_id')
+    try:
+        response = supabase.table('users').select('id', 'name', 'roll_number', 'points')\
+            .eq('role', 'student').order('points', desc=True).limit(100).execute()
+        learners = response.data or []
+        for learner in learners:
+            learner['points'] = int(learner.get('points') or 0)
+        learners.sort(key=lambda learner: (-learner['points'], (learner.get('name') or '').casefold()))
+        current_rank = next((index for index, learner in enumerate(learners, 1) if str(learner['id']) == str(user_id)), None)
+        return render_template(
+            'student leaderboard.html',
+            learners=learners,
+            current_rank=current_rank,
+            stats={
+                'learners': len(learners),
+                'top_score': learners[0]['points'] if learners else 0,
+                'participants': sum(1 for learner in learners if learner['points'] > 0),
+            },
+        )
+    except Exception:
+        app.logger.exception('Coding leaderboard could not be loaded')
+        return render_template(
+            'student leaderboard.html',
+            learners=[],
+            current_rank=None,
+            stats={'learners': 0, 'top_score': 0, 'participants': 0},
+            error='The leaderboard could not be loaded. Please try again later.',
+        )
 
 @app.route('/recommend', methods=['POST'])
 def recommend_jobs():
-    skills_input = request.form['skills']
+    skills_input = request.form.get('skills', '').strip()
+    if not skills_input or len(skills_input) > 2000:
+        return render_template('job_match_recomender.html', error='Enter skills in 2,000 characters or fewer')
+    if not co:
+        return render_template('job_match_recomender.html', error='Recommendations are not configured on this server')
 
     prompt = f"""
     You are an expert career advisor.
@@ -2118,15 +2294,10 @@ def recommend_jobs():
     """
 
     try:
-        response = co.generate(
-            model='command-r-plus',
-            prompt=prompt,
-            max_tokens=400,
-            temperature=0.7
-        )
-        recommendation = response.generations[0].text
-    except Exception as e:
-        recommendation = f"Error: {str(e)}"
+        recommendation = generate_with_cohere(prompt, max_tokens=400, temperature=0.7)
+    except Exception:
+        app.logger.exception('Career recommendations failed')
+        recommendation = 'Recommendations are temporarily unavailable. Please try again later.'
 
     return render_template('job_match_recomender.html', recommendation=recommendation)
 @app.route('/ai_code_assistant')
@@ -2135,7 +2306,11 @@ def ai_code_assistant():
 
 @app.route('/solve', methods=['POST'])
 def solve_code_problem():
-    question = request.form['question']
+    question = request.form.get('question', '').strip()
+    if not question or len(question) > 3000:
+        return render_template('ai_code_assistant.html', error='Enter a question in 3,000 characters or fewer')
+    if not co:
+        return render_template('ai_code_assistant.html', error='The AI assistant is not configured on this server')
 
     prompt = f"""
     You are a helpful coding assistant.
@@ -2154,15 +2329,10 @@ def solve_code_problem():
     """
 
     try:
-        response = co.generate(
-            model='command-r-plus',
-            prompt=prompt,
-            max_tokens=500,
-            temperature=0.7
-        )
-        result = response.generations[0].text
-    except Exception as e:
-        result = f"Error: {str(e)}"
+        result = generate_with_cohere(prompt, max_tokens=500, temperature=0.7)
+    except Exception:
+        app.logger.exception('AI assistant request failed')
+        result = 'The assistant is temporarily unavailable. Please try again later.'
 
     return render_template('ai_code_assistant.html', result=result)
 
@@ -2228,8 +2398,9 @@ def create_chat_room():
         if not other_user_response.data:
             return jsonify({'status': 'error', 'message': 'Recipient user not found'}), 404
         
-        # Additional role-based validation if needed
-        other_user_role = other_user_response.data[0]['role']
+        expected_role = 'faculty' if session.get('role') == 'student' else 'student'
+        if other_user_response.data[0]['role'] != expected_role:
+            return jsonify({'status': 'error', 'message': 'Invalid chat participants'}), 403
         
         # Prevent creating chat rooms with the same user
         if user_id == other_user_id:
@@ -2256,7 +2427,7 @@ def create_chat_room():
         new_room_data = {
             'user1_id': user_id,
             'user2_id': other_user_id,
-            'created_at': dt.now(tz.tzutc()).isoformat()
+            'created_at': dt.now(timezone.utc).isoformat()
         }
         
         room_response = supabase.table('chat_rooms').insert(new_room_data).execute()
@@ -2271,8 +2442,8 @@ def create_chat_room():
             return jsonify({'status': 'error', 'message': 'Failed to create chat room'}), 500
     
     except Exception as e:
-        print(f"Error creating chat room: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        app.logger.exception('Request processing failed')
+        return jsonify({'status': 'error', 'message': 'Failed to send message'}), 500
 
 @app.route('/send_chat_message', methods=['POST'])
 def send_chat_message():
@@ -2291,8 +2462,10 @@ def send_chat_message():
         message_content = request.form.get('message')
         
         # Validate inputs
-        if not room_id or not message_content:
+        if not room_id or not isinstance(message_content, str) or not message_content.strip():
             return jsonify({'status': 'error', 'message': 'Missing room_id or message'}), 400
+        if len(message_content) > 2000:
+            return jsonify({'status': 'error', 'message': 'Messages must be 2,000 characters or fewer'}), 413
         
         # Convert to integers
         try:
@@ -2316,7 +2489,7 @@ def send_chat_message():
             'room_id': room_id,
             'sender_id': user_id,
             'message': message_content,
-            'created_at': dt.now(tz.tzutc()).isoformat()
+            'created_at': dt.now(timezone.utc).isoformat()
         }
         
         # Insert message
@@ -2332,44 +2505,24 @@ def send_chat_message():
             return jsonify({'status': 'error', 'message': 'Failed to send message'}), 500
     
     except Exception as e:
-        print(f"Error sending message: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/get_users', methods=['POST'])
 def get_users():
-    """
-    Retrieve users based on search criteria
-    Supports filtering by role and search term
-    """
+    search_term = request.form.get('search_term', '').strip()
+    if len(search_term) > 80:
+        return jsonify({'error': 'Search is too long'}), 400
+    # Students can find faculty; faculty can find students. Never expose arbitrary role directories.
+    role = 'faculty' if session.get('role') == 'student' else 'student'
     try:
-        # Get search parameters
-        search_term = request.form.get('search_term', '').strip()
-        role = request.form.get('role')
-        
-        # Start with base query
-        query = supabase.table('users').select('id', 'name', 'role')
-        
-        # Apply role filter if specified
-        if role:
-            query = query.eq('role', role)
-        
-        # Apply search term if provided
+        query = supabase.table('users').select('id', 'name', 'role').eq('role', role)
         if search_term:
-            # Use multiple filter conditions
             query = query.filter('name', 'ilike', f'%{search_term}%')
-        
-        # Execute query
-        response = query.execute()
-        
-        # Return results
-        if response.data:
-            return jsonify(response.data)
-        else:
-            return jsonify([])
-    
-    except Exception as e:
-        print(f"Error fetching users: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify(query.order('name').limit(50).execute().data or [])
+    except Exception:
+        app.logger.exception('User directory lookup failed')
+        return jsonify({'error': 'Unable to search users'}), 500
 
 @app.route('/get_current_user_id')
 def get_current_user_id():
@@ -2395,7 +2548,7 @@ def get_current_user_id():
         })
     
     except Exception as e:
-        print(f"Error retrieving user ID: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/faculty_chat')
@@ -2418,7 +2571,7 @@ def faculty_chat():
         return render_template('faculty_chat.html', user_name=user_data['name'])
     
     except Exception as e:
-        print(f"Error loading faculty chat: {e}")
+        app.logger.exception('Request processing failed')
         return redirect(url_for('login'))
 
 @app.route('/create_faculty_chat_room', methods=['POST'])
@@ -2455,12 +2608,13 @@ def create_faculty_chat_room():
         if not other_user_response.data:
             return jsonify({'status': 'error', 'message': 'Recipient user not found'}), 404
         
-        # Additional role-based validation if needed
-        other_user_role = other_user_response.data[0]['role']
+        # The signed-in faculty member may only open a room with a student.
+        if faculty_id != user_id or other_user_response.data[0]['role'] != 'student':
+            return jsonify({'status': 'error', 'message': 'Invalid chat participants'}), 403
         
         # Prevent creating chat rooms with the same user
-        if user_id == student_id:
-            return jsonify({'status': 'error', 'message': 'Cannot create a chat room with yourself'}), 400
+        if user_id != faculty_id or user_id == student_id:
+            return jsonify({'status': 'error', 'message': 'Invalid chat participants'}), 400
         
         # Check if a chat room already exists (in either direction)
         existing_room_query1 = supabase.table('chat_rooms').select('id').eq('user1_id', faculty_id).eq('user2_id', student_id)
@@ -2483,7 +2637,7 @@ def create_faculty_chat_room():
         new_room_data = {
             'user1_id': faculty_id,
             'user2_id': student_id,
-            'created_at': dt.now(tz.tzutc()).isoformat()
+            'created_at': dt.now(timezone.utc).isoformat()
         }
         
         # Insert new room
@@ -2500,7 +2654,7 @@ def create_faculty_chat_room():
         })
     
     except Exception as e:
-        print(f"Error creating faculty chat room: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/get_chat_messages/<int:room_id>')
@@ -2568,9 +2722,10 @@ def get_chat_messages(room_id):
         })
     
     except Exception as e:
-        print(f"Error fetching messages: {e}")
+        app.logger.exception('Request processing failed')
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    host = os.environ.get('HOST', '127.0.0.1')
+    app.run(host=host, port=port)

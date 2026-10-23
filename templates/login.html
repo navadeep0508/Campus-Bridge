@@ -156,11 +156,11 @@
             .container {
                 flex-direction: column;
             }
-            
+
             .illustration {
                 padding: 1rem;
             }
-            
+
             .illustration svg {
                 max-width: 300px;
             }
@@ -208,6 +208,11 @@
             text-decoration: none;
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 <body>
     <h1 class="main-heading">CAMPUS BRIDGE</h1>
@@ -255,11 +260,11 @@
                 <div class="remember-me">
                     <input type="checkbox" id="remember" name="remember">
                     <label for="remember">Remember me</label>
-                    
+
                 </div>
-                
+
                 <a href="{{ url_for('change_password') }}" class="forgot-password">Change Password</a>
-                
+
                 <button type="submit" class="submit-btn">Login</button>
             </form>
         </div>
@@ -273,6 +278,8 @@
         </div>
     </div>
 
-    
+
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

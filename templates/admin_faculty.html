@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Management - Campus Bridge</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -379,7 +379,7 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
-            
+
             select.form-input {
                 background-position: right 0.8rem center;
             }
@@ -411,6 +411,10 @@
             background: var(--accent-color);
         }
     </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <div class="admin-container">
@@ -419,7 +423,7 @@
             <div class="sidebar-header">
                 <h2>Admin Panel</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <h3>Main</h3>
@@ -441,7 +445,7 @@
                     </a>
                 </div>
 
-               
+
 
             </nav>
         </aside>
@@ -540,10 +544,10 @@
                             <td>{{ member.sections|join(', ') }}</td>
                             <td>{{ member.created_at }}</td>
                             <td>
-                                <button class="action-btn" onclick="editFaculty('{{ member.id }}')">
+                                <button class="action-btn" aria-label="Edit {{ member.name }}" onclick="editFaculty('{{ member.id }}')" type="button">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="action-btn delete" onclick="deleteFaculty('{{ member.id }}')">
+                                <button class="action-btn delete" aria-label="Delete {{ member.name }}" onclick="deleteFaculty('{{ member.id }}')" type="button">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -583,7 +587,7 @@
         // Handle form submission
         document.getElementById('addFacultyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             // Get form data
             const formData = {
                 name: document.getElementById('facultyName').value,
@@ -613,7 +617,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.success) {
                     showToast('Faculty added successfully', 'success');
                     // Reset form
@@ -637,7 +641,7 @@
             toast.className = `toast ${type}`;
             toast.textContent = message;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.remove();
             }, 3000);
@@ -654,5 +658,7 @@
             console.log('Delete faculty:', id);
         }
     </script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html> 
