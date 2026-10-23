@@ -305,6 +305,10 @@ def home_page():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    demo_credentials_enabled = (
+        os.environ.get('VERCEL') == '1'
+        and os.environ.get('SEED_DEMO_DATA', '').strip().lower() in {'1', 'true', 'yes'}
+    )
     if request.method == 'POST':
         now = time.monotonic()
         address = request.remote_addr or 'unknown'
@@ -312,11 +316,11 @@ def login():
             attempts = [stamp for stamp in _login_attempts[address] if now - stamp < 300]
             _login_attempts[address] = attempts
             if len(attempts) >= 10:
-                return render_template('login_redesign.html', error='Too many sign-in attempts. Wait a few minutes and try again.'), 429
+                return render_template('login_redesign.html', error='Too many sign-in attempts. Wait a few minutes and try again.', demo_credentials_enabled=demo_credentials_enabled), 429
         email = request.form.get('email', '').strip().casefold()
         password = request.form.get('password', '')
         if not email or len(email) > 254 or not password or len(password.encode('utf-8')) > 72:
-            return render_template('login_redesign.html', error='Invalid credentials')
+            return render_template('login_redesign.html', error='Invalid credentials', demo_credentials_enabled=demo_credentials_enabled)
 
         try:
             # Fetch user by email
@@ -343,16 +347,16 @@ def login():
                 else:
                     with _execution_lock:
                         _login_attempts[address].append(now)
-                    return render_template('login_redesign.html', error='Invalid credentials')
+                    return render_template('login_redesign.html', error='Invalid credentials', demo_credentials_enabled=demo_credentials_enabled)
             else:
                 with _execution_lock:
                     _login_attempts[address].append(now)
-                return render_template('login_redesign.html', error='Invalid credentials')
+                    return render_template('login_redesign.html', error='Invalid credentials', demo_credentials_enabled=demo_credentials_enabled)
         except Exception as e:
             app.logger.exception('Request processing failed')
-            return render_template('login_redesign.html', error='An error occurred')
+            return render_template('login_redesign.html', error='An error occurred', demo_credentials_enabled=demo_credentials_enabled)
 
-    return render_template('login_redesign.html')
+    return render_template('login_redesign.html', demo_credentials_enabled=demo_credentials_enabled)
 
 @app.route('/logout')
 def logout():
