@@ -50,8 +50,9 @@ To use Supabase instead of SQLite, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE
 
 - `JUDGE0_API_KEY` enables code execution and coding-assessment grading.
 - `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` select the Supabase database instead of local SQLite.
-- `COHERE_API_KEY` enables the in-app AI assistant, career recommendations, and code-review endpoint.
-- `COHERE_MODEL` selects the Cohere Chat model; it defaults to `command-a-plus-05-2026`.
+- `GROQ_API_KEY` enables the in-app AI assistant, career recommendations, and code-review endpoint. Groq is preferred when configured.
+- `GROQ_MODEL` selects the Groq chat model; it defaults to `llama-3.3-70b-versatile`.
+- `COHERE_API_KEY` and `COHERE_MODEL` provide an optional fallback when Groq is not configured.
 - `GEMINI_API_KEY` configures the standalone `CodeReviewBot` helper.
 - `COOKIE_SECURE=true` enables secure session cookies when serving over HTTPS.
 

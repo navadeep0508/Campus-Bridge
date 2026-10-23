@@ -2159,6 +2159,8 @@ def delete_student(student_id):
 # Instead of directly hardcoding the key, use a more secure method
 COHERE_API_KEY = os.environ.get('COHERE_API_KEY', '')
 COHERE_MODEL = os.environ.get('COHERE_MODEL', 'command-a-plus-05-2026')
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 # Safely initialize Cohere client
 co = None
@@ -2168,9 +2170,31 @@ try:
 except Exception as e:
     app.logger.exception('Request processing failed')
 
-def generate_with_cohere(prompt, max_tokens=500, temperature=0.7):
+def ai_provider_configured():
+    return bool(GROQ_API_KEY or co)
+
+
+def generate_with_ai(prompt, max_tokens=500, temperature=0.7):
+    if GROQ_API_KEY:
+        response = requests.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            headers={'Authorization': f'Bearer {GROQ_API_KEY}'},
+            json={
+                'model': GROQ_MODEL,
+                'messages': [{'role': 'user', 'content': prompt}],
+                'max_completion_tokens': max_tokens,
+                'temperature': temperature,
+            },
+            timeout=(5, 45),
+        )
+        response.raise_for_status()
+        content = response.json().get('choices', [{}])[0].get('message', {}).get('content')
+        if content:
+            return content
+        raise RuntimeError('Groq returned an empty response')
+
     if not co:
-        raise RuntimeError('Cohere is not configured')
+        raise RuntimeError('No AI provider is configured')
     response = co.chat(
         model=COHERE_MODEL,
         messages=[{'role': 'user', 'content': prompt}],
@@ -2183,6 +2207,10 @@ def generate_with_cohere(prompt, max_tokens=500, temperature=0.7):
         if text:
             return text
     raise RuntimeError('The AI provider returned an empty response')
+
+
+# Backwards-compatible name used by older integrations.
+generate_with_cohere = generate_with_ai
 @app.route('/job_match_recommender')
 def job_match_recommender():
     return redirect(url_for('job_match_recomender1'))
@@ -2197,7 +2225,7 @@ def review_code_api():
     language = request.form.get('language', 'python')
     if not code or len(code) > 30000:
         return jsonify({'error': 'Code is required and must be under 30,000 characters'}), 400
-    if not co:
+    if not ai_provider_configured():
         return jsonify({'error': 'Code review is not configured on this server'}), 503
 
     prompt = f"""
@@ -2233,7 +2261,7 @@ Here is the code to review:
 """
 
     try:
-        feedback = generate_with_cohere(prompt, max_tokens=300, temperature=0.7)
+        feedback = generate_with_ai(prompt, max_tokens=300, temperature=0.7)
         return jsonify({'feedback': feedback})
 
     except Exception:
@@ -2278,7 +2306,7 @@ def recommend_jobs():
     skills_input = request.form.get('skills', '').strip()
     if not skills_input or len(skills_input) > 2000:
         return render_template('job_match_recomender.html', error='Enter skills in 2,000 characters or fewer')
-    if not co:
+    if not ai_provider_configured():
         return render_template('job_match_recomender.html', error='Recommendations are not configured on this server')
 
     prompt = f"""
@@ -2298,7 +2326,7 @@ def recommend_jobs():
     """
 
     try:
-        recommendation = generate_with_cohere(prompt, max_tokens=400, temperature=0.7)
+        recommendation = generate_with_ai(prompt, max_tokens=400, temperature=0.7)
     except Exception:
         app.logger.exception('Career recommendations failed')
         recommendation = 'Recommendations are temporarily unavailable. Please try again later.'
@@ -2313,7 +2341,7 @@ def solve_code_problem():
     question = request.form.get('question', '').strip()
     if not question or len(question) > 3000:
         return render_template('ai_code_assistant.html', error='Enter a question in 3,000 characters or fewer')
-    if not co:
+    if not ai_provider_configured():
         return render_template('ai_code_assistant.html', error='The AI assistant is not configured on this server')
 
     prompt = f"""
@@ -2333,7 +2361,7 @@ def solve_code_problem():
     """
 
     try:
-        result = generate_with_cohere(prompt, max_tokens=500, temperature=0.7)
+        result = generate_with_ai(prompt, max_tokens=500, temperature=0.7)
     except Exception:
         app.logger.exception('AI assistant request failed')
         result = 'The assistant is temporarily unavailable. Please try again later.'
