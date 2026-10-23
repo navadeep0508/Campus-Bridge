@@ -846,12 +846,19 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
     now = _utcnow()
     pw = _hash(demo_password)
 
-    users = [
-        ("admin@gmail.com", pw, "Admin", "admin", None, None, None, None, None, 0, now),
-        ("faculty@gmail.com", pw, "john", "faculty", "FAC001", "CSE", None, None, "Programming", 0, now),
-        ("23102a040719@mbu.asia", pw, "sunny", "student", "23102A040719", "CSE", "A", "1", None, 0, now),
-        ("raghs@gmail.com", pw, "raghs", "student", "23102A040001", "CSE", "A", "1", None, 0, now),
-    ]
+    is_vercel = os.environ.get("VERCEL") == "1"
+    if is_vercel:
+        # Public demo deployments must not expose an administrator account.
+        users = [
+            ("demo.student@campusbridge.test", pw, "Demo Student", "student", "DEMO001", "CSE", "A", "1", None, 0, now),
+        ]
+    else:
+        users = [
+            ("admin@gmail.com", pw, "Admin", "admin", None, None, None, None, None, 0, now),
+            ("faculty@gmail.com", pw, "john", "faculty", "FAC001", "CSE", None, None, "Programming", 0, now),
+            ("23102a040719@mbu.asia", pw, "sunny", "student", "23102A040719", "CSE", "A", "1", None, 0, now),
+            ("raghs@gmail.com", pw, "raghs", "student", "23102A040001", "CSE", "A", "1", None, 0, now),
+        ]
     conn.executemany(
         """
         INSERT INTO users (email, password, name, role, roll_number, branch, section, semester, subject, points, created_at)
@@ -859,6 +866,17 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
         """,
         users,
     )
+
+    if is_vercel:
+        student_id = conn.execute(
+            "SELECT id FROM users WHERE email = ?", ("demo.student@campusbridge.test",)
+        ).fetchone()["id"]
+        conn.execute(
+            "INSERT INTO attendance (student_id, section, attended_classes, total_classes) VALUES (?, 'A', 0, 0)",
+            (student_id,),
+        )
+        conn.commit()
+        return
 
     faculty_id = conn.execute(
         "SELECT id FROM users WHERE email = ?", ("faculty@gmail.com",)
