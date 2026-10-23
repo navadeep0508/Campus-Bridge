@@ -17,9 +17,34 @@ Faculty can publish timetable sessions for assigned sections; students see only 
 2. Copy `.env.example` to `.env` and set a unique `SECRET_KEY`. Third-party API keys can stay blank to disable those integrations.
 3. Start the server with `py app.py` and open `http://127.0.0.1:5000/`.
 
-By default, the app creates a local database at `DATABASE_PATH` or `campus_bridge.db` and fills its eight semester catalogs with starter course content. New databases still have no user accounts; administrators create faculty and student accounts in the application. The catalog is sample curriculum content, not an official university syllabus. To use Supabase, set both `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then apply [`supabase_schema.sql`](supabase_schema.sql) in the Supabase SQL editor. That script creates the catalog tables if needed and inserts missing starter courses; it is safe to reapply. Applying it is required for the content to be present in a deployed Supabase database. The service-role key must stay on the server and must never be added to browser code. For a disposable local demo database, set `SEED_DEMO_DATA=true` and `DEMO_PASSWORD` (at least 12 characters) before first launch. Seeded demo accounts share that password. Do not use demo seeding in production.
+By default, the app creates `campus_bridge.db` in the project folder (or uses `DATABASE_PATH` if set) and fills the eight semester catalogs with sample courses. A new database has no accounts; an administrator must create them, unless demo seeding is enabled below. The catalog is sample content, not an official university syllabus.
 
-The Vercel demo seeds an admin, faculty member, and two students when `SEED_DEMO_DATA=true` and `DEMO_PASSWORD` is set in the Vercel Production environment. The sign-in page shows their demo email addresses and the shared demo password. These are public accounts, including the admin account, and can modify demo records. Do not enter private or real campus information. Vercel demo records are temporary and can reset when an instance restarts.
+### Local demo accounts
+
+To create sample accounts in a new local database, set `SEED_DEMO_DATA=true` and `DEMO_PASSWORD` in `.env` before starting the app. The password must be at least 12 characters. The app creates one admin, one faculty member, and two students; all four accounts use the value of `DEMO_PASSWORD`:
+
+| Role | Demo email |
+| --- | --- |
+| Admin | `admin@gmail.com` |
+| Faculty | `faculty@gmail.com` |
+| Student | `23102a040719@mbu.asia` |
+| Student | `raghs@gmail.com` |
+
+Seeding runs only when the database has no users. It does not reset existing accounts or passwords. Use demo seeding only with disposable data.
+
+### Vercel demo login
+
+The deployed Vercel demo is configured to seed the same four accounts. Open the app’s **Sign in** page to see the email addresses and password:
+
+**Shared password:** `CampusBridgeStudent2026!`
+
+The admin account is public and can change or delete demo data. These credentials are for testing only. Do not enter real or private campus information.
+
+Vercel uses SQLite at `/tmp/campus_bridge.db` for this demo. `/tmp` is temporary and may not be shared between function instances, so accounts or changes can disappear or differ between requests. This setup is not suitable for persistent or production data.
+
+### Supabase setup
+
+To use Supabase instead of SQLite, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then run [`supabase_schema.sql`](supabase_schema.sql) in the Supabase SQL editor. It creates the catalog tables and inserts missing sample courses, and is safe to reapply. The service-role key must remain server-side and must never be added to browser code.
 
 ## Optional integrations
 
@@ -42,7 +67,7 @@ The Vercel demo seeds an admin, faculty member, and two students when `SEED_DEMO
 
 Passwords use bcrypt. Protected routes verify the role from SQLite, and account creation is restricted to administrators. Store secrets in the deployment environment, use HTTPS, set a stable random `SECRET_KEY`, and back up the SQLite database. Third-party execution and AI features require API credentials.
 
-For deployment, run behind a production WSGI server such as Gunicorn. SQLite requires persistent storage and a single application instance; Supabase supports a shared database across application instances. On Vercel, SQLite defaults to `/tmp/campus_bridge.db` so the app can run for disposable demos, but that filesystem is temporary and is not shared across function instances. Use Supabase for persistent Vercel data.
+For deployment, run behind a production WSGI server such as Gunicorn. SQLite requires persistent storage and a single application instance. The Vercel `/tmp` SQLite setup is demo-only; use Supabase or another persistent database for production data. Never use the public demo credentials in a real deployment.
 
 ## License
 
