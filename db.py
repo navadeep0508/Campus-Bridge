@@ -12,7 +12,12 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import bcrypt
 
-DB_PATH = Path(os.environ.get("DATABASE_PATH", Path(__file__).resolve().parent / "campus_bridge.db")).expanduser()
+_DEFAULT_DB_PATH = (
+    Path("/tmp/campus_bridge.db")
+    if os.environ.get("VERCEL") == "1"
+    else Path(__file__).resolve().parent / "campus_bridge.db"
+)
+DB_PATH = Path(os.environ.get("DATABASE_PATH", _DEFAULT_DB_PATH)).expanduser()
 
 # Public, non-personal starter content. This is deliberately separate from
 # optional demo accounts and can safely be applied on every local startup.

@@ -40,7 +40,7 @@ By default, the app creates a local database at `DATABASE_PATH` or `campus_bridg
 
 Passwords use bcrypt. Protected routes verify the role from SQLite, and account creation is restricted to administrators. Store secrets in the deployment environment, use HTTPS, set a stable random `SECRET_KEY`, and back up the SQLite database. Third-party execution and AI features require API credentials.
 
-For deployment, run behind a production WSGI server such as Gunicorn. SQLite requires persistent storage and a single application instance; Supabase supports a shared database across application instances.
+For deployment, run behind a production WSGI server such as Gunicorn. SQLite requires persistent storage and a single application instance; Supabase supports a shared database across application instances. On Vercel, SQLite defaults to `/tmp/campus_bridge.db` so the app can run for disposable demos, but that filesystem is temporary and is not shared across function instances. Use Supabase for persistent Vercel data.
 
 ## License
 
